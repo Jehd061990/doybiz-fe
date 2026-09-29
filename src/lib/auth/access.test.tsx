@@ -1,4 +1,4 @@
-import { canAccessBranch, hasModulePermission, isActiveUser, isKnownRole } from './access';
+import { canAccessBranch, canAccessModuleRoute, hasModuleAccess, isActiveUser, isKnownRole } from './access';
 import type { AuthUser } from '@/types/auth';
 
 const cashier: AuthUser = {
@@ -21,10 +21,17 @@ describe('authorization display helpers', () => {
   });
 
   it('checks module and branch access independently', () => {
-    expect(hasModulePermission(cashier, 'POS')).toBe(true);
-    expect(hasModulePermission(cashier, 'SALES')).toBe(false);
+    expect(hasModuleAccess(cashier, 'POS')).toBe(true);
+    expect(hasModuleAccess(cashier, 'SALES')).toBe(false);
     expect(canAccessBranch(cashier, 'branch-a')).toBe(true);
     expect(canAccessBranch(cashier, 'branch-b')).toBe(false);
+  });
+
+  it('requires both effective module permission and an implemented route', () => {
+    expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['BILLING'] }, 'BILLING')).toBe(true);
+    expect(canAccessModuleRoute({ ...cashier, role: 'CASHIER', modulePermissions: ['BILLING'] }, 'BILLING')).toBe(false);
+    expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['POS'] }, 'POS')).toBe(false);
+    expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['BILLING'] }, 'POS')).toBe(false);
   });
 
   it('recognizes active status and owner-wide branch access', () => {

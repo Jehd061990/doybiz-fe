@@ -31,6 +31,9 @@ The current tests cover:
 - Billing detail preserves backend payment totals/history, makes paid records read-only, and handles Xendit initiation without marking records paid.
 - Prepaid adjustments submit selected IDs only, require acknowledgement of backend pending-state effects, and preserve owner-only authorization.
 - Initial prepaid subscription activation uses an allowed term and opens the returned setup invoice.
+- The module registry matches backend module keys and exposes routes only for implemented modules.
+- App navigation filters supported module routes by effective module permission and backend-supported reader roles.
+- The server-side module route guard allows, denies, and redirects through the existing auth flow without exposing internals.
 
 Authorization tests only verify frontend visibility helpers. Backend endpoints remain responsible for security and tenant validation.
 
@@ -43,6 +46,8 @@ Preset preview tests are tied to the current backend `rolePermissions` mapping. 
 Branch list/page tests mock the shared `useBranches()` hook; provider tests separately check its Refine resource maps to the bare-array `GET /api/branches` contract. Branch creation tests assert only `name`, `address`, `contactNumber`, and `status` are submitted, with no browser-provided organization ID. No test invents or calls a branch edit/delete or organization profile endpoint.
 
 Billing tests mock Refine's existing resource/custom hooks. They assert seat values are rendered from backend estimate payloads rather than calculated, payment/adjustment actions use inspected URLs and payloads, paid records have no payment action, payment initiation remains pending, and only returned HTTPS Xendit action URLs are followed. No tests call Xendit or the webhook.
+
+Module foundation tests assert the registry's exact key order (and absence of `INVENTORY`/`SUPER_ADMIN`), routes only for implemented features, permission/branch-access independence, Billing's module-plus-role UX rule, and safe route-guard behavior. Backend endpoints remain authoritative for authorization.
 
 ## Commands
 

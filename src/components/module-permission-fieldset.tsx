@@ -1,14 +1,4 @@
-import { MODULES, type ModuleName } from '@/config/modules';
-
-const moduleLabels: Record<ModuleName, string> = {
-  POS: 'Point of sale',
-  SALES: 'Sales',
-  APPOINTMENTS: 'Appointments',
-  CUSTOMERS: 'Customers',
-  REPORTS: 'Reports',
-  STAFF: 'Staff',
-  BILLING: 'Billing',
-};
+import { MODULE_REGISTRY, type ModuleName } from '@/config/modules';
 
 interface ModulePermissionFieldsetProps {
   permissions: ModuleName[];
@@ -22,14 +12,14 @@ export function ModulePermissionFieldset({ permissions, disabled = false, onChan
       <legend>Module permissions</legend>
       <p className="field-help">These permissions are separate from role and branch access.</p>
       <div className="module-permission-grid">
-        {MODULES.map(module => (
-          <label className="check-option" key={module}>
+        {MODULE_REGISTRY.map(({ key, label }) => (
+          <label className="check-option" key={key}>
             <input
               type="checkbox"
-              checked={permissions.includes(module)}
-              onChange={event => onChange(module, event.currentTarget.checked)}
+              checked={permissions.includes(key)}
+              onChange={event => onChange(key, event.currentTarget.checked)}
             />
-            <span>{moduleLabels[module]}</span>
+            <span>{label}</span>
           </label>
         ))}
       </div>

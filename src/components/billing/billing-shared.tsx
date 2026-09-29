@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import type { AuthUser } from '@/types/auth';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
+import { canAccessModuleRoute } from '@/lib/auth/access';
 
 interface BillingGateProps {
   ownerOnly?: boolean;
@@ -18,7 +19,7 @@ export function BillingGate({ ownerOnly = false, children }: BillingGateProps) {
   }
 
   const user = session.user;
-  if (!user.modulePermissions.includes('BILLING') || !['OWNER', 'MANAGER'].includes(user.role)) {
+  if (!canAccessModuleRoute(user, 'BILLING')) {
     return <section className="management-state" role="alert">
       <h1>Billing unavailable</h1>
       <p>Billing access is not available for your account.</p>

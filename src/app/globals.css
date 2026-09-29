@@ -138,6 +138,9 @@ button { cursor: pointer; }
 .app-shell { display: flex; min-height: 100svh; flex-direction: column; padding: 0 5vw; }
 .app-header { display: flex; align-items: center; min-height: 76px; border-bottom: 1px solid var(--line); gap: 38px; }
 .app-navigation { display: flex; flex: 1; align-self: stretch; align-items: center; gap: 26px; }
+.app-nav-group { display: flex; align-self: stretch; align-items: center; gap: 18px; }
+.app-nav-module-group { padding-left: 18px; border-left: 1px solid var(--line); }
+.app-nav-group-heading { color: var(--ink-soft); font: 500 9px var(--font-mono); text-transform: uppercase; white-space: nowrap; }
 .app-nav-link { position: relative; display: flex; align-items: center; min-height: 100%; color: var(--ink-soft); font-size: 13px; font-weight: 700; }
 .app-nav-link:hover, .app-nav-link-active { color: var(--green); }
 .app-nav-link-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; background: var(--green); content: ''; }
@@ -286,6 +289,8 @@ button { cursor: pointer; }
   .app-shell { padding: 0 18px; }
   .app-header { min-height: 68px; gap: 18px; }
   .app-navigation { gap: 16px; }
+  .app-nav-group { gap: 12px; }
+  .app-nav-module-group { padding-left: 12px; }
   .app-nav-link { font-size: 12px; }
   .app-header .account-menu { gap: 10px; }
   .app-header .account-name { max-width: 95px; }

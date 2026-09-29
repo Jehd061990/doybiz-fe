@@ -70,7 +70,9 @@ The smallest safe selection contract is for login to validate the submitted cred
 
 ## Authorization Types
 
-`src/config/roles.ts` and `src/config/modules.ts` mirror the current backend registries exactly. Helpers in `src/lib/auth/access.ts` support UI visibility for role, module, branch, and active status. The server validates every protected operation independently.
+`src/config/roles.ts` and `src/config/modules.ts` mirror the current backend registries exactly. The single `MODULE_REGISTRY` maps all seven backend keys to labels and a route only when the module UI exists; currently Billing is the only routable operational module. `hasModuleAccess` reads effective permissions from the authenticated user; `canAccessModuleRoute` also requires a registered route and any route-specific UX role constraint. Module access never checks branch access. `canAccessBranch` remains independent.
+
+The app shell builds operational navigation from registry entries with implemented routes and effective permission. Future module routes can wrap their content in the server-side `ModuleRouteGuard`, which reuses the existing cookie-backed session, redirects unauthenticated users through the existing login route, and renders a safe denied/not-yet-available state. Billing uses this guard and retains its existing OWNER/MANAGER + BILLING-module check. These frontend checks only improve UX; backend middleware remains the security boundary.
 
 ## Environment
 
@@ -83,7 +85,7 @@ Copy `.env.example` to a local environment file and set `DOYBIZ_API_URL` for the
 - `src/providers`: Refine and auth providers.
 - `src/lib/api`: centralized API helper and Refine data provider.
 - `src/lib/auth`: server session parsing, cookie names, and UI access helpers.
-- `src/config`: role and module registries.
+- `src/config`: role, module, and preset registries.
 - `src/types`: frontend auth/session response types.
 - `docs`: architecture, test strategy, and Phase 7 notes.
 
