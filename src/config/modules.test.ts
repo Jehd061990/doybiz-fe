@@ -18,7 +18,7 @@ describe('frontend module registry', () => {
 
   it('has stable labels and only registers the implemented Billing route', () => {
     expect(MODULE_REGISTRY).toEqual([
-      { key: 'POS', label: 'Point of sale', route: null },
+      { key: 'POS', label: 'Point of sale', route: '/app/pos' },
       { key: 'SALES', label: 'Sales', route: null },
       { key: 'APPOINTMENTS', label: 'Appointments', route: null },
       { key: 'CUSTOMERS', label: 'Customers', route: null },

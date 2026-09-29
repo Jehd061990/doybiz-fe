@@ -251,6 +251,61 @@ button { cursor: pointer; }
 .billing-impact-warning p { margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.6; }
 .billing-impact-warning .check-option { align-items: flex-start; margin-top: 4px; line-height: 1.5; }
 .billing-impact-warning .check-option input { margin-top: 2px; }
+.pos-page { padding-bottom: 56px; }
+.pos-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(310px, 390px); align-items: start; gap: 28px; }
+.pos-catalog-column { min-width: 0; }
+.pos-branch-panel, .pos-service-panel, .pos-payment-panel { padding: 18px 0 22px; border-top: 1px solid var(--line); }
+.pos-branch-panel h2, .pos-service-panel h2, .pos-payment-panel h2, .pos-completion h2 { margin: 0 0 14px; font-size: 16px; }
+.pos-branch-panel .field-control { max-width: 420px; }
+.pos-contract-notice { max-width: 640px; margin: 16px 0 0; padding: 12px 14px; border-left: 3px solid var(--coral); background: #fff8f4; color: var(--ink-soft); font-size: 12px; line-height: 1.6; }
+.pos-service-list { border-top: 1px solid var(--line); }
+.pos-service-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 15px 4px; border-bottom: 1px solid var(--line); }
+.pos-service-row h3 { margin: 0; font-size: 14px; }
+.pos-service-row p { margin: 5px 0; color: var(--ink-soft); font-size: 11px; line-height: 1.5; }
+.pos-service-row > div > span, .pos-service-row small { display: block; margin-top: 5px; color: var(--ink-soft); font: 11px var(--font-mono); }
+.pos-service-row .secondary-button { min-height: 36px; }
+.pos-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 14px; color: var(--ink-soft); font-size: 11px; }
+.pos-pagination .secondary-button { min-height: 34px; }
+.pos-cart-panel { position: sticky; top: 18px; padding: 18px; border: 1px solid var(--line); border-radius: 6px; background: var(--white); }
+.pos-cart-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.pos-cart-header h2 { margin: 0; font-size: 17px; }
+.pos-cart-header > span { color: var(--ink-soft); font: 10px var(--font-mono); }
+.pos-cart-panel > .billing-empty-note { padding: 18px 0; }
+.pos-cart-items { display: grid; }
+.pos-cart-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.pos-cart-item > div:first-child { display: grid; min-width: 0; gap: 4px; }
+.pos-cart-item strong { overflow-wrap: anywhere; font-size: 12px; }
+.pos-cart-item small { color: var(--ink-soft); font: 10px var(--font-mono); }
+.pos-quantity-control { display: flex; align-items: center; gap: 8px; }
+.pos-quantity-control button { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--line); border-radius: 4px; background: var(--white); color: var(--ink); font-size: 18px; }
+.pos-quantity-control button:hover { border-color: var(--green); color: var(--green); }
+.pos-quantity-control span { min-width: 18px; text-align: center; font: 12px var(--font-mono); }
+.pos-cart-panel > .field-help { padding: 13px 0 2px; }
+.pos-checkout-button { width: 100%; min-height: 44px; margin-top: 16px; }
+.pos-checkout-button:disabled { cursor: not-allowed; opacity: .55; }
+.pos-clear-cart { display: block; margin: 11px auto 0; }
+.pos-completed-flow { max-width: 1040px; }
+.pos-completion { padding: 22px 0; border-top: 1px solid var(--line); }
+.pos-completion-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.pos-completion-header h2 { margin: 0; font: 500 22px var(--font-mono); }
+.pos-sale-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.pos-sale-summary > div { display: grid; gap: 7px; padding: 13px 12px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.pos-sale-summary dt { color: var(--ink-soft); font-size: 10px; font-weight: 700; }
+.pos-sale-summary dd { margin: 0; font: 12px var(--font-mono); }
+.pos-receipt { padding: 18px 0 24px; border-top: 1px solid var(--line); }
+.pos-receipt-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.pos-receipt-header h3 { margin: 0; font-size: 15px; }
+.pos-receipt-header span { color: var(--ink-soft); font-size: 12px; }
+.pos-receipt > p { color: var(--ink-soft); font-size: 11px; }
+.pos-receipt-table { min-width: 600px; }
+.pos-payment-panel { max-width: 720px; }
+.pos-payment-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.pos-payment-form .management-error, .pos-payment-form .management-success { grid-column: 1 / -1; margin: 0; }
+.pos-payment-form .primary-button { min-height: 42px; margin: 0; }
+.pos-new-sale { margin-top: 12px; }
+.pos-payment-history { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.pos-payment-history h4 { margin: 0 0 8px; font-size: 12px; }
+.pos-payment-history p { margin: 5px 0; color: var(--ink-soft); font-size: 11px; }
 .preset-action { display: grid; gap: 7px; margin-top: 15px; }
 .management-fieldset, .status-options { min-width: 0; margin: 0; padding: 0; border: 0; }
 .management-fieldset legend, .status-options legend { margin-bottom: 8px; color: var(--ink); font-size: 13px; font-weight: 700; }
@@ -318,6 +373,13 @@ button { cursor: pointer; }
   .billing-record-summary { grid-template-columns: 1fr; gap: 0; }
   .billing-record-summary .billing-section { padding: 18px 0; border-top: 1px solid var(--line); }
   .billing-selection-list { grid-template-columns: 1fr; }
+  .pos-workspace { grid-template-columns: 1fr; gap: 20px; }
+  .pos-cart-panel { position: static; }
+  .pos-sale-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pos-sale-summary > div:nth-child(even) { border-right: 0; }
+  .pos-payment-form { grid-template-columns: 1fr; }
+  .pos-payment-form .management-error, .pos-payment-form .management-success { grid-column: auto; }
+  .pos-completion-header { flex-direction: column; }
 }
 
 @media (max-width: 440px) {

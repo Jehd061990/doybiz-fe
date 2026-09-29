@@ -39,6 +39,17 @@ describe('ModuleRouteGuard', () => {
     expect(redirectMock).not.toHaveBeenCalled();
   });
 
+  it('allows a user with POS permission through the POS module guard', async () => {
+    getAuthSessionMock.mockResolvedValue({
+      ...managerSession,
+      user: { ...managerSession.user, modulePermissions: ['POS'] },
+    });
+
+    render(await ModuleRouteGuard({ module: 'POS', children: <p>POS checkout</p> }));
+
+    expect(screen.getByText('POS checkout')).toBeInTheDocument();
+  });
+
   it('blocks a user without the module permission with a safe message', async () => {
     getAuthSessionMock.mockResolvedValue({
       ...managerSession,
@@ -63,12 +74,12 @@ describe('ModuleRouteGuard', () => {
   it('blocks a module that has not been registered as a supported route', async () => {
     getAuthSessionMock.mockResolvedValue({
       ...managerSession,
-      user: { ...managerSession.user, modulePermissions: ['POS'] },
+      user: { ...managerSession.user, modulePermissions: ['SALES'] },
     });
 
-    render(await ModuleRouteGuard({ module: 'POS', children: <p>POS content</p> }));
+    render(await ModuleRouteGuard({ module: 'SALES', children: <p>Sales content</p> }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('This module is not available in the workspace yet.');
-    expect(screen.queryByText('POS content')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sales content')).not.toBeInTheDocument();
   });
 });

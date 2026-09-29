@@ -34,6 +34,9 @@ The current tests cover:
 - The module registry matches backend module keys and exposes routes only for implemented modules.
 - App navigation filters supported module routes by effective module permission and backend-supported reader roles.
 - The server-side module route guard allows, denies, and redirects through the existing auth flow without exposing internals.
+- POS route/navigation access uses the effective `POS` module permission and existing auth guard.
+- POS service-catalog permission gap, branch selection, service/cart behavior, exact sale/payment payloads, backend confirmation, and state retention on failure.
+- POS payment loading/validation and backend-returned payment status/change behavior.
 
 Authorization tests only verify frontend visibility helpers. Backend endpoints remain responsible for security and tenant validation.
 
@@ -48,6 +51,8 @@ Branch list/page tests mock the shared `useBranches()` hook; provider tests sepa
 Billing tests mock Refine's existing resource/custom hooks. They assert seat values are rendered from backend estimate payloads rather than calculated, payment/adjustment actions use inspected URLs and payloads, paid records have no payment action, payment initiation remains pending, and only returned HTTPS Xendit action URLs are followed. No tests call Xendit or the webhook.
 
 Module foundation tests assert the registry's exact key order (and absence of `INVENTORY`/`SUPER_ADMIN`), routes only for implemented features, permission/branch-access independence, Billing's module-plus-role UX rule, and safe route-guard behavior. Backend endpoints remain authoritative for authorization.
+
+POS tests mock the existing Refine custom query/mutation hooks and shared `useBranches()`. They assert the actual `/services`, `/sales`, `/sales/:id/payments`, and `/sales/:id/receipt` request shapes, preserve cart state after failure, and display backend-confirmed sale/payment values. No test calls a production backend or adds a fake product/inventory contract.
 
 ## Commands
 

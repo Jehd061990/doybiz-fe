@@ -52,6 +52,16 @@ Billing record details preserve the backend's completed payment list and paid/ou
 
 Initial prepaid activation uses backend-supported terms and opens the returned setup invoice. Subscription status/period are read-only; cancellation and renewal scheduling are not exposed. No recurring/renewal billing workflow was found. The backend owns webhook reconciliation, invoice immutability, pending target activation, and all billing calculations.
 
+## POS
+
+POS is implemented at `/app/pos` under the server-side `ModuleRouteGuard` for `POS`. The module catalog supplies the navigation item only when the authenticated session contains effective `POS` permission. Sale creation and payments use existing Refine custom mutations and the centralized same-origin API client; service listing uses the existing `services` endpoint through the same provider/proxy.
+
+The selected branch ID is explicit in sale creation. Branch options come from the authenticated user's existing `useBranches()` result, with only active returned branches selectable; the backend revalidates organization, active status, and per-user branch access. `branchAccess: 'ALL'` is never sent as a branch ID. Sale line item service IDs are selected from the active service list and backend prices/totals are authoritative. Payment is a separate action; the frontend displays the backend payment status and cash change. Sale/cart state is reset only after the backend confirms sale creation.
+
+The backend currently guards `GET /api/services` with `APPOINTMENTS`, while sale creation requires either `POS` or `SALES`. Therefore POS-only users without APPOINTMENTS can enter the POS module but cannot load the service catalog. The UI shows this limitation instead of inventing a catalog endpoint or bypassing permissions. A future backend change should expose a read-only POS catalog with current organization/branch-access checks, or allow POS on the GET service routes without widening service mutation access.
+
+No product/inventory/stock API, POS-specific transaction resource, POS history, refund workflow, or printer contract is present in the inspected backend. The UI uses the existing sale and service models only and does not add these features.
+
 ## Authentication
 
 The login handler calls the existing `POST /api/auth/login` backend endpoint. It accepts the backend's sanitized user and JWT, validates the required public fields, and sets the JWT in an HttpOnly, same-site cookie. A second HttpOnly cookie stores the public user snapshot needed for server-rendered shell identity; neither cookie is readable by browser JavaScript. Logout expires both cookies, and the authenticated backend proxy also expires them on an upstream 401. The login page does not persist or log the password.

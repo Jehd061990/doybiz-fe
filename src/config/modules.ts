@@ -1,5 +1,5 @@
 export const MODULE_REGISTRY = [
-  { key: 'POS', label: 'Point of sale', route: null },
+  { key: 'POS', label: 'Point of sale', route: '/app/pos' },
   { key: 'SALES', label: 'Sales', route: null },
   { key: 'APPOINTMENTS', label: 'Appointments', route: null },
   { key: 'CUSTOMERS', label: 'Customers', route: null },
