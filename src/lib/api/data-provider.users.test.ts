@@ -125,4 +125,34 @@ describe('Refine user and branch endpoint mappings', () => {
       variables: { status: 'INACTIVE' },
     })).rejects.toMatchObject({ status: 405 });
   });
+
+  it('preserves backend billing detail payments and paid/outstanding totals', async () => {
+    const record = {
+      _id: 'billing-1',
+      invoiceNumber: 'INV-2026-000001',
+      billingType: 'ADJUSTMENT',
+      totalAmount: 1200,
+      currency: 'PHP',
+      status: 'PENDING',
+    };
+    const payments = [{ _id: 'payment-1', amount: 200, status: 'COMPLETED', providerStatus: 'SUCCEEDED' }];
+    apiRequestMock.mockResolvedValueOnce({
+      success: true,
+      record,
+      payments,
+      paidAmount: 0,
+      outstandingAmount: 1200,
+    });
+
+    const result = await apiDataProvider.getOne({ resource: 'billing', id: 'billing-1' });
+
+    expect(apiRequestMock).toHaveBeenCalledWith('/billing/billing-1');
+    expect(result.data).toEqual({
+      ...record,
+      id: 'billing-1',
+      payments,
+      paidAmount: 0,
+      outstandingAmount: 1200,
+    });
+  });
 });

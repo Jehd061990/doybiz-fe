@@ -15,7 +15,7 @@ const user: AuthUser = {
   email: 'user@example.com',
   role: 'OWNER',
   branchAccess: 'ALL',
-  modulePermissions: ['POS'],
+  modulePermissions: ['POS', 'BILLING'],
   status: 'ACTIVE',
 };
 
@@ -28,10 +28,20 @@ describe('AppShell navigation', () => {
     expect(screen.getByRole('link', { name: 'Users' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: 'Branches' })).toHaveAttribute('href', '/app/branches');
     expect(screen.getByRole('link', { name: 'Organization' })).toHaveAttribute('href', '/app/organization');
+    expect(screen.getByRole('link', { name: 'Billing' })).toHaveAttribute('href', '/app/billing');
 
     rerender(<AppShell user={{ ...user, role: 'MANAGER' }}><p>Current route</p></AppShell>);
 
     expect(screen.queryByRole('link', { name: 'Users' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Branches' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Billing' })).toBeInTheDocument();
+
+    rerender(<AppShell user={{ ...user, role: 'CASHIER' }}><p>Current route</p></AppShell>);
+
+    expect(screen.queryByRole('link', { name: 'Billing' })).not.toBeInTheDocument();
+
+    rerender(<AppShell user={{ ...user, modulePermissions: ['POS'] }}><p>Current route</p></AppShell>);
+
+    expect(screen.queryByRole('link', { name: 'Billing' })).not.toBeInTheDocument();
   });
 });

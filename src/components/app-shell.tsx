@@ -13,6 +13,11 @@ export function AppShell({ user, children }: { user: AuthUser; children: ReactNo
     { href: '/app/organization', label: 'Organization', visible: true },
     { href: '/app/branches', label: 'Branches', visible: true },
     { href: '/app/users', label: 'Users', visible: user.role === 'OWNER' },
+    {
+      href: '/app/billing',
+      label: 'Billing',
+      visible: (user.role === 'OWNER' || user.role === 'MANAGER') && user.modulePermissions.includes('BILLING'),
+    },
   ].filter(item => item.visible);
 
   return (

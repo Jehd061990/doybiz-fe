@@ -42,6 +42,16 @@ The backend exposes no branch get-by-ID, patch, status-update, or delete route. 
 
 Branch count and seat billing are not computed or mutated in the frontend. Branch/user relationship and billing remain backend responsibilities.
 
+## Billing
+
+Billing is available under `/app/billing`, with record detail at `/app/billing/:id` and owner-only prepaid adjustment creation at `/app/billing/adjustments/create`. The shared Refine `billing` resource and authenticated proxy back billing list/detail; custom Refine requests use the same data provider and centralized API client for subscription estimate/status, invoice generation, adjustment creation, subscription activation, and Xendit initiation.
+
+Only OWNER/MANAGER users with the `BILLING` module see the read UI, matching backend middleware. OWNER-only actions are initial prepaid subscription activation, invoice generation, adjustment creation, and Xendit payment initiation. The backend's estimate response supplies active users, included seats, additional users, and amounts; the frontend renders those fields without reproducing seat or price calculations.
+
+Billing record details preserve the backend's completed payment list and paid/outstanding totals. PAID and VOID records have no payment action. Xendit initiation is a backend custom mutation; the UI follows only an HTTPS action URL returned by the backend, keeps the record pending until backend refresh reports otherwise, and never calls the webhook or manual-payment endpoint. Adjustment targets are selected by ID from authenticated organization user/branch lists; the backend decides chargeability and activation. The UI explicitly warns that selected branches and chargeable users can become pending/inactive until verified payment processing.
+
+Initial prepaid activation uses backend-supported terms and opens the returned setup invoice. Subscription status/period are read-only; cancellation and renewal scheduling are not exposed. No recurring/renewal billing workflow was found. The backend owns webhook reconciliation, invoice immutability, pending target activation, and all billing calculations.
+
 ## Authentication
 
 The login handler calls the existing `POST /api/auth/login` backend endpoint. It accepts the backend's sanitized user and JWT, validates the required public fields, and sets the JWT in an HttpOnly, same-site cookie. A second HttpOnly cookie stores the public user snapshot needed for server-rendered shell identity; neither cookie is readable by browser JavaScript. Logout expires both cookies, and the authenticated backend proxy also expires them on an upstream 401. The login page does not persist or log the password.
@@ -69,7 +79,7 @@ Copy `.env.example` to a local environment file and set `DOYBIZ_API_URL` for the
 ## Structure
 
 - `src/app`: App Router pages, layouts, and route handlers.
-- `src/components`: login UI, shared authenticated shell, user and branch list/forms, and reusable branch/module controls.
+- `src/components`: login UI, shared authenticated shell, user/branch/billing screens and forms, and reusable access controls.
 - `src/providers`: Refine and auth providers.
 - `src/lib/api`: centralized API helper and Refine data provider.
 - `src/lib/auth`: server session parsing, cookie names, and UI access helpers.
@@ -77,4 +87,4 @@ Copy `.env.example` to a local environment file and set `DOYBIZ_API_URL` for the
 - `src/types`: frontend auth/session response types.
 - `docs`: architecture, test strategy, and Phase 7 notes.
 
-User Management CRUD is implemented under `/app/users`; supported branch list/create is under `/app/branches`. No organization CRUD, branch edit/delete, billing UI, POS, reports, or Super Admin implementation is included.
+User Management CRUD is implemented under `/app/users`; supported branch list/create is under `/app/branches`; billing and seat display are under `/app/billing`. No organization CRUD, branch edit/delete, POS, reports, or Super Admin implementation is included.

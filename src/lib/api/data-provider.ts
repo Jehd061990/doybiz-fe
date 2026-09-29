@@ -47,7 +47,16 @@ const getOneRecord = async <TData extends BaseRecord = BaseRecord>(resource: str
   requireResource(resource);
   if (resource === 'branches') return unsupported(resource, 'getOne');
   const payload = await apiRequest<unknown>(`/${resource}/${encodeURIComponent(String(id))}`);
-  return recordFrom(property(payload, resource === 'users' ? 'user' : 'record'));
+  const record = recordFrom<TData>(property(payload, resource === 'users' ? 'user' : 'record'));
+  if (resource === 'billing') {
+    return {
+      ...record,
+      payments: property(payload, 'payments'),
+      paidAmount: property(payload, 'paidAmount'),
+      outstandingAmount: property(payload, 'outstandingAmount'),
+    } as TData;
+  }
+  return record;
 };
 
 const createRecord = async <TData extends BaseRecord = BaseRecord>(resource: string, variables: object): Promise<TData> => {
