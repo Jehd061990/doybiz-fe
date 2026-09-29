@@ -76,4 +76,53 @@ describe('Refine user and branch endpoint mappings', () => {
     expect(apiRequestMock).toHaveBeenCalledWith('/branches');
     expect(result.data).toEqual([{ _id: 'branch-1', id: 'branch-1', name: 'Main Branch' }]);
   });
+
+  it('creates a branch with only the backend-supported fields and unwraps its raw response', async () => {
+    const branch = {
+      _id: 'branch-2',
+      organizationId: 'org-1',
+      name: 'North Branch',
+      address: '12 North Road',
+      contactNumber: '555-0102',
+      status: 'ACTIVE',
+    };
+    apiRequestMock.mockResolvedValueOnce(branch);
+
+    const result = await apiDataProvider.create({
+      resource: 'branches',
+      variables: {
+        name: 'North Branch',
+        address: '12 North Road',
+        contactNumber: '555-0102',
+        status: 'ACTIVE',
+      },
+    });
+
+    expect(apiRequestMock).toHaveBeenCalledWith('/branches', {
+      method: 'POST',
+      body: {
+        name: 'North Branch',
+        address: '12 North Road',
+        contactNumber: '555-0102',
+        status: 'ACTIVE',
+      },
+    });
+    expect(result.data).toEqual({ ...branch, id: 'branch-2' });
+  });
+
+  it('does not invent organization, branch detail, or branch update endpoints', async () => {
+    await expect(apiDataProvider.getList({
+      resource: 'organizations',
+      pagination: { currentPage: 1, pageSize: 20 },
+      filters: [],
+      sorters: [],
+    })).rejects.toMatchObject({ status: 404 });
+    await expect(apiDataProvider.getOne({ resource: 'branches', id: 'branch-1' }))
+      .rejects.toMatchObject({ status: 405 });
+    await expect(apiDataProvider.update({
+      resource: 'branches',
+      id: 'branch-1',
+      variables: { status: 'INACTIVE' },
+    })).rejects.toMatchObject({ status: 405 });
+  });
 });

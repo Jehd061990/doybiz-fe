@@ -26,9 +26,12 @@ describe('AppShell navigation', () => {
 
     expect(screen.getByRole('link', { name: 'Users' })).toHaveAttribute('href', '/app/users');
     expect(screen.getByRole('link', { name: 'Users' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Branches' })).toHaveAttribute('href', '/app/branches');
+    expect(screen.getByRole('link', { name: 'Organization' })).toHaveAttribute('href', '/app/organization');
 
     rerender(<AppShell user={{ ...user, role: 'MANAGER' }}><p>Current route</p></AppShell>);
 
     expect(screen.queryByRole('link', { name: 'Users' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Branches' })).toBeInTheDocument();
   });
 });

@@ -21,7 +21,11 @@ const getMessage = (error: ErrorLike) => {
   return '';
 };
 
-export function getUserManagementErrorMessage(value: unknown, operation: 'load' | 'create' | 'update' = 'load') {
+export function getUserManagementErrorMessage(
+  value: unknown,
+  operation: 'load' | 'create' | 'update' = 'load',
+  resource: 'users' | 'branches' = 'users',
+) {
   const error = typeof value === 'object' && value !== null ? value as ErrorLike : {};
   const status = getStatus(error);
   const message = getMessage(error).toLowerCase();
@@ -33,9 +37,21 @@ export function getUserManagementErrorMessage(value: unknown, operation: 'load' 
     return 'Assign organization branches before changing this owner to a non-owner role.';
   }
   if (status === 401) return 'Your session has expired. Sign in again.';
-  if (status === 403) return 'Only an organization owner can manage users.';
-  if (status === 404) return 'This user could not be found in your organization.';
-  if (status === 409) return 'A user with this email already exists in your organization.';
+  if (status === 403) {
+    return resource === 'branches'
+      ? 'You do not have permission to create organization branches.'
+      : 'Only an organization owner can manage users.';
+  }
+  if (status === 404) {
+    return resource === 'branches'
+      ? 'The branch could not be found in your organization.'
+      : 'This user could not be found in your organization.';
+  }
+  if (status === 409) {
+    return resource === 'branches'
+      ? 'The branch could not be saved because it conflicts with existing organization data. Review the details and try again.'
+      : 'A user with this email already exists in your organization.';
+  }
   if (status === 400 && message.includes('password of at least 8 characters')) {
     return 'Enter a password with at least 8 characters.';
   }
@@ -46,11 +62,17 @@ export function getUserManagementErrorMessage(value: unknown, operation: 'load' 
     return 'Choose a role preset that is valid for this role.';
   }
   if (status === 400) {
+    if (resource === 'branches') return 'Check the branch details and try again.';
     return operation === 'create'
       ? 'Check the user details and try again. The email may already be in use.'
       : 'Check the user changes and try again.';
   }
-  return operation === 'load'
-    ? 'Unable to load organization users. Try again shortly.'
+  if (operation === 'load') {
+    return resource === 'branches'
+      ? 'Unable to load organization branches. Try again shortly.'
+      : 'Unable to load organization users. Try again shortly.';
+  }
+  return resource === 'branches'
+    ? 'Unable to create this branch right now. Try again shortly.'
     : 'Unable to save this user right now. Try again shortly.';
 }

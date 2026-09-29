@@ -3,8 +3,8 @@ import { UserForm } from './user-form';
 import type { OrganizationBranch, OrganizationUser } from '@/types/user-management';
 
 const branches: OrganizationBranch[] = [
-  { id: 'branch-1', name: 'Main Branch', status: 'ACTIVE' },
-  { id: 'branch-2', name: 'North Branch', status: 'INACTIVE' },
+  { id: 'branch-1', name: 'Main Branch', address: '1 Main Street', contactNumber: '555-0101', status: 'ACTIVE' },
+  { id: 'branch-2', name: 'North Branch', address: '12 North Road', contactNumber: '555-0102', status: 'INACTIVE' },
 ];
 
 const ownerUser: OrganizationUser = {

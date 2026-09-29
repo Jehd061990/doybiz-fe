@@ -5,15 +5,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { useCreate, useList, useOne, useUpdate, type HttpError } from '@refinedev/core';
 import { useState } from 'react';
 import { ROLES, type UserRole } from '@/config/roles';
+import { useBranches } from '@/lib/branches/use-branches';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
 import { getUserManagementErrorMessage } from '@/lib/users/errors';
 import type { AuthUser } from '@/types/auth';
-import type {
-  CreateOrganizationUserValues,
-  OrganizationBranch,
-  OrganizationUser,
-  UpdateOrganizationUserValues,
-} from '@/types/user-management';
+import type { CreateOrganizationUserValues, OrganizationUser, UpdateOrganizationUserValues } from '@/types/user-management';
 import { UserForm } from './user-form';
 
 function UserManagementGate({ children }: { children: (user: AuthUser) => React.ReactNode }) {
@@ -34,7 +30,7 @@ function UserManagementGate({ children }: { children: (user: AuthUser) => React.
 
 function UserListContent() {
   const usersQuery = useList<OrganizationUser>({ resource: 'users', pagination: { mode: 'off' } });
-  const branchesQuery = useList<OrganizationBranch>({ resource: 'branches', pagination: { mode: 'off' } });
+  const branchesQuery = useBranches();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
@@ -145,7 +141,7 @@ function UserListContent() {
 
 function UserCreateContent({ organizationId }: { organizationId: string }) {
   const router = useRouter();
-  const branchesQuery = useList<OrganizationBranch>({ resource: 'branches', pagination: { mode: 'off' } });
+  const branchesQuery = useBranches();
   const { mutateAsync, mutation } = useCreate<OrganizationUser, HttpError, CreateOrganizationUserValues>({
     mutationOptions: { gcTime: 0 },
   });
@@ -194,7 +190,7 @@ function UserEditContent({ organizationId }: { organizationId: string }) {
   const params = useParams<{ id: string }>();
   const userId = params.id;
   const userQuery = useOne<OrganizationUser>({ resource: 'users', id: userId });
-  const branchesQuery = useList<OrganizationBranch>({ resource: 'branches', pagination: { mode: 'off' } });
+  const branchesQuery = useBranches();
   const { mutateAsync, mutation } = useUpdate<OrganizationUser, HttpError, UpdateOrganizationUserValues>({
     resource: 'users',
     id: userId,

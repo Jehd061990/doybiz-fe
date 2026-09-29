@@ -10,6 +10,8 @@ export function AppShell({ user, children }: { user: AuthUser; children: ReactNo
   const pathname = usePathname();
   const navigation = [
     { href: '/app', label: 'Workspace', visible: true },
+    { href: '/app/organization', label: 'Organization', visible: true },
+    { href: '/app/branches', label: 'Branches', visible: true },
     { href: '/app/users', label: 'Users', visible: user.role === 'OWNER' },
   ].filter(item => item.visible);
 

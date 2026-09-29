@@ -30,6 +30,18 @@ The UI keeps role, branch access, module permissions, role preset, and status as
 
 The backend returns all organization users with `passwordHash` removed and has no pagination/filter parameters. Duplicate-email errors currently use HTTP 400, so unrecognized validation details are shown as a generic form error rather than exposing database messages. Last-active-owner rejections are translated to a clear message without duplicating the backend protection rule. Seat billing is not calculated or mutated by this UI.
 
+## Organization and Branches
+
+`/app/organization` displays only the organization ID from the existing authenticated session. There is no registered organization-management API; the organization model's name, address, phone, and status are not available from login/session and are not inferred from public tenant routes. The page is read-only, and the Refine resource registry does not add a fake `organizations` resource.
+
+`/app/branches` uses the shared `useBranches()` hook and the real `GET /api/branches` resource. The backend scopes the returned bare array to the authenticated organization and the current user's allowed branch IDs. All backend-supported roles may list branches; the UI does not display branches not returned by the backend. Search/status filters are local because this endpoint has no query filtering or pagination contract.
+
+`/app/branches/create` is available to owners in the UI and uses the existing `POST /api/branches` mapping through Refine. Its fields are the backend model's `name`, `address`, `contactNumber`, and supported initial `status` (`ACTIVE` or `INACTIVE`). Organization ID is never sent by the browser; the service attaches the authenticated organization's ID. The backend restricts create to owners.
+
+The backend exposes no branch get-by-ID, patch, status-update, or delete route. The frontend therefore has no branch edit/detail/deletion UI. A branch status can only be selected when creating it; existing status is displayed read-only. User Management shares the same `useBranches()` data source and continues to submit branch IDs through the existing user endpoints.
+
+Branch count and seat billing are not computed or mutated in the frontend. Branch/user relationship and billing remain backend responsibilities.
+
 ## Authentication
 
 The login handler calls the existing `POST /api/auth/login` backend endpoint. It accepts the backend's sanitized user and JWT, validates the required public fields, and sets the JWT in an HttpOnly, same-site cookie. A second HttpOnly cookie stores the public user snapshot needed for server-rendered shell identity; neither cookie is readable by browser JavaScript. Logout expires both cookies, and the authenticated backend proxy also expires them on an upstream 401. The login page does not persist or log the password.
@@ -57,7 +69,7 @@ Copy `.env.example` to a local environment file and set `DOYBIZ_API_URL` for the
 ## Structure
 
 - `src/app`: App Router pages, layouts, and route handlers.
-- `src/components`: login UI, shared authenticated shell, user list/forms, and reusable branch/module controls.
+- `src/components`: login UI, shared authenticated shell, user and branch list/forms, and reusable branch/module controls.
 - `src/providers`: Refine and auth providers.
 - `src/lib/api`: centralized API helper and Refine data provider.
 - `src/lib/auth`: server session parsing, cookie names, and UI access helpers.
@@ -65,4 +77,4 @@ Copy `.env.example` to a local environment file and set `DOYBIZ_API_URL` for the
 - `src/types`: frontend auth/session response types.
 - `docs`: architecture, test strategy, and Phase 7 notes.
 
-User Management CRUD is implemented under `/app/users` using existing user/branch resources. No branch CRUD, billing UI, POS, reports, or Super Admin implementation is included.
+User Management CRUD is implemented under `/app/users`; supported branch list/create is under `/app/branches`. No organization CRUD, branch edit/delete, billing UI, POS, reports, or Super Admin implementation is included.

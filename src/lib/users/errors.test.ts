@@ -17,4 +17,15 @@ describe('user management error messages', () => {
   ])('maps HTTP %s to a safe message', (status, expected) => {
     expect(getUserManagementErrorMessage({ status, message: 'database stack trace' })).toBe(expected);
   });
+
+  it('maps branch authorization and create errors without exposing backend internals', () => {
+    expect(getUserManagementErrorMessage({ status: 403 }, 'create', 'branches'))
+      .toBe('You do not have permission to create organization branches.');
+    expect(getUserManagementErrorMessage({ status: 400, message: 'duplicate index stack' }, 'create', 'branches'))
+      .toBe('Check the branch details and try again.');
+    expect(getUserManagementErrorMessage({ status: 409 }, 'create', 'branches'))
+      .toContain('conflicts with existing organization data');
+    expect(getUserManagementErrorMessage(new Error('network unavailable'), 'load', 'branches'))
+      .toBe('Unable to load organization branches. Try again shortly.');
+  });
 });

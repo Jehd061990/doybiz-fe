@@ -18,7 +18,17 @@ export interface OrganizationUser {
 export interface OrganizationBranch {
   id: string;
   _id?: string;
+  organizationId?: string;
   name: string;
+  address: string;
+  contactNumber: string;
+  status: AccountStatus;
+}
+
+export interface CreateOrganizationBranchValues {
+  name: string;
+  address: string;
+  contactNumber: string;
   status: AccountStatus;
 }
 

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useCreate, useList, useOne, useUpdate } from '@refinedev/core';
 import { useParams, useRouter } from 'next/navigation';
+import { useBranches } from '@/lib/branches/use-branches';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
 import type { AuthUser } from '@/types/auth';
 import type { OrganizationBranch, OrganizationUser } from '@/types/user-management';
@@ -13,6 +14,7 @@ jest.mock('@refinedev/core', () => ({
   useUpdate: jest.fn(),
 }));
 jest.mock('next/navigation', () => ({ useParams: jest.fn(), useRouter: jest.fn() }));
+jest.mock('@/lib/branches/use-branches', () => ({ useBranches: jest.fn() }));
 jest.mock('@/lib/auth/use-auth-session', () => ({ useAuthSession: jest.fn() }));
 
 const useCreateMock = useCreate as jest.Mock;
@@ -21,6 +23,7 @@ const useOneMock = useOne as jest.Mock;
 const useUpdateMock = useUpdate as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
 const useRouterMock = useRouter as jest.Mock;
+const useBranchesMock = useBranches as jest.Mock;
 const useAuthSessionMock = useAuthSession as jest.Mock;
 
 const owner: AuthUser = {
@@ -48,8 +51,8 @@ const managedUser: OrganizationUser = {
 };
 
 const branches: OrganizationBranch[] = [
-  { id: 'branch-1', name: 'Main Branch', status: 'ACTIVE' },
-  { id: 'branch-2', name: 'North Branch', status: 'ACTIVE' },
+  { id: 'branch-1', name: 'Main Branch', address: '1 Main Street', contactNumber: '555-0101', status: 'ACTIVE' },
+  { id: 'branch-2', name: 'North Branch', address: '12 North Road', contactNumber: '555-0102', status: 'ACTIVE' },
 ];
 
 const listResult = (data: unknown[], state: 'loaded' | 'loading' | 'error' = 'loaded', error?: unknown) => ({
@@ -69,9 +72,9 @@ function setSession(user: AuthUser = owner) {
   });
 }
 
-function setListResults(users: OrganizationUser[] = [managedUser], branchData = branches) {
-  useListMock.mockImplementation(({ resource }: { resource: string }) =>
-    resource === 'users' ? listResult(users) : listResult(branchData));
+function setListResults(users: OrganizationUser[] = [managedUser]) {
+  useListMock.mockReturnValue(listResult(users));
+  useBranchesMock.mockReturnValue(listResult(branches));
 }
 
 function fillCreateForm() {
@@ -86,6 +89,7 @@ describe('User Management pages', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setSession();
+    useBranchesMock.mockReturnValue(listResult(branches));
     useRouterMock.mockReturnValue({ replace });
     useParamsMock.mockReturnValue({ id: managedUser.id });
   });
@@ -104,8 +108,7 @@ describe('User Management pages', () => {
   });
 
   it('shows the loading state while organization users are being requested', () => {
-    useListMock.mockImplementation(({ resource }: { resource: string }) =>
-      resource === 'users' ? listResult([], 'loading') : listResult(branches));
+    useListMock.mockReturnValue(listResult([], 'loading'));
     render(<UserListPage />);
 
     expect(screen.getByRole('status')).toHaveTextContent('Loading organization users');
@@ -163,7 +166,7 @@ describe('User Management pages', () => {
   it('creates a user through Refine using the selected organization branch and backend preset defaults', async () => {
     const mutateAsync = jest.fn().mockResolvedValue({ data: managedUser });
     useCreateMock.mockReturnValue({ mutateAsync, mutation: { isPending: false } });
-    setListResults([], branches);
+    setListResults([]);
     render(<UserCreatePage />);
     fillCreateForm();
     fireEvent.click(screen.getByLabelText('Main Branch'));
@@ -187,7 +190,7 @@ describe('User Management pages', () => {
   it('shows a safe create validation error and keeps the form values available', async () => {
     const mutateAsync = jest.fn().mockRejectedValue({ status: 400, message: 'Invalid user role' });
     useCreateMock.mockReturnValue({ mutateAsync, mutation: { isPending: false } });
-    setListResults([], branches);
+    setListResults([]);
     render(<UserCreatePage />);
     fillCreateForm();
     fireEvent.click(screen.getByRole('button', { name: 'Create user' }));
@@ -199,7 +202,7 @@ describe('User Management pages', () => {
   it('loads, edits, and submits role, branch, module, and status fields to the exact update contract', async () => {
     const mutateAsync = jest.fn().mockResolvedValue({ data: managedUser });
     useOneMock.mockReturnValue({ result: managedUser, query: { isLoading: false, isError: false, error: null } });
-    useListMock.mockReturnValue(listResult(branches));
+    useBranchesMock.mockReturnValue(listResult(branches));
     useUpdateMock.mockReturnValue({ mutateAsync, mutation: { isPending: false } });
     render(<UserEditPage />);
 
@@ -233,7 +236,7 @@ describe('User Management pages', () => {
       message: 'The organization must retain at least one active owner',
     });
     useOneMock.mockReturnValue({ result: { ...managedUser, role: 'OWNER', branchAccess: 'ALL' }, query: { isLoading: false, isError: false, error: null } });
-    useListMock.mockReturnValue(listResult(branches));
+    useBranchesMock.mockReturnValue(listResult(branches));
     useUpdateMock.mockReturnValue({ mutateAsync, mutation: { isPending: false } });
     render(<UserEditPage />);
     fireEvent.click(screen.getByLabelText('Inactive'));
