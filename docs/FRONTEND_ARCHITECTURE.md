@@ -18,7 +18,17 @@ Refine is mounted once in `src/app/providers.tsx`. Its router provider comes fro
 
 The backend base URL is server-only `DOYBIZ_API_URL`, defaulting by configuration example to `http://localhost:3000/api`. One typed JSON request helper lives in `src/lib/api/client.ts`. Components and Refine use same-origin routes; they do not make separate direct-fetch or Axios calls to the backend.
 
-The `/api/backend/*` route handler reads the HttpOnly backend-token cookie, attaches `Authorization: Bearer ...` server-side, and proxies the selected request method/path/query. Backend authorization remains the security boundary. The provider understands the existing response differences (bare branch arrays versus wrapped user/billing payloads) where needed; it does not change backend shapes.
+The `/api/backend/*` route handler reads the HttpOnly backend-token cookie, attaches `Authorization: Bearer ...` server-side, and proxies the selected request method/path/query. Backend authorization remains the security boundary. The provider understands the existing response differences (bare branch arrays versus wrapped user/billing payloads) where needed; it does not change backend shapes. User list/create/get/update map to the existing `GET /api/users`, `POST /api/users`, `GET /api/users/:id`, and `PATCH /api/users/:id` contracts. Branch lists use the bare-array `GET /api/branches` response.
+
+## User Management
+
+User Management lives at `/app/users`, `/app/users/create`, and `/app/users/:id`, inside the existing protected `/app` layout and Refine provider. The frontend uses Refine's existing `users` and `branches` resources and data provider. It never supplies an organization ID in user requests; the backend scopes every operation to the authenticated user's organization.
+
+The user list is the complete, backend-sorted organization response. The backend has no user pagination or search/filter query contract, so name/email search and role/status filters are client-side only. User management is owner-only in the UI (navigation and page gate) and independently enforced by the backend user routes. A 401/403 response is handled through Refine auth/error behavior; frontend checks are not an authorization boundary.
+
+The UI keeps role, branch access, module permissions, role preset, and status as separate fields. Owners use organization-wide `branchAccess: 'ALL'`; non-owner selections are branch ID arrays sourced from the authenticated owner's branch response. The module preset preview mirrors the current backend `rolePermissions` utility for presentation only. Create requests omit `modulePermissions` when backend preset defaults are selected, allowing backend model defaults to apply. Edit requests preserve the returned effective module list when role/preset selection changes; only the explicit “Apply this preset when saving” action sends `applyPreset: true`, allowing the backend to replace that list. Backend responses remain authoritative.
+
+The backend returns all organization users with `passwordHash` removed and has no pagination/filter parameters. Duplicate-email errors currently use HTTP 400, so unrecognized validation details are shown as a generic form error rather than exposing database messages. Last-active-owner rejections are translated to a clear message without duplicating the backend protection rule. Seat billing is not calculated or mutated by this UI.
 
 ## Authentication
 
@@ -47,7 +57,7 @@ Copy `.env.example` to a local environment file and set `DOYBIZ_API_URL` for the
 ## Structure
 
 - `src/app`: App Router pages, layouts, and route handlers.
-- `src/components`: login form, login screen, and small shell components.
+- `src/components`: login UI, shared authenticated shell, user list/forms, and reusable branch/module controls.
 - `src/providers`: Refine and auth providers.
 - `src/lib/api`: centralized API helper and Refine data provider.
 - `src/lib/auth`: server session parsing, cookie names, and UI access helpers.
@@ -55,4 +65,4 @@ Copy `.env.example` to a local environment file and set `DOYBIZ_API_URL` for the
 - `src/types`: frontend auth/session response types.
 - `docs`: architecture, test strategy, and Phase 7 notes.
 
-No user CRUD, branch CRUD, billing UI, POS, reports, or Super Admin implementation is included in this foundation.
+User Management CRUD is implemented under `/app/users` using existing user/branch resources. No branch CRUD, billing UI, POS, reports, or Super Admin implementation is included.
