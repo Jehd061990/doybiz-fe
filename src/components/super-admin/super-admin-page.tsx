@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { apiRequest } from '@/lib/api/client';
 import type { ModuleName } from '@/config/modules';
 
@@ -39,14 +39,14 @@ export function SuperAdminPage() {
   const selectedOrg = useMemo(() => organizations.find(org => org._id === selectedOrgId), [organizations, selectedOrgId]);
 
   const loadOrganizations = async () => {
-    const response = await apiRequest<OrganizationsResponse>('/api/backend/platform/organizations');
+    const response = await apiRequest<OrganizationsResponse>('/platform/organizations');
     setOrganizations(response.organizations);
   };
 
   const loadOrgData = async (organizationId: string) => {
     const [branchResponse, userResponse] = await Promise.all([
-      apiRequest<BranchesResponse>(`/api/backend/platform/organizations/${organizationId}/branches`),
-      apiRequest<UsersResponse>(`/api/backend/platform/organizations/${organizationId}/users`),
+      apiRequest<BranchesResponse>(`/platform/organizations/${organizationId}/branches`),
+      apiRequest<UsersResponse>(`/platform/organizations/${organizationId}/users`),
     ]);
     setBranches(branchResponse.branches);
     setUsers(userResponse.users);
@@ -58,28 +58,28 @@ export function SuperAdminPage() {
     void loadOrgData(selectedOrgId).catch(error => setMessage(error instanceof Error ? error.message : 'Failed to load organization data.'));
   }, [selectedOrgId]);
 
-  const createOrganization = async (event: React.FormEvent) => {
+  const createOrganization = async (event: FormEvent) => {
     event.preventDefault(); setMessage('');
     try {
-      await apiRequest('/api/backend/platform/organizations', { method: 'POST', body: orgForm });
+      await apiRequest('/platform/organizations', { method: 'POST', body: orgForm });
       setOrgForm({ name: '', slug: '', email: '', phone: '', address: '' });
       await loadOrganizations(); setMessage('Organization created.');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Failed to create organization.'); }
   };
 
-  const createBranch = async (event: React.FormEvent) => {
+  const createBranch = async (event: FormEvent) => {
     event.preventDefault(); if (!selectedOrgId) return; setMessage('');
     try {
-      await apiRequest(`/api/backend/platform/organizations/${selectedOrgId}/branches`, { method: 'POST', body: branchForm });
+      await apiRequest(`/platform/organizations/${selectedOrgId}/branches`, { method: 'POST', body: branchForm });
       setBranchForm({ name: '', address: '', contactNumber: '' }); await loadOrgData(selectedOrgId); setMessage('Branch created.');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Failed to create branch.'); }
   };
 
-  const createUser = async (event: React.FormEvent) => {
+  const createUser = async (event: FormEvent) => {
     event.preventDefault(); if (!selectedOrgId) return; setMessage('');
     const branchAccess = userForm.role === 'OWNER' ? 'ALL' : userForm.branchAccess;
     try {
-      await apiRequest(`/api/backend/platform/organizations/${selectedOrgId}/users`, {
+      await apiRequest(`/platform/organizations/${selectedOrgId}/users`, {
         method: 'POST',
         body: { ...userForm, branchAccess, modulePermissions: userForm.modulePermissions },
       });
