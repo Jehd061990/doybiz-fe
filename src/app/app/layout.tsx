@@ -6,7 +6,10 @@ import { getAuthSession } from '@/lib/auth/server-session';
 
 export default async function AppLayout({ children }: Readonly<{ children: ReactNode }>) {
   const session = await getAuthSession();
-  if (!session.authenticated || !session.user) redirect('/login');
+  if (!session.authenticated || !session.user) {
+    redirect('/login');
+    return null;
+  }
 
   if (session.user.role === 'PLATFORM_ADMIN') {
     return <SuperAdminShell user={session.user}>{children}</SuperAdminShell>;
