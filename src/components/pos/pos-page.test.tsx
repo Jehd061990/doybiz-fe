@@ -52,9 +52,19 @@ const receipt: PosReceipt = {
   business: { name: 'DoyBiz Salon' },
   branch: { name: 'Main Branch' },
   sale: {
-    id: 'sale-1', saleNumber: 'SALE-20260929-0001', branchId: 'branch-1', subtotal: 600, discount: 0,
-    tax: 0, total: 600, amountPaid: 0, change: 0, paymentStatus: 'UNPAID', status: 'COMPLETED',
-    createdAt: '2026-09-29T10:00:00.000Z', updatedAt: '2026-09-29T10:00:00.000Z',
+    id: 'sale-1',
+    saleNumber: 'SALE-20260929-0001',
+    branchId: 'branch-1',
+    subtotal: 600,
+    discount: 0,
+    tax: 0,
+    total: 600,
+    amountPaid: 0,
+    change: 0,
+    paymentStatus: 'UNPAID',
+    status: 'COMPLETED',
+    createdAt: '2026-09-29T10:00:00.000Z',
+    updatedAt: '2026-09-29T10:00:00.000Z',
   },
   cashier: { name: 'Casey Cashier' },
   customer: null,
@@ -109,22 +119,21 @@ describe('PosPage', () => {
   it('does not show POS content without effective POS module permission', () => {
     setPosHooks({ ...cashier, modulePermissions: ['APPOINTMENTS'] });
     render(<PosPage />);
-
     expect(screen.getByRole('alert')).toHaveTextContent("You don't have access to this module.");
     expect(useBranchesMock).not.toHaveBeenCalled();
   });
 
-  it('shows the service-catalog permission contract gap without pretending POS access is absent', () => {
+  it('allows POS users to browse and add services without requiring SERVICES management permission', () => {
     setPosHooks({ ...cashier, modulePermissions: ['POS'] });
     render(<PosPage />);
     fireEvent.change(screen.getByLabelText('Sale branch'), { target: { value: 'branch-1' } });
 
     expect(screen.getByRole('heading', { name: 'Point of sale' })).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent('service catalog requires the APPOINTMENTS module');
-    expect(screen.queryByRole('button', { name: 'Add service' })).not.toBeInTheDocument();
+    expect(screen.getByText('Haircut')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add service' })).toBeInTheDocument();
     expect(useCustomMock).toHaveBeenCalledWith(expect.objectContaining({
       url: '/services?branchId=branch-1&status=ACTIVE&page=1&limit=100',
-      queryOptions: { enabled: false },
+      queryOptions: { enabled: true },
     }));
   });
 
