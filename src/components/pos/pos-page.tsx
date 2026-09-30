@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useCustom, useCustomMutation, type HttpError } from '@refinedev/core';
 import { useBranches } from '@/lib/branches/use-branches';
 import { hasModuleAccess } from '@/lib/auth/access';
@@ -144,6 +144,7 @@ function PosWorkspace({ user }: { user: AuthUser }) {
   const paymentMutation = useCustomMutation<PosPaymentResponse, HttpError, CreatePosPaymentValues>({
     mutationOptions: { gcTime: 0 },
   });
+  const serviceCategories = Array.from(new Set((servicesQuery.result.data?.data || []).map(service => service.category).filter(Boolean) as string[])).sort();
 
   if (branchesQuery.query.isLoading) {
     return <p className="management-state" role="status">Loading available branches…</p>;
@@ -155,7 +156,6 @@ function PosWorkspace({ user }: { user: AuthUser }) {
   const activeBranches = branchesQuery.result.data.filter(branch => branch.status === 'ACTIVE');
   const catalog = servicesQuery.result.data?.data || [];
   const pagination = servicesQuery.result.data?.pagination;
-  const serviceCategories = useMemo(() => Array.from(new Set(catalog.map(service => service.category).filter(Boolean) as string[])).sort(), [catalog]);
   const canChangeBranch = cart.length === 0;
 
   function changeBranch(nextBranchId: string) {
