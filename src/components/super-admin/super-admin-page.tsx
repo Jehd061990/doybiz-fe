@@ -89,8 +89,22 @@ export function SuperAdminPage() {
   };
 
   const changeRole = (role: 'OWNER' | 'MANAGER' | 'CASHIER') => {
-    setUserForm(prev => ({ ...prev, role, permissionPreset: role, modulePermissions: [...PRESETS[role]], branchAccess: role === 'OWNER' ? [] : prev.branchAccess }));
+    setUserForm(prev => ({
+      ...prev,
+      role,
+      permissionPreset: role,
+      modulePermissions: [...PRESETS[role]],
+      branchAccess: role === 'OWNER' ? [] : prev.branchAccess,
+    }));
   };
+
+  const applyPreset = (preset: 'OWNER' | 'MANAGER' | 'CASHIER') => {
+    if (preset !== userForm.role) return;
+    setUserForm(prev => ({ ...prev, permissionPreset: preset, modulePermissions: [...PRESETS[preset]] }));
+  };
+
+  const permissionsMatchPreset = userForm.modulePermissions.length === PRESETS[userForm.permissionPreset].length
+    && PRESETS[userForm.permissionPreset].every(module => userForm.modulePermissions.includes(module));
 
   return (
     <section className="management-page" aria-labelledby="super-admin-heading">
@@ -143,16 +157,47 @@ export function SuperAdminPage() {
                 <label>Email<input type="email" value={userForm.email} onChange={e => setUserForm(prev => ({ ...prev, email: e.target.value }))} required /></label>
                 <label>Temporary password<input type="password" minLength={8} value={userForm.password} onChange={e => setUserForm(prev => ({ ...prev, password: e.target.value }))} required /></label>
                 <label>Role<select value={userForm.role} onChange={e => changeRole(e.target.value as TenantUser['role'])}>{['OWNER','MANAGER','CASHIER'].map(role => <option key={role}>{role}</option>)}</select></label>
-                <label>Permission preset<select value={userForm.permissionPreset} onChange={e => {
-                  const preset = e.target.value as TenantUser['role'];
-                  setUserForm(prev => ({ ...prev, permissionPreset: preset, modulePermissions: [...PRESETS[preset]] }));
-                }}>{['OWNER','MANAGER','CASHIER'].map(preset => <option key={preset}>{preset}</option>)}</select></label>
+                <fieldset>
+                  <legend>Role permission preset</legend>
+                  <p>Selecting a preset automatically checks its recommended modules. You can still manually change the module checkboxes below.</p>
+                  <div role="group" aria-label="Permission preset">
+                    {(['OWNER', 'MANAGER', 'CASHIER'] as const).map(preset => (
+                      <button
+                        key={preset}
+                        type="button"
+                        aria-pressed={userForm.permissionPreset === preset}
+                        disabled={preset !== userForm.role}
+                        onClick={() => applyPreset(preset)}
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+                  <p role="status">
+                    {permissionsMatchPreset ? `${userForm.permissionPreset} preset applied.` : 'Manual module override active.'}
+                  </p>
+                </fieldset>
                 {userForm.role !== 'OWNER' ? <fieldset><legend>Branch access</legend>{branches.map(branch => (
                   <label key={branch._id}><input type="checkbox" checked={userForm.branchAccess.includes(branch._id)} onChange={e => setUserForm(prev => ({ ...prev, branchAccess: e.target.checked ? [...prev.branchAccess, branch._id] : prev.branchAccess.filter(id => id !== branch._id) }))} /> {branch.name}</label>
                 ))}</fieldset> : <p>OWNER receives ALL branch access.</p>}
-                <fieldset><legend>Module permissions</legend>{MODULES.map(module => (
-                  <label key={module}><input type="checkbox" checked={userForm.modulePermissions.includes(module)} onChange={e => setUserForm(prev => ({ ...prev, modulePermissions: e.target.checked ? [...prev.modulePermissions, module] : prev.modulePermissions.filter(item => item !== module) }))} /> {module}</label>
-                ))}</fieldset>
+                <fieldset>
+                  <legend>Module permissions</legend>
+                  <p>Manual assignment remains available even after applying a role preset.</p>
+                  {MODULES.map(module => (
+                    <label key={module}>
+                      <input
+                        type="checkbox"
+                        checked={userForm.modulePermissions.includes(module)}
+                        onChange={e => setUserForm(prev => ({
+                          ...prev,
+                          modulePermissions: e.target.checked
+                            ? [...prev.modulePermissions, module]
+                            : prev.modulePermissions.filter(item => item !== module),
+                        }))}
+                      /> {module}
+                    </label>
+                  ))}
+                </fieldset>
                 <button type="submit">Create user</button>
               </form>
             </section>
