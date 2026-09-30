@@ -8,7 +8,8 @@
     "start": "next start -p 3001",
     "lint": "eslint .",
     "test": "jest --runInBand",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@refinedev/core": "5.0.12",
