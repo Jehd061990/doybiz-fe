@@ -91,6 +91,7 @@ function StaffEditContent() {
   const {session}=useAuthSession(); const canManage=session.user?.role==='OWNER'||session.user?.role==='MANAGER';
   const {mutateAsync,mutation}=useUpdate<Staff,HttpError,StaffFormValues>({resource:'staff',id:staffId});
   const deleteMutation=useCustomMutation<{success:boolean;staff:Staff},HttpError,Record<string,never>>({mutationOptions:{gcTime:0}});
+  const assignmentMutation=useCustomMutation({mutationOptions:{gcTime:0}});
   const servicesQuery=useCustom<StaffServiceListResponse>({url:`/staff/${encodeURIComponent(staffId)}/services`,method:'get'});
   const services=servicesQuery.result.data?.services || [];
   const [error,setError]=useState<string|null>(null);
@@ -104,15 +105,14 @@ function StaffEditContent() {
   const canAssign=canManage;
   async function save(values:StaffFormValues){setError(null);try{await mutateAsync({resource:'staff',id:staffId,values});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'update'));return false}}
   async function deactivate(){if(staff.status==='INACTIVE'||!window.confirm('Deactivate this staff member?'))return;setError(null);try{await deleteMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}`,method:'delete',values:{}});router.replace('/app/staff')}catch(e){setError(getStaffErrorMessage(e,'delete'))}}
-  async function assign(){if(!serviceId)return;setAssignmentError(null);try{await useCustomMutation; }catch(e){setAssignmentError(getStaffErrorMessage(e,'assignment'))}}
-  async function assignService(){if(!serviceId)return;setAssignmentError(null);try{await fetch('/api/staff');}catch(e){setAssignmentError(getStaffErrorMessage(e,'assignment'))}}
+  async function assignService(){if(!serviceId)return;setAssignmentError(null);try{await assignmentMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}/services/${encodeURIComponent(serviceId)}`,method:'post',values:{}});setServiceId('');await servicesQuery.query.refetch();}catch(e){setAssignmentError(getStaffErrorMessage(e,'assignment'))}}
   return <section className="management-page" aria-labelledby="staff-detail-heading"><header className="management-page-header"><div><p className="eyebrow">STAFF</p><h1 id="staff-detail-heading">{staff.firstName} {staff.lastName}</h1><p className="management-description">{staff.position} · {branchName(staff.branchId)}</p></div><Link className="secondary-button" href="/app/staff">Back</Link></header>
     <StaffForm initial={staff} saving={mutation.isPending||deleteMutation.mutation.isPending} error={error} onSubmit={save}/>
     <section className="management-panel"><h2>Assigned services</h2><p className="management-description">Services this staff member is qualified to perform.</p>
       {servicesQuery.query.isLoading?<p className="management-state">Loading assigned services…</p>:null}
       {servicesQuery.query.isError?<p className="management-error">{getStaffErrorMessage(servicesQuery.query.error,'assignment')}</p>:null}
       <ul>{services.map(service=><li key={idOf(service)}>{service.name} — ₱{service.price}</li>)}</ul>
-      {canAssign?<div className="form-actions"><select value={serviceId} onChange={e=>setServiceId(e.currentTarget.value)}><option value="">Select active service</option>{(availableServices.result.data?.data||[]).filter(s=>!services.some(a=>idOf(a)===idOf(s))).map(s=><option key={idOf(s)} value={idOf(s)}>{s.name}</option>)}</select><button className="primary-button" disabled={!serviceId} onClick={assignService}>Assign service</button></div>:null}
+      {canAssign?<div className="form-actions"><select value={serviceId} onChange={e=>setServiceId(e.currentTarget.value)}><option value="">Select active service</option>{(availableServices.result.data?.data||[]).filter(s=>!services.some(a=>idOf(a)===idOf(s))).map(s=><option key={idOf(s)} value={idOf(s)}>{s.name}</option>)}</select><button className="primary-button" disabled={!serviceId||assignmentMutation.mutation.isPending} onClick={assignService}>{assignmentMutation.mutation.isPending?'Assigning…':'Assign service'}</button></div>:null}
       {assignmentError?<p className="management-error">{assignmentError}</p>:null}
     </section>
   </section>;
