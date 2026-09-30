@@ -1,13 +1,12 @@
-import { MODULES, type ModuleName } from './modules';
-import type { PermissionPreset } from '@/types/auth';
-import type { UserRole } from './roles';
+import type { ModuleName } from './modules';
+import type { PermissionPreset, UserRole } from '@/types/auth';
 
-const PRESET_MODULES: Record<PermissionPreset, readonly ModuleName[]> = {
-  OWNER: MODULES,
-  MANAGER: ['POS', 'SALES', 'APPOINTMENTS', 'CUSTOMERS', 'REPORTS', 'STAFF'],
+export const ROLE_PRESET_MODULES: Record<PermissionPreset, ModuleName[]> = {
+  OWNER: ['POS', 'SALES', 'APPOINTMENTS', 'SERVICES', 'CUSTOMERS', 'REPORTS', 'STAFF', 'BILLING'],
+  MANAGER: ['POS', 'SALES', 'APPOINTMENTS', 'SERVICES', 'CUSTOMERS', 'REPORTS', 'STAFF'],
   CASHIER: ['POS', 'SALES', 'APPOINTMENTS', 'CUSTOMERS'],
 };
-
-export function getPresetPreview(role: UserRole, preset: PermissionPreset): ModuleName[] {
-  return role === 'OWNER' ? [...MODULES] : [...PRESET_MODULES[preset]];
-}
+export const getPresetPreview = (role: UserRole, preset: PermissionPreset): ModuleName[] => {
+  if (role === 'OWNER') return [...ROLE_PRESET_MODULES.OWNER];
+  return [...ROLE_PRESET_MODULES[preset]];
+};
