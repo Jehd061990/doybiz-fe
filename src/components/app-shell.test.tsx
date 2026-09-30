@@ -20,7 +20,7 @@ const user: AuthUser = {
 };
 
 describe('AppShell navigation', () => {
-  it('shows an active Users link to owners only', () => {
+  it('shows owner-only Users access and module links according to effective access', () => {
     usePathnameMock.mockReturnValue('/app/users');
     const { rerender } = render(<AppShell user={user}><p>Current route</p></AppShell>);
 
@@ -30,7 +30,7 @@ describe('AppShell navigation', () => {
     expect(screen.getByRole('link', { name: 'Organization' })).toHaveAttribute('href', '/app/organization');
     expect(screen.getByRole('link', { name: 'Billing' })).toHaveAttribute('href', '/app/billing');
     expect(screen.getByRole('link', { name: 'Point of sale' })).toHaveAttribute('href', '/app/pos');
-    expect(screen.queryByRole('link', { name: 'Sales' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sales' })).toHaveAttribute('href', '/app/sales');
 
     rerender(<AppShell user={{ ...user, role: 'MANAGER' }}><p>Current route</p></AppShell>);
 
@@ -47,5 +47,6 @@ describe('AppShell navigation', () => {
 
     expect(screen.queryByRole('link', { name: 'Billing' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Point of sale' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sales' })).toHaveAttribute('href', '/app/sales');
   });
 });
