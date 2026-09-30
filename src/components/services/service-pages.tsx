@@ -7,6 +7,7 @@ import { apiRequest } from '@/lib/api/client';
 import { hasModuleAccess } from '@/lib/auth/access';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
 import { optimizeServiceImage } from '@/lib/images/optimize-service-image';
+import { ServiceImage } from '@/components/services/service-image';
 import type { Service, ServiceListResponse } from '@/types/services';
 
 const idOf = (value: unknown) => typeof value === 'string'
@@ -21,36 +22,72 @@ const branchName = (value: Service['branchId']) => typeof value === 'object' && 
 
 const money = (value: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
 
-function ServiceImageField({ value, onChange, onRemove }: { value?: string; onChange: (value: string | undefined) => void; onRemove?: () => void }) {
+function ServiceImageField({ source, imageValue, onSourceChange, onImageChange }: { source: 'UPLOAD' | 'URL' | 'NONE'; imageValue?: string; onSourceChange: (source: 'UPLOAD' | 'URL' | 'NONE') => void; onImageChange: (value: string | undefined) => void }) {
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
 
   async function choose(file: File | undefined) {
     if (!file) return;
     setProcessing(true); setMessage(null);
     try {
       const result = await optimizeServiceImage(file);
-      onChange(result.dataUrl);
+      onImageChange(result.dataUrl);
+      onSourceChange('UPLOAD');
       setMessage(`Optimized to ${Math.round(result.bytes / 1024)} KB · ${result.width}×${result.height}`);
     } catch (error) {
       setMessage((error as Error).message);
     } finally { setProcessing(false); }
   }
 
+  function changeUrl(value: string) {
+    onImageChange(value.trim() || undefined);
+    setUrlError(null);
+    if (!value.trim()) return;
+    try {
+      const url = new URL(value.trim());
+      if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
+    } catch {
+      setUrlError('Enter a valid public http:// or https:// image URL.');
+    }
+  }
+
   return (
     <div className="service-image-field">
       <div className="service-image-preview">
-        {value ? <img src={value} alt="Service preview" /> : <div className="service-image-placeholder">No image</div>}
+        <ServiceImage src={imageValue} alt="Service preview" />
       </div>
-      <div className="service-image-actions">
-        <label className="secondary-button service-upload-button">
-          {processing ? 'Optimizing…' : value ? 'Replace image' : 'Upload image'}
-          <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={processing} onChange={event => void choose(event.currentTarget.files?.[0])} />
-        </label>
-        {value ? <button className="text-button" type="button" onClick={() => { onChange(undefined); onRemove?.(); }}>Remove image</button> : null}
+      <div className="service-image-controls">
+        <div className="service-image-source-options" role="radiogroup" aria-label="Service image source">
+          <label className="check-option"><input type="radio" name="service-image-source" checked={source === 'UPLOAD'} onChange={() => { onSourceChange('UPLOAD'); onImageChange(undefined); setMessage(null); setUrlError(null); }} /><span>Upload image</span></label>
+          <label className="check-option"><input type="radio" name="service-image-source" checked={source === 'URL'} onChange={() => { onSourceChange('URL'); onImageChange(undefined); setMessage(null); setUrlError(null); }} /><span>Use image URL</span></label>
+          <label className="check-option"><input type="radio" name="service-image-source" checked={source === 'NONE'} onChange={() => { onSourceChange('NONE'); onImageChange(undefined); setMessage(null); setUrlError(null); }} /><span>No image</span></label>
+        </div>
+
+        {source === 'UPLOAD' ? (
+          <div className="service-image-actions">
+            <label className="secondary-button service-upload-button">
+              {processing ? 'Optimizing…' : 'Choose image'}
+              <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={processing} onChange={event => void choose(event.currentTarget.files?.[0])} />
+            </label>
+            <span className="field-help">Optional. JPG, PNG, or WebP. Resized to max 800×800 and compressed to about 180 KB, with a 300 KB hard limit.</span>
+          </div>
+        ) : null}
+
+        {source === 'URL' ? (
+          <div className="service-image-url-control">
+            <label className="field-control">
+              <span>Image URL</span>
+              <input value={imageValue || ''} onChange={event => changeUrl(event.currentTarget.value)} placeholder="https://example.com/service-image.jpg" inputMode="url" />
+            </label>
+            <p className="field-help">Paste a publicly accessible image link. DOYBIZ stores the URL and does not re-upload it to Cloudinary.</p>
+            {urlError ? <p className="management-error" role="alert">{urlError}</p> : null}
+          </div>
+        ) : null}
+
+        {source === 'NONE' ? <p className="field-help">Image is optional. If you leave it empty, DOYBIZ automatically uses the default service image.</p> : null}
+        {message ? <p className="field-help" role="status">{message}</p> : null}
       </div>
-      <p className="field-help">JPG, PNG, or WebP. Images are resized to max 800×800 and compressed to a target of about 180 KB, with a 300 KB hard limit.</p>
-      {message ? <p className="field-help" role="status">{message}</p> : null}
     </div>
   );
 }
@@ -111,7 +148,7 @@ export function ServiceListPage() {
         {services.map(service => {
           const id = idOf(service);
           return <article className="service-admin-card" key={id || service.name}>
-            <div className="service-admin-image">{service.imageUrl ? <img src={service.imageUrl} alt="" /> : <div className="service-image-placeholder">No image</div>}</div>
+            <div className="service-admin-image"><ServiceImage src={service.imageUrl} alt="" /></div>
             <div className="service-admin-body">
               <div className="service-card-meta"><span>{service.category || 'Uncategorized'}</span><span>{service.status} · {branchName(service.branchId)}</span></div>
               <h2>{service.name}</h2>
@@ -135,20 +172,38 @@ export function ServiceFormPage({ serviceId }: { serviceId?: string }) {
   const [loading, setLoading] = useState(editing);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [imageData, setImageData] = useState<string | undefined>();
-  const [removeImage, setRemoveImage] = useState(false);
-  const displayImage = imageData !== undefined ? imageData : (removeImage ? undefined : service?.imageUrl);
+  const [imageSource, setImageSource] = useState<'UPLOAD' | 'URL' | 'NONE'>('NONE');
+  const [imageValue, setImageValue] = useState<string | undefined>();
+  const displayImage = imageSource === 'NONE' ? undefined : imageValue;
 
   useEffect(() => {
     if (!serviceId || !user) return;
     void apiRequest<{ success: true; service: Service }>(`/services/${encodeURIComponent(serviceId)}`).then(response => {
       setService(response.service);
+      setImageSource(response.service.imageUrl ? (response.service.imagePublicId ? 'UPLOAD' : 'URL') : 'NONE');
+      setImageValue(response.service.imageUrl);
     }).catch(e => setError((e as Error).message)).finally(() => setLoading(false));
   }, [serviceId, user]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(null); setSaving(true);
     const form = new FormData(event.currentTarget);
+    const imageUrl = imageSource === 'URL' ? imageValue?.trim() : undefined;
+    if (imageSource === 'URL' && imageUrl) {
+      try {
+        const parsed = new URL(imageUrl);
+        if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error();
+      } catch {
+        setSaving(false);
+        setError('Enter a valid public http:// or https:// image URL.');
+        return;
+      }
+    }
+    if (imageSource === 'URL' && !imageUrl) {
+      setSaving(false);
+      setError('Enter an image URL or choose No image.');
+      return;
+    }
     const payload = {
       name: String(form.get('name') || '').trim(),
       code: String(form.get('code') || '').trim() || undefined,
@@ -158,16 +213,15 @@ export function ServiceFormPage({ serviceId }: { serviceId?: string }) {
       durationMinutes: Number(form.get('durationMinutes')),
       branchId: String(form.get('branchId') || '') || undefined,
       status: String(form.get('status') || 'ACTIVE'),
-      ...(imageData ? { imageData } : {}),
+      imageSource,
+      ...(imageSource === 'UPLOAD' && imageValue ? { imageData: imageValue } : {}),
+      ...(imageSource === 'URL' && imageUrl ? { imageUrl } : {}),
     };
     try {
       if (!payload.name || !Number.isFinite(payload.price) || payload.price < 0 || !Number.isFinite(payload.durationMinutes) || payload.durationMinutes < 1) throw new Error('Enter a service name, valid price, and duration.');
       const response = editing
         ? await apiRequest<{ success: true; service: Service }>(`/services/${encodeURIComponent(serviceId!)}`, { method: 'PUT', body: payload })
         : await apiRequest<{ success: true; service: Service }>('/services', { method: 'POST', body: payload });
-      if (editing && removeImage && !imageData) {
-        await apiRequest(`/services/${encodeURIComponent(serviceId!)}/image`, { method: 'DELETE' });
-      }
       window.location.href = '/app/services';
       void response;
     } catch (e) { setError((e as Error).message); }
@@ -194,7 +248,7 @@ export function ServiceFormPage({ serviceId }: { serviceId?: string }) {
 
       <form className="service-form" onSubmit={submit}>
         <section className="service-form-main">
-          <div className="form-section"><h2>Service image</h2><ServiceImageField value={displayImage} onChange={value => { setImageData(value); setRemoveImage(!value); }} onRemove={() => { setImageData(undefined); setRemoveImage(true); }} /></div>
+          <div className="form-section"><h2>Service image <span className="field-optional">(optional)</span></h2><ServiceImageField source={imageSource} imageValue={displayImage} onSourceChange={setImageSource} onImageChange={setImageValue} /></div>
           <div className="form-section"><h2>Details</h2><div className="form-grid">
             <label className="field-control"><span>Service name *</span><input name="name" required defaultValue={service?.name} placeholder="e.g. Laptop Cleaning" /></label>
             <label className="field-control"><span>Service code</span><input name="code" defaultValue={service?.code} placeholder="e.g. SVC-001" /></label>
@@ -208,7 +262,7 @@ export function ServiceFormPage({ serviceId }: { serviceId?: string }) {
           {error ? <p className="management-error" role="alert">{error}</p> : null}
           <div className="form-actions"><Link className="secondary-button" href="/app/services">Cancel</Link><button className="primary-button" type="submit" disabled={saving}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Create service'}</button></div>
         </section>
-        {editing ? <aside className="service-form-side"><div className="service-side-card"><span className="eyebrow">POS PREVIEW</span><div className="service-pos-preview">{displayImage ? <img src={displayImage} alt="" /> : <div className="service-image-placeholder">No image</div>}<strong>{service?.name || 'Service name'}</strong><span>{service ? money(service.price) : '₱0.00'} · {service?.durationMinutes || 30} min</span></div><button className="secondary-button danger-button" type="button" onClick={() => void deactivate()} disabled={saving}>Deactivate service</button></div></aside> : null}
+        {editing ? <aside className="service-form-side"><div className="service-side-card"><span className="eyebrow">POS PREVIEW</span><div className="service-pos-preview"><ServiceImage src={displayImage} alt="" /><strong>{service?.name || 'Service name'}</strong><span>{service ? money(service.price) : '₱0.00'} · {service?.durationMinutes || 30} min</span></div><button className="secondary-button danger-button" type="button" onClick={() => void deactivate()} disabled={saving}>Deactivate service</button></div></aside> : null}
       </form>
     </section>
   );
