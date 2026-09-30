@@ -170,6 +170,44 @@ button { cursor: pointer; }
 .app-nav-link-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; background: var(--green); content: ''; }
 .app-main { width: min(100%, 1320px); flex: 1; margin: 0 auto; }
 .app-footer { display: flex; justify-content: space-between; padding: 18px 0; border-top: 1px solid var(--line); color: var(--ink-soft); font: 10px var(--font-mono); }
+
+.super-admin-page { padding-top: 34px; }
+.super-admin-context-card { margin-bottom: 24px; }
+.super-admin-provisioning-grid { align-items: start; }
+.section-description { margin: -5px 0 20px; color: var(--ink-soft); font-size: 12px; line-height: 1.6; }
+.management-form { display: grid; gap: 20px; }
+.form-field-group { display: grid; gap: 12px; padding-top: 18px; border-top: 1px solid var(--line); }
+.form-field-group:first-child { padding-top: 0; border-top: 0; }
+.form-field-group h3 { margin: 0; color: var(--ink); font-size: 12px; letter-spacing: 0.01em; }
+.field-control em { color: var(--ink-soft); font-style: normal; font-weight: 500; }
+.form-grid { gap: 14px; }
+.form-grid .full-width { grid-column: 1 / -1; }
+.super-admin-form .primary-button { width: 100%; margin-top: 0; min-height: 44px; }
+.provisioning-list { display: grid; gap: 0; margin: 20px 0 0; padding: 0; border-top: 1px solid var(--line); list-style: none; }
+.provisioning-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+.provisioning-list li strong, .provisioning-list li span { min-width: 0; overflow-wrap: anywhere; }
+.provisioning-list li span { color: var(--ink-soft); }
+.provisioning-list li small { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--ink-soft); font: 500 9px var(--font-mono); }
+.compact-empty { padding: 22px 0 0; }
+.super-admin-user-card { margin-top: 24px; }
+.access-control-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 28px; }
+.access-control-grid .management-fieldset + .management-fieldset { padding-left: 28px; border-left: 1px solid var(--line); }
+.preset-button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.preset-button { min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 5px; background: var(--white); color: var(--ink-soft); font-size: 11px; font-weight: 700; }
+.preset-button:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.preset-button-active { border-color: var(--green); background: var(--mint); color: var(--green-deep); }
+.preset-button:disabled { cursor: not-allowed; opacity: .45; }
+.super-admin-password-field { position: relative; width: 100%; }
+.super-admin-password-input { padding-right: 52px !important; }
+.super-admin-password-toggle { position: absolute; top: 50%; right: 7px; z-index: 2; display: grid; width: 36px; height: 36px; margin: 0; padding: 0; place-items: center; transform: translateY(-50%); border: 0; border-radius: 5px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.super-admin-password-toggle svg { display: block; pointer-events: none; }
+.super-admin-password-toggle:hover { background: var(--mint); color: var(--green); }
+.super-admin-password-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+@media (max-width: 900px) {
+  .access-control-grid { grid-template-columns: 1fr; }
+  .access-control-grid .management-fieldset + .management-fieldset { padding-left: 0; border-top: 1px solid var(--line); border-left: 0; padding-top: 22px; }
+}
+
 .super-admin-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 24px; }
 .super-admin-stats > div { display: grid; gap: 6px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 7px; background: var(--white); }
 .super-admin-stats span { color: var(--ink-soft); font: 500 10px var(--font-mono); text-transform: uppercase; }
