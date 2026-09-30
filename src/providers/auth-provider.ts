@@ -8,12 +8,12 @@ const authProvider: AuthProvider = {
       return { success: false, error: new Error('Enter your email and password.') };
     }
     try {
-      await apiRequest<AuthResponse>('/api/auth/login', {
+      const response = await apiRequest<AuthResponse>('/api/auth/login', {
         method: 'POST',
         body: { email, password },
         apiBase: '',
       });
-      return { success: true, redirectTo: '/app' };
+      return { success: true, redirectTo: response.user.role === 'PLATFORM_ADMIN' ? '/app/super-admin' : '/app' };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error : new Error('Login failed.') };
     }
