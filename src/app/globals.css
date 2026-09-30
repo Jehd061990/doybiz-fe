@@ -171,6 +171,45 @@ button { cursor: pointer; }
 .app-main { width: min(100%, 1320px); flex: 1; margin: 0 auto; }
 .app-footer { display: flex; justify-content: space-between; padding: 18px 0; border-top: 1px solid var(--line); color: var(--ink-soft); font: 10px var(--font-mono); }
 
+
+.super-admin-header-actions { display:flex; align-items:center; gap:8px; }
+.super-admin-header-actions .primary-button { width:auto; margin:0; }
+.organization-table-scroll { overflow-x:auto; margin-top:8px; }
+.organization-table { width:100%; border-collapse:collapse; min-width:720px; }
+.organization-table th, .organization-table td { padding:13px 14px; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle; font-size:12px; }
+.organization-table th { color:var(--ink-soft); font:600 9px var(--font-mono); letter-spacing:.05em; text-transform:uppercase; }
+.organization-table td:first-child { min-width:190px; }
+.organization-table td:first-child strong, .organization-table td:first-child span { display:block; }
+.table-action-button { border:0; background:transparent; color:var(--green); cursor:pointer; font-size:11px; font-weight:700; }
+.table-action-button:hover { text-decoration:underline; }
+.super-admin-empty-organizations { display:grid; justify-items:center; gap:10px; padding:30px 0 12px; }
+.super-admin-empty-organizations .empty-state { padding:0; text-align:center; }
+.super-admin-modal-backdrop { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:24px; background:rgb(15 31 25 / 42%); }
+.super-admin-modal { width:min(620px,100%); max-height:calc(100vh - 48px); overflow:auto; padding:26px; border:1px solid var(--line); border-radius:10px; background:var(--white); box-shadow:0 20px 60px rgb(15 31 25 / 18%); }
+.super-admin-create-modal { width:min(680px,100%); }
+.modal-close-button { display:grid; width:34px; height:34px; padding:0; place-items:center; border:1px solid var(--line); border-radius:5px; background:var(--white); color:var(--ink-soft); cursor:pointer; font-size:22px; line-height:1; }
+.modal-close-button:hover { border-color:var(--green); color:var(--green); }
+.organization-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; margin:20px 0; border-top:1px solid var(--line); }
+.organization-detail-grid > div { display:grid; gap:5px; padding:14px 12px; border-bottom:1px solid var(--line); }
+.organization-detail-grid > div:nth-child(odd) { border-right:1px solid var(--line); }
+.organization-detail-grid span { color:var(--ink-soft); font:600 9px var(--font-mono); text-transform:uppercase; letter-spacing:.04em; }
+.organization-detail-grid strong { overflow-wrap:anywhere; font-size:12px; }
+.organization-detail-grid .organization-detail-full { grid-column:1 / -1; border-right:0; }
+.organization-stepper { display:grid; grid-template-columns:1fr 1fr; gap:0; margin:22px 0 24px; border-bottom:1px solid var(--line); }
+.organization-step { position:relative; display:flex; align-items:center; gap:10px; padding:0 10px 14px 0; color:var(--ink-soft); }
+.organization-step + .organization-step { padding-left:18px; }
+.organization-step + .organization-step::before { content:""; position:absolute; left:0; top:16px; width:18px; height:1px; background:var(--line); transform:translateX(-18px); }
+.organization-step > span { display:grid; width:30px; height:30px; flex:none; place-items:center; border:1px solid var(--line); border-radius:50%; font-size:11px; font-weight:700; }
+.organization-step div { display:grid; gap:2px; }
+.organization-step strong { font-size:11px; color:var(--ink-soft); }
+.organization-step small { font-size:10px; color:var(--ink-soft); }
+.organization-step-active > span { border-color:var(--green); background:var(--mint); color:var(--green-deep); }
+.organization-step-active strong { color:var(--green-deep); }
+.organization-review { display:grid; gap:5px; margin-top:18px; padding:14px; border:1px solid var(--line); border-radius:6px; background:var(--surface); }
+.organization-review p { margin:0; }
+.organization-review strong { font-size:13px; }
+.organization-review span { color:var(--ink-soft); font-size:11px; overflow-wrap:anywhere; }
+
 .super-admin-page { padding-top: 34px; }
 .super-admin-context-card { margin-bottom: 24px; }
 .super-admin-provisioning-grid { align-items: start; }
