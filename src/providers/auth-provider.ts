@@ -44,12 +44,14 @@ const authProvider: AuthProvider = {
   },
   getPermissions: async () => {
     const session = await apiRequest<AuthSession>('/api/auth/session', { apiBase: '' });
-    return session.user ? {
+    if (!session.user) return null;
+    if (session.user.role === 'PLATFORM_ADMIN') return { role: session.user.role };
+    return {
       role: session.user.role,
       branchAccess: session.user.branchAccess,
       modulePermissions: session.user.modulePermissions,
       status: session.user.status,
-    } : null;
+    };
   },
 };
 
