@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -10,6 +11,7 @@ import type { AuthUser } from '@/types/auth';
 
 export function AppShell({ user, children }: { user: AuthUser; children: ReactNode }) {
   const pathname = usePathname();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const workspaceNavigation = [
     { href: '/app', label: 'Dashboard', icon: '⌂', visible: true },
     { href: '/app/organization', label: 'Organization', icon: '◫', visible: true },
@@ -38,12 +40,23 @@ export function AppShell({ user, children }: { user: AuthUser; children: ReactNo
   };
 
   return (
-    <div className="app-shell">
+    <div className={sidebarCollapsed ? 'app-shell sidebar-is-collapsed' : 'app-shell'}>
       <aside className="app-sidebar" aria-label="Main navigation">
-        <Link className="sidebar-brand" href="/app" aria-label="DOYBIZ home">
+        <div className="sidebar-brand-row">
+          <Link className="sidebar-brand" href="/app" aria-label="DOYBIZ home">
           <span className="sidebar-brand-mark">d</span>
           <span>doybiz<span>.</span></span>
-        </Link>
+          </Link>
+          <button
+            className="sidebar-toggle"
+            type="button"
+            aria-label={sidebarCollapsed ? 'Expand navigation' : 'Collapse navigation'}
+            aria-expanded={!sidebarCollapsed}
+            onClick={() => setSidebarCollapsed(value => !value)}
+          >
+            <span aria-hidden="true">{sidebarCollapsed ? '›' : '‹'}</span>
+          </button>
+        </div>
 
         <div className="sidebar-scroll">
           <nav className="sidebar-navigation">
