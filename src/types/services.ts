@@ -9,6 +9,7 @@ export interface Service {
   description?: string;
   price: number;
   durationMinutes: number;
+  imageSource?: 'CLOUDINARY' | 'EXTERNAL_URL' | 'NONE';
   imageUrl?: string;
   imagePublicId?: string;
   status: 'ACTIVE' | 'INACTIVE';
