@@ -4,7 +4,7 @@ export const MODULE_REGISTRY = [
   { key: 'APPOINTMENTS', label: 'Appointments', route: '/app/appointments' },
   { key: 'CUSTOMERS', label: 'Customers', route: '/app/customers' },
   { key: 'REPORTS', label: 'Reports', route: null },
-  { key: 'STAFF', label: 'Staff', route: null },
+  { key: 'STAFF', label: 'Staff', route: '/app/staff' },
   { key: 'BILLING', label: 'Billing', route: '/app/billing', allowedRoles: ['OWNER', 'MANAGER'] },
 ] as const;
 
