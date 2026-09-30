@@ -47,9 +47,11 @@ export function LoginForm({ onLogin }: { onLogin: (credentials: LoginCredentials
         />
         <button
           type="button"
-          onMouseDown={(event) => event.preventDefault()}\n          onClick={() => setShowPassword((current) => !current)}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => setShowPassword((current) => !current)}
           aria-label={showPassword ? 'Hide password' : 'Show password'}
           title={showPassword ? 'Hide password' : 'Show password'}
+          className="login-password-toggle"
           style={{
             position: 'absolute',
             top: '50%',
