@@ -900,3 +900,58 @@ button { cursor: pointer; }
     grid-template-columns: 1fr;
   }
 }
+
+
+.service-admin-grid,.pos-service-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.service-admin-card,.pos-service-card{overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--white);transition:transform 140ms ease,box-shadow 140ms ease}
+.service-admin-card:hover,.pos-service-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgb(15 31 25 / 8%)}
+.service-admin-image,.pos-service-card-image{height:190px;background:var(--mint)}
+.service-admin-image img,.pos-service-card-image img{display:block;width:100%;height:100%;object-fit:cover}
+.service-image-placeholder{display:grid;width:100%;height:100%;place-items:center;color:var(--ink-soft);font:500 11px var(--font-mono);background:var(--mint)}
+.service-admin-body,.pos-service-card-body{display:grid;gap:9px;padding:16px}
+.service-admin-body h2,.pos-service-card-body h3{margin:0;font-size:17px}
+.service-admin-body p,.pos-service-card-body p{margin:0;color:var(--ink-soft);font-size:12px;line-height:1.55}
+.service-card-meta{display:flex;justify-content:space-between;gap:8px;color:var(--ink-soft);font:500 9px var(--font-mono);text-transform:uppercase}
+.service-card-meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.service-admin-price,.pos-service-card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.service-admin-price strong,.pos-service-card-footer strong{font-size:17px}
+.service-admin-price span,.pos-service-card-footer span{color:var(--ink-soft);font-size:11px}
+.service-admin-body .secondary-button,.pos-service-card-body .secondary-button{justify-content:center;min-height:40px;margin-top:3px}
+.service-filters{align-items:end;margin-bottom:20px}
+.service-search{min-width:240px}
+.service-form{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px}
+.service-form-main{min-width:0}
+.service-form-side{min-width:0}
+.service-side-card{position:sticky;top:20px;display:grid;gap:14px;padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--white)}
+.service-pos-preview{overflow:hidden;display:grid;gap:8px;border:1px solid var(--line);border-radius:8px;padding-bottom:12px}
+.service-pos-preview img,.service-pos-preview .service-image-placeholder{width:100%;height:180px;object-fit:cover}
+.service-pos-preview strong,.service-pos-preview span{padding:0 12px}
+.service-pos-preview span{color:var(--ink-soft);font-size:12px}
+.service-image-field{display:grid;grid-template-columns:180px 1fr;gap:18px;align-items:start}
+.service-image-preview{width:180px;height:180px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:var(--mint)}
+.service-image-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.service-image-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.service-upload-button{position:relative}
+.service-upload-button input{display:none}
+.danger-button{border-color:#e3b5ae!important;color:var(--error)!important}
+.pos-service-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:16px}
+.pos-service-filters{display:flex;gap:10px;align-items:flex-end}
+.pos-service-filters .field-control{min-width:170px}
+.pos-service-card{cursor:pointer}
+.pos-service-card-image{height:150px}
+.pos-service-card-body{min-height:190px}
+.pos-service-card-footer{margin-top:auto}
+@media (max-width:1050px){
+  .service-admin-grid,.pos-service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .service-form{grid-template-columns:1fr}
+  .service-form-side{order:-1}
+  .service-side-card{position:static}
+}
+@media (max-width:700px){
+  .service-admin-grid,.pos-service-grid{grid-template-columns:1fr}
+  .service-image-field{grid-template-columns:1fr}
+  .service-image-preview{width:100%;max-width:280px;height:220px}
+  .pos-service-heading{align-items:stretch;flex-direction:column}
+  .pos-service-filters{flex-direction:column}
+  .pos-service-filters .field-control{min-width:0}
+}
