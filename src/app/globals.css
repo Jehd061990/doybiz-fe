@@ -510,3 +510,47 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
+
+
+.super-admin-organization-modal {
+  width: min(980px, calc(100vw - 32px));
+  max-height: min(88vh, 900px);
+  overflow-y: auto;
+}
+.organization-modal-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: -4px 0 18px;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+.organization-modal-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 -2px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.organization-modal-tab {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+.organization-modal-tab-active {
+  border-bottom-color: var(--green);
+  color: var(--green);
+}
+.organization-modal-tab span {
+  margin-left: 5px;
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: var(--mint);
+  font-size: 0.75rem;
+}
+.organization-modal-content {
+  padding-bottom: 4px;
+}
