@@ -117,7 +117,7 @@ export function SuperAdminPage() {
   };
 
   const applyPreset = (preset: 'OWNER' | 'MANAGER' | 'CASHIER') => {
-    if (preset !== userForm.role) return;
+    if (userForm.role === 'OWNER' && preset !== 'OWNER') return;
     setUserForm(prev => ({ ...prev, permissionPreset: preset, modulePermissions: [...PRESETS[preset]] }));
   };
 
@@ -189,7 +189,7 @@ export function SuperAdminPage() {
                         key={preset}
                         type="button"
                         aria-pressed={userForm.permissionPreset === preset}
-                        disabled={preset !== userForm.role}
+                        disabled={userForm.role === 'OWNER' && preset !== 'OWNER'}
                         onClick={() => applyPreset(preset)}
                       >
                         {preset}
