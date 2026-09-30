@@ -16,6 +16,17 @@ export interface AuthUser {
   status: AccountStatus;
 }
 
+export interface PlatformAdminUser {
+  _id: 'platform-admin';
+  name: string;
+  email: string;
+  role: 'PLATFORM_ADMIN';
+  scope: 'PLATFORM_ADMIN';
+  status: 'ACTIVE';
+}
+
+export type AuthIdentity = AuthUser | PlatformAdminUser;
+
 export interface AuthOrganizationContext {
   id: string;
 }
@@ -23,10 +34,10 @@ export interface AuthOrganizationContext {
 export interface AuthSession {
   authenticated: boolean;
   organization: AuthOrganizationContext | null;
-  user: AuthUser | null;
+  user: AuthIdentity | null;
 }
 
 export interface AuthResponse {
   success: true;
-  user: AuthUser;
+  user: AuthIdentity;
 }
