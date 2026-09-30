@@ -1,11 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useCustom, useCustomMutation, type HttpError } from '@refinedev/core';
 import { useBranches } from '@/lib/branches/use-branches';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
 import { getSalesErrorMessage } from '@/lib/sales/errors';
-import type { AuthUser } from '@/types/auth';
 import type { PaymentMethod, Sale, SaleDetailResponse, SalePaymentResponse, SalePaymentsResponse, SalesListResponse, VoidSaleResponse } from '@/types/sales';
 
 const money = (value: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
@@ -15,7 +14,7 @@ const branchName = (value: Sale['branchId']) => typeof value === 'object' && val
 const customerName = (value: Sale['customerId']) => typeof value === 'object' && value ? [value.firstName, value.lastName].filter(Boolean).join(' ') || value.phone || idOf(value) : value || 'Walk-in';
 const cashierName = (value: Sale['cashierId']) => typeof value === 'object' && value ? value.name || value.email || idOf(value) : value || '—';
 
-function SalesFilters({ user, onApply }: { user: AuthUser; onApply: (query: string) => void }) {
+function SalesFilters({ onApply }: { onApply: (query: string) => void }) {
   const branches = useBranches();
   const [branchId, setBranchId] = useState('');
   const [status, setStatus] = useState('');
@@ -73,7 +72,7 @@ export function SalesListPage() {
       <header className="management-page-header">
         <div><p className="eyebrow">OPERATIONS · SALES</p><h1 id="sales-heading">Sales</h1><p className="management-description">Review completed financial records and payment status for branches this account can access.</p></div>
       </header>
-      <SalesFilters user={user} onApply={setQuery} />
+      <SalesFilters onApply={setQuery} />
       {salesQuery.query.isLoading ? <p className="management-state" role="status">Loading sales…</p> : null}
       {salesQuery.query.isError ? <p className="management-error" role="alert">{getSalesErrorMessage(salesQuery.query.error)}</p> : null}
       {!salesQuery.query.isLoading && !salesQuery.query.isError && rows.length === 0 ? <p className="billing-empty-note">No sales matched the selected filters.</p> : null}
