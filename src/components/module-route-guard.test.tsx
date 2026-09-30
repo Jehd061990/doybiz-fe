@@ -74,12 +74,12 @@ describe('ModuleRouteGuard', () => {
   it('blocks a module that has not been registered as a supported route', async () => {
     getAuthSessionMock.mockResolvedValue({
       ...managerSession,
-      user: { ...managerSession.user, modulePermissions: ['SALES'] },
+      user: { ...managerSession.user, modulePermissions: ['REPORTS'] },
     });
 
-    render(await ModuleRouteGuard({ module: 'SALES', children: <p>Sales content</p> }));
+    render(await ModuleRouteGuard({ module: 'REPORTS', children: <p>Reports content</p> }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('This module is not available in the workspace yet.');
-    expect(screen.queryByText('Sales content')).not.toBeInTheDocument();
+    expect(screen.queryByText('Reports content')).not.toBeInTheDocument();
   });
 });
