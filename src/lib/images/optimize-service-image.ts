@@ -17,39 +17,28 @@ export async function optimizeServiceImage(file: File): Promise<{ dataUrl: strin
   if (file.size > 10 * 1024 * 1024) throw new Error('Image must be 10 MB or smaller before processing.');
 
   const source = await createImageBitmap(file);
-  const scale = Math.min(1, SERVICE_IMAGE_MAX_DIMENSION / Math.max(source.width, source.height));
-  const width = Math.max(1, Math.round(source.width * scale));
-  const height = Math.max(1, Math.round(source.height * scale));
+  let width = Math.max(1, Math.round(source.width * Math.min(1, SERVICE_IMAGE_MAX_DIMENSION / Math.max(source.width, source.height))));
+  let height = Math.max(1, Math.round(source.height * Math.min(1, SERVICE_IMAGE_MAX_DIMENSION / Math.max(source.width, source.height))));
   const canvas = document.createElement('canvas');
-  canvas.width = width; canvas.height = height;
   const context = canvas.getContext('2d');
-  if (!context) throw new Error('Your browser cannot process this image.');
-  context.drawImage(source, 0, 0, width, height);
+  if (!context) { source.close(); throw new Error('Your browser cannot process this image.'); }
+
+  let blob: Blob | null = null;
+  let quality = 0.82;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    canvas.width = width; canvas.height = height;
+    const draw = canvas.getContext('2d');
+    if (!draw) break;
+    draw.clearRect(0, 0, width, height);
+    draw.drawImage(source, 0, 0, width, height);
+    blob = await canvasBlob(canvas, quality);
+    if (!blob) break;
+    if (blob.size <= SERVICE_IMAGE_TARGET_BYTES) break;
+    if (quality > 0.46) quality -= 0.08;
+    else { width = Math.max(160, Math.round(width * 0.8)); height = Math.max(160, Math.round(height * 0.8)); }
+  }
   source.close();
 
-  let quality = 0.82;
-  let blob = await canvasBlob(canvas, quality);
-  if (!blob) throw new Error('Unable to compress image.');
-
-  while (blob.size > SERVICE_IMAGE_TARGET_BYTES && quality > 0.42) {
-    quality -= 0.08;
-    blob = await canvasBlob(canvas, quality);
-    if (!blob) throw new Error('Unable to compress image.');
-  }
-
-  if (blob.size > SERVICE_IMAGE_MAX_BYTES) {
-    const smallerScale = Math.min(0.75, Math.sqrt(SERVICE_IMAGE_MAX_BYTES / blob.size));
-    canvas.width = Math.max(240, Math.round(width * smallerScale));
-    canvas.height = Math.max(240, Math.round(height * smallerScale));
-    const retryContext = canvas.getContext('2d');
-    if (!retryContext) throw new Error('Your browser cannot process this image.');
-    retryContext.drawImage(document.createElement('canvas'), 0, 0);
-    const sourceAgain = await createImageBitmap(file);
-    retryContext.drawImage(sourceAgain, 0, 0, canvas.width, canvas.height);
-    sourceAgain.close();
-    blob = await canvasBlob(canvas, 0.5);
-  }
-
   if (!blob || blob.size > SERVICE_IMAGE_MAX_BYTES) throw new Error('Unable to reduce this image below 300 KB. Please choose a smaller image.');
-  return { dataUrl: await blobToDataUrl(blob), bytes: blob.size, width: canvas.width, height: canvas.height };
+  return { dataUrl: await blobToDataUrl(blob), bytes: blob.size, width, height };
 }
