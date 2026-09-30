@@ -31,15 +31,7 @@ export function LoginForm({ onLogin }: { onLogin: (credentials: LoginCredentials
   }
 
   function handlePasswordToggle() {
-    console.log('[DOYBIZ LOGIN] Eye button CLICKED', {
-      currentType: document.getElementById('password')?.getAttribute('type'),
-      currentShowPassword: showPassword,
-    });
-    setShowPassword((current) => {
-      const next = !current;
-      console.log('[DOYBIZ LOGIN] Password visibility changing', { from: current, to: next });
-      return next;
-    });
+    setShowPassword((current) => !current);
   }
 
   return (
@@ -60,10 +52,6 @@ export function LoginForm({ onLogin }: { onLogin: (credentials: LoginCredentials
         <button
           type="button"
           onClick={handlePasswordToggle}
-          onMouseDown={() => console.log('[DOYBIZ LOGIN] Eye button MOUSEDOWN')}
-          onMouseUp={() => console.log('[DOYBIZ LOGIN] Eye button MOUSEUP')}
-          onPointerDown={() => console.log('[DOYBIZ LOGIN] Eye button POINTERDOWN')}
-          onPointerUp={() => console.log('[DOYBIZ LOGIN] Eye button POINTERUP')}
           aria-label={showPassword ? 'Hide password' : 'Show password'}
           title={showPassword ? 'Hide password' : 'Show password'}
           className="login-password-toggle"
