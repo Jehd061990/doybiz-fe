@@ -2,9 +2,12 @@ export interface PosService {
   id?: string;
   _id?: string;
   name: string;
+  code?: string;
+  category?: string;
   description?: string;
   price: number;
   durationMinutes: number;
+  imageUrl?: string;
   status: 'ACTIVE' | 'INACTIVE';
   branchId?: string | { _id?: string; id?: string; name?: string } | null;
 }
