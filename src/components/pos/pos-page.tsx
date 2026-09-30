@@ -6,6 +6,7 @@ import { useBranches } from '@/lib/branches/use-branches';
 import { hasModuleAccess } from '@/lib/auth/access';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
 import { getPosErrorMessage } from '@/lib/pos/errors';
+import { ServiceImage } from '@/components/services/service-image';
 import type { AuthUser } from '@/types/auth';
 import type {
   CreatePosPaymentValues,
@@ -351,7 +352,7 @@ function PosWorkspace({ user }: { user: AuthUser }) {
                       const existing = cart.find(item => item.serviceId === id);
                       return (
                         <article className="pos-service-card" key={id || service.name} onClick={() => id && addService(service)}>
-                          <div className="pos-service-card-image">{service.imageUrl ? <img src={service.imageUrl} alt="" loading="lazy" /> : <div className="service-image-placeholder">No image</div>}</div>
+                          <div className="pos-service-card-image"><ServiceImage src={service.imageUrl} alt="" loading="lazy" /></div>
                           <div className="pos-service-card-body">
                             <div className="service-card-meta"><span>{service.category || 'Service'}</span>{serviceBranchName(service) ? <span>{serviceBranchName(service)}</span> : null}</div>
                             <h3>{service.name}</h3>
