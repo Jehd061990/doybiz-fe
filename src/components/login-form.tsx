@@ -36,7 +36,7 @@ export function LoginForm({ onLogin }: { onLogin: (credentials: LoginCredentials
       <input id="email" name="email" type="email" autoComplete="username" required />
 
       <label htmlFor="password">Password</label>
-      <div style={{ position: 'relative' }}>
+      <div className="login-password-field">
         <input
           id="password"
           name="password"
@@ -47,26 +47,10 @@ export function LoginForm({ onLogin }: { onLogin: (credentials: LoginCredentials
         />
         <button
           type="button"
-          onMouseDown={(event) => event.preventDefault()}
           onClick={() => setShowPassword((current) => !current)}
           aria-label={showPassword ? 'Hide password' : 'Show password'}
           title={showPassword ? 'Hide password' : 'Show password'}
           className="login-password-toggle"
-          style={{
-            position: 'absolute',
-            top: '50%',
-            right: '8px',
-            display: 'grid',
-            width: '34px',
-            height: '34px',
-            padding: 0,
-            placeItems: 'center',
-            border: 0,
-            borderRadius: '5px',
-            transform: 'translateY(-50%)',
-            background: 'transparent',
-            color: 'var(--ink-soft)',
-          }}
         >
           {showPassword ? (
             <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
