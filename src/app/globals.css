@@ -91,7 +91,31 @@ button { cursor: pointer; }
   background: var(--white);
   color: var(--ink);
 }
-.login-form input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgb(23 107 82 / 12%); }\n.login-password-field { position: relative; width: 100%; }\n.login-password-input { padding-right: 52px !important; }\n.login-password-toggle { position: absolute; top: 50%; right: 8px; z-index: 10; display: grid; width: 36px; height: 36px; margin: 0; padding: 0; place-items: center; transform: translateY(-50%); border: 0; border-radius: 5px; background: transparent; color: var(--ink-soft); cursor: pointer; pointer-events: auto; }\n.login-password-toggle svg { display: block; pointer-events: none; }\n.login-password-toggle:hover { background: var(--mint); color: var(--green); }\n.login-password-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+.login-form input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgb(23 107 82 / 12%); }
+.login-password-field { position: relative; width: 100%; }
+.login-password-input { padding-right: 52px !important; }
+.login-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  z-index: 10;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  pointer-events: auto;
+}
+.login-password-toggle svg { display: block; pointer-events: none; }
+.login-password-toggle:hover { background: var(--mint); color: var(--green); }
+.login-password-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
 .primary-button {
   min-height: 50px;
   margin-top: 18px;
