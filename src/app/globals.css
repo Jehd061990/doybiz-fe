@@ -146,6 +146,16 @@ button { cursor: pointer; }
 .app-nav-link-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; background: var(--green); content: ''; }
 .app-main { width: min(100%, 1320px); flex: 1; margin: 0 auto; }
 .app-footer { display: flex; justify-content: space-between; padding: 18px 0; border-top: 1px solid var(--line); color: var(--ink-soft); font: 10px var(--font-mono); }
+.super-admin-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 24px; }
+.super-admin-stats > div { display: grid; gap: 6px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 7px; background: var(--white); }
+.super-admin-stats span { color: var(--ink-soft); font: 500 10px var(--font-mono); text-transform: uppercase; }
+.super-admin-stats strong { font-size: 24px; letter-spacing: -0.04em; }
+.management-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+.management-card-heading .eyebrow { margin-bottom: 5px; }
+.management-card-heading h2 { margin: 0; font-size: 18px; }
+.selected-org-context { display: grid; gap: 4px; margin-top: 14px; padding: 13px 14px; border-left: 3px solid var(--green); background: var(--mint); font-size: 12px; line-height: 1.5; }
+.selected-org-context strong { font-size: 14px; }
+.management-card button:disabled { cursor: wait; opacity: 0.65; }
 .management-page { padding: 46px 0 72px; }
 .management-page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
 .management-page-header .eyebrow { margin-bottom: 10px; }
