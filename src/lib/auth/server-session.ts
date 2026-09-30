@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { AUTH_TOKEN_COOKIE, AUTH_USER_COOKIE } from './cookies';
-import type { AuthSession, AuthUser } from '@/types/auth';
+import type { AuthSession, AuthIdentity, AuthUser } from '@/types/auth';
 
 const isAuthUser = (value: unknown): value is AuthUser => {
   if (typeof value !== 'object' || value === null) return false;
@@ -15,6 +15,17 @@ const isAuthUser = (value: unknown): value is AuthUser => {
     && (user.status === 'ACTIVE' || user.status === 'INACTIVE');
 };
 
+const isPlatformAdmin = (value: unknown): value is AuthIdentity => {
+  if (typeof value !== 'object' || value === null) return false;
+  const user = value as Record<string, unknown>;
+  return user._id === 'platform-admin'
+    && user.role === 'PLATFORM_ADMIN'
+    && user.scope === 'PLATFORM_ADMIN'
+    && typeof user.name === 'string'
+    && typeof user.email === 'string'
+    && user.status === 'ACTIVE';
+};
+
 export async function getAuthSession(): Promise<AuthSession> {
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_TOKEN_COOKIE)?.value;
@@ -23,6 +34,9 @@ export async function getAuthSession(): Promise<AuthSession> {
 
   try {
     const user: unknown = JSON.parse(serializedUser);
+    if (isPlatformAdmin(user)) {
+      return { authenticated: true, organization: null, user };
+    }
     if (!isAuthUser(user) || user.status !== 'ACTIVE') {
       return { authenticated: false, organization: null, user: null };
     }
