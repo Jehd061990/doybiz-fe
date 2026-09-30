@@ -11,56 +11,74 @@ import type { AuthUser } from '@/types/auth';
 export function AppShell({ user, children }: { user: AuthUser; children: ReactNode }) {
   const pathname = usePathname();
   const workspaceNavigation = [
-    { href: '/app', label: 'Workspace', visible: true },
-    { href: '/app/organization', label: 'Organization', visible: true },
-    { href: '/app/branches', label: 'Branches', visible: true },
-    { href: '/app/users', label: 'Users', visible: user.role === 'OWNER' },
+    { href: '/app', label: 'Dashboard', icon: '⌂', visible: true },
+    { href: '/app/organization', label: 'Organization', icon: '◫', visible: true },
+    { href: '/app/branches', label: 'Branches', icon: '⌘', visible: true },
+    { href: '/app/users', label: 'Users', icon: '♙', visible: user.role === 'OWNER' },
   ].filter(item => item.visible);
   const moduleNavigation = MODULE_REGISTRY
     .filter(module => canAccessModuleRoute(user, module.key))
-    .map(module => ({ href: module.route!, label: module.label }));
+    .map(module => ({ href: module.route!, label: module.label, icon: '▦' }));
 
-  const link = (item: { href: string; label: string }) => {
+  const link = (item: { href: string; label: string; icon: string }) => {
     const active = item.href === '/app'
       ? pathname === '/app'
       : pathname === item.href || pathname.startsWith(`${item.href}/`);
     return (
       <Link
         aria-current={active ? 'page' : undefined}
-        className={active ? 'app-nav-link app-nav-link-active' : 'app-nav-link'}
+        className={active ? 'sidebar-nav-link sidebar-nav-link-active' : 'sidebar-nav-link'}
         href={item.href}
         key={item.href}
       >
-        {item.label}
+        <span className="sidebar-nav-icon" aria-hidden="true">{item.icon}</span>
+        <span>{item.label}</span>
       </Link>
     );
   };
 
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <Link className="wordmark" href="/app">doybiz<span>.</span></Link>
-        <nav className="app-navigation" aria-label="Workspace navigation">
-          <div className="app-nav-group" aria-label="Workspace">
-            {workspaceNavigation.map(link)}
-          </div>
-          {moduleNavigation.length ? (
-            <div className="app-nav-group app-nav-module-group" aria-label="Modules">
-              <span className="app-nav-group-heading">Modules</span>
-              {moduleNavigation.map(link)}
+      <aside className="app-sidebar" aria-label="Main navigation">
+        <Link className="sidebar-brand" href="/app" aria-label="DOYBIZ home">
+          <span className="sidebar-brand-mark">d</span>
+          <span>doybiz<span>.</span></span>
+        </Link>
+
+        <div className="sidebar-scroll">
+          <nav className="sidebar-navigation">
+            <div className="sidebar-section">
+              <span className="sidebar-section-label">Workspace</span>
+              {workspaceNavigation.map(link)}
             </div>
-          ) : null}
-        </nav>
-        <div className="account-menu">
-          <span className="account-name">{user.name}</span>
+            {moduleNavigation.length ? (
+              <div className="sidebar-section">
+                <span className="sidebar-section-label">Modules</span>
+                {moduleNavigation.map(link)}
+              </div>
+            ) : null}
+          </nav>
+        </div>
+
+        <div className="sidebar-account">
+          <div className="sidebar-user">
+            <span className="sidebar-user-avatar">{user.name.trim().charAt(0).toUpperCase() || 'U'}</span>
+            <div className="sidebar-user-copy">
+              <strong>{user.name}</strong>
+              <span>{user.role}</span>
+            </div>
+          </div>
           <LogoutButton />
         </div>
-      </header>
-      <main className="app-main">{children}</main>
-      <footer className="app-footer">
-        <span>DOYBIZ</span>
-        <span>Organization access is enforced by your account permissions.</span>
-      </footer>
+      </aside>
+
+      <div className="app-main-column">
+        <main className="app-main">{children}</main>
+        <footer className="app-footer">
+          <span>DOYBIZ</span>
+          <span>Organization access is enforced by your account permissions.</span>
+        </footer>
+      </div>
     </div>
   );
 }
