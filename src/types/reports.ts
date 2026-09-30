@@ -81,13 +81,14 @@ export interface PaymentsSummaryReport {
   dateRange: ReportDateRange;
 }
 
-export interface ReservationsSummaryReport extends ReportDateRange {
+export interface ReservationsSummaryReport {
   pending: number;
   confirmed: number;
   checked_in: number;
   completed: number;
   cancelled: number;
   no_show: number;
+  dateRange: ReportDateRange;
 }
 
 export interface CustomersSummaryReport {
