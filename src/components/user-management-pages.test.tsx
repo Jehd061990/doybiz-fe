@@ -3,6 +3,7 @@ import { useCreate, useList, useOne, useUpdate } from '@refinedev/core';
 import { useParams, useRouter } from 'next/navigation';
 import { useBranches } from '@/lib/branches/use-branches';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
+import { apiRequest } from '@/lib/api/client';
 import type { AuthUser } from '@/types/auth';
 import type { OrganizationBranch, OrganizationUser } from '@/types/user-management';
 import { UserCreatePage, UserEditPage, UserListPage } from './user-management-pages';
@@ -16,6 +17,7 @@ jest.mock('@refinedev/core', () => ({
 jest.mock('next/navigation', () => ({ useParams: jest.fn(), useRouter: jest.fn() }));
 jest.mock('@/lib/branches/use-branches', () => ({ useBranches: jest.fn() }));
 jest.mock('@/lib/auth/use-auth-session', () => ({ useAuthSession: jest.fn() }));
+jest.mock('@/lib/api/client', () => ({ apiRequest: jest.fn() }));
 
 const useCreateMock = useCreate as jest.Mock;
 const useListMock = useList as jest.Mock;
@@ -25,6 +27,7 @@ const useParamsMock = useParams as jest.Mock;
 const useRouterMock = useRouter as jest.Mock;
 const useBranchesMock = useBranches as jest.Mock;
 const useAuthSessionMock = useAuthSession as jest.Mock;
+const apiRequestMock = apiRequest as jest.Mock;
 
 const owner: AuthUser = {
   _id: 'owner-1',
@@ -92,6 +95,7 @@ describe('User Management pages', () => {
     useBranchesMock.mockReturnValue(listResult(branches));
     useRouterMock.mockReturnValue({ replace });
     useParamsMock.mockReturnValue({ id: managedUser.id });
+    apiRequestMock.mockReturnValue(new Promise(() => {}));
   });
 
   it('loads organization users and displays role, status, branches, and effective modules', () => {
