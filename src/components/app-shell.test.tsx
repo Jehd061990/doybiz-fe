@@ -43,7 +43,17 @@ describe('AppShell navigation', () => {
     expect(screen.queryByRole('link', { name: 'Billing' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Point of sale' })).toBeInTheDocument();
 
-    rerender(<AppShell user={{ ...user, modulePermissions: ['SALES'] }}><p>Current route</p></AppShell>);
+    rerender(
+      <AppShell
+        user={{
+          ...user,
+          role: 'CASHIER',
+          modulePermissions: ['SALES'],
+        }}
+      >
+        <p>Current route</p>
+      </AppShell>
+    );
 
     expect(screen.queryByRole('link', { name: 'Billing' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Point of sale' })).not.toBeInTheDocument();
