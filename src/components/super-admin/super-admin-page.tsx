@@ -35,6 +35,9 @@ export function SuperAdminPage() {
   const [creatingBranch, setCreatingBranch] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
   const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
+  const [showCreateOrganization, setShowCreateOrganization] = useState(false);
+  const [organizationStep, setOrganizationStep] = useState(1);
+  const [organizationDetails, setOrganizationDetails] = useState<Organization | null>(null);
   const [orgForm, setOrgForm] = useState({ name: '', slug: '', email: '', phone: '', address: '' });
   const [branchForm, setBranchForm] = useState({ name: '', address: '', contactNumber: '' });
   const [userForm, setUserForm] = useState({
@@ -79,6 +82,8 @@ export function SuperAdminPage() {
     try {
       await apiRequest('/platform/organizations', { method: 'POST', body: orgForm });
       setOrgForm({ name: '', slug: '', email: '', phone: '', address: '' });
+      setOrganizationStep(1);
+      setShowCreateOrganization(false);
       await loadOrganizations(); setMessage('Organization created.');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Failed to create organization.'); }
     finally { setCreatingOrganization(false); }
@@ -146,21 +151,18 @@ export function SuperAdminPage() {
 
       <section className="management-card super-admin-context-card">
         <div className="management-card-heading">
-          <div><p className="eyebrow">TENANT CONTEXT</p><h2>Organizations</h2></div>
-          <button type="button" className="secondary-button" onClick={() => void loadOrganizations()} disabled={loadingOrganizations}>{loadingOrganizations ? 'Refreshing…' : 'Refresh'}</button>
-        </div>
-        <select aria-label="Select organization" value={selectedOrgId} onChange={e => setSelectedOrgId(e.target.value)}>
-          <option value="">Select an organization</option>
-          {organizations.map(org => <option key={org._id} value={org._id}>{org.name} — {org.email}</option>)}
-        </select>
-        {selectedOrg ? (
-          <div className="selected-org-context">
-            <strong>{selectedOrg.name}</strong>
-            <span>{selectedOrg.slug ? `/${selectedOrg.slug}` : 'No slug'} · {selectedOrg.status}</span>
-            <span>{selectedOrg.address} · {selectedOrg.phone}</span>
+          <div><p className="eyebrow">TENANT MANAGEMENT</p><h2>Organizations</h2><p className="section-description">Select an organization to manage its branches and tenant users.</p></div>
+          <div className="super-admin-header-actions">
+            <button type="button" className="secondary-button" onClick={() => void loadOrganizations()} disabled={loadingOrganizations}>{loadingOrganizations ? 'Refreshing…' : 'Refresh'}</button>
+            <button type="button" className="primary-button" onClick={() => { setOrganizationStep(1); setShowCreateOrganization(true); }}>+ Add organization</button>
           </div>
+        </div>
+        {loadingOrganizations ? <p className="empty-state">Loading organizations…</p> : organizations.length === 0 ? (
+          <div className="super-admin-empty-organizations"><p className="empty-state">No organizations have been provisioned yet.</p><button type="button" className="primary-button" onClick={() => { setOrganizationStep(1); setShowCreateOrganization(true); }}>Add your first organization</button></div>
         ) : (
-          <p className="field-help">Select an organization to manage its branches and users. All provisioning below is scoped to the selected organization.</p>
+          <div className="organization-table-scroll"><table className="organization-table"><thead><tr><th>Organization</th><th>Contact</th><th>Phone</th><th>Status</th><th>Action</th></tr></thead><tbody>
+            {organizations.map(org => <tr key={org._id}><td><strong>{org.name}</strong><span className="table-secondary">{org.slug ? `/${org.slug}` : 'No slug'}</span></td><td>{org.email}</td><td>{org.phone}</td><td><span className={`status-label ${org.status === 'ACTIVE' ? 'status-label-active' : 'status-label-inactive'}`}>{org.status}</span></td><td><button type="button" className="table-action-button" onClick={() => { setSelectedOrgId(org._id); setOrganizationDetails(org); }}>View details</button></td></tr>)}
+          </tbody></table></div>
         )}
       </section>
 
@@ -211,6 +213,47 @@ export function SuperAdminPage() {
           )}
         </section>
       </div>
+
+      {organizationDetails ? (
+        <div className="super-admin-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setOrganizationDetails(null); }}>
+          <section className="super-admin-modal" role="dialog" aria-modal="true" aria-labelledby="organization-details-heading">
+            <div className="management-card-heading"><div><p className="eyebrow">ORGANIZATION DETAILS</p><h2 id="organization-details-heading">{organizationDetails.name}</h2></div><button type="button" className="modal-close-button" onClick={() => setOrganizationDetails(null)} aria-label="Close organization details">×</button></div>
+            <div className="organization-detail-grid">
+              <div><span>Organization name</span><strong>{organizationDetails.name}</strong></div><div><span>Slug</span><strong>{organizationDetails.slug ? `/${organizationDetails.slug}` : '—'}</strong></div>
+              <div><span>Email</span><strong>{organizationDetails.email}</strong></div><div><span>Phone</span><strong>{organizationDetails.phone}</strong></div>
+              <div className="organization-detail-full"><span>Address</span><strong>{organizationDetails.address}</strong></div><div><span>Status</span><strong>{organizationDetails.status}</strong></div>
+            </div>
+            <div className="form-actions"><button type="button" className="primary-button" onClick={() => { setSelectedOrgId(organizationDetails._id); setOrganizationDetails(null); }}>Manage organization</button></div>
+          </section>
+        </div>
+      ) : null}
+
+      {showCreateOrganization ? (
+        <div className="super-admin-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !creatingOrganization) setShowCreateOrganization(false); }}>
+          <section className="super-admin-modal super-admin-create-modal" role="dialog" aria-modal="true" aria-labelledby="create-organization-heading">
+            <div className="management-card-heading"><div><p className="eyebrow">NEW TENANT</p><h2 id="create-organization-heading">Add organization</h2></div><button type="button" className="modal-close-button" onClick={() => setShowCreateOrganization(false)} disabled={creatingOrganization} aria-label="Close add organization">×</button></div>
+            <div className="organization-stepper" aria-label="Organization creation steps">
+              <div className={organizationStep >= 1 ? 'organization-step organization-step-active' : 'organization-step'}><span>1</span><div><strong>Company</strong><small>Identity</small></div></div>
+              <div className={organizationStep >= 2 ? 'organization-step organization-step-active' : 'organization-step'}><span>2</span><div><strong>Contact</strong><small>Details & review</small></div></div>
+            </div>
+            <form onSubmit={createOrganization} className="management-form super-admin-form">
+              {organizationStep === 1 ? (
+                <div className="form-field-group"><h3>Company information</h3><div className="form-grid">
+                  <label className="field-control"><span>Organization name</span><input autoFocus value={orgForm.name} required onChange={e => setOrgForm(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g. ABC Salon & Spa" /></label>
+                  <label className="field-control"><span>Slug <em>(optional)</em></span><input value={orgForm.slug} onChange={e => setOrgForm(prev => ({ ...prev, slug: e.target.value }))} placeholder="e.g. abc-salon" /></label>
+                </div><div className="form-actions"><button type="button" className="primary-button" disabled={!orgForm.name.trim()} onClick={() => setOrganizationStep(2)}>Continue</button></div></div>
+              ) : (
+                <div className="form-field-group"><h3>Contact details</h3><div className="form-grid">
+                  <label className="field-control"><span>Email</span><input type="email" value={orgForm.email} required onChange={e => setOrgForm(prev => ({ ...prev, email: e.target.value }))} placeholder="business@example.com" /></label>
+                  <label className="field-control"><span>Phone</span><input value={orgForm.phone} required onChange={e => setOrgForm(prev => ({ ...prev, phone: e.target.value }))} placeholder="+63 9XX XXX XXXX" /></label>
+                  <label className="field-control full-width"><span>Address</span><input value={orgForm.address} required onChange={e => setOrgForm(prev => ({ ...prev, address: e.target.value }))} placeholder="Business address" /></label>
+                </div><div className="organization-review"><p className="eyebrow">REVIEW</p><strong>{orgForm.name}</strong><span>{orgForm.slug ? `/${orgForm.slug}` : 'No slug'} · {orgForm.email || 'No email yet'}</span></div>
+                <div className="form-actions"><button type="button" className="secondary-button" onClick={() => setOrganizationStep(1)} disabled={creatingOrganization}>Back</button><button type="submit" className="primary-button" disabled={creatingOrganization}>{creatingOrganization ? 'Creating…' : 'Create organization'}</button></div></div>
+              )}
+            </form>
+          </section>
+        </div>
+      ) : null}
 
       {selectedOrg ? (
         <>
