@@ -38,6 +38,8 @@ export function SuperAdminPage() {
   const [showCreateOrganization, setShowCreateOrganization] = useState(false);
   const [organizationStep, setOrganizationStep] = useState(1);
   const [organizationDetails, setOrganizationDetails] = useState<Organization | null>(null);
+  const [editingOrganization, setEditingOrganization] = useState(false);
+  const [savingOrganization, setSavingOrganization] = useState(false);
   const [orgForm, setOrgForm] = useState({ name: '', slug: '', email: '', phone: '', address: '' });
   const [branchForm, setBranchForm] = useState({ name: '', address: '', contactNumber: '' });
   const [userForm, setUserForm] = useState({
@@ -76,6 +78,27 @@ export function SuperAdminPage() {
     if (!selectedOrgId) { setBranches([]); setUsers([]); return; }
     void loadOrgData(selectedOrgId).catch(error => setMessage(error instanceof Error ? error.message : 'Failed to load organization data.'));
   }, [selectedOrgId]);
+
+  const saveOrganization = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!organizationDetails) return;
+    setMessage('');
+    setSavingOrganization(true);
+    try {
+      const response = await apiRequest<{ success: true; organization: Organization }>(
+        `/platform/organizations/${organizationDetails._id}`,
+        { method: 'PATCH', body: { ...orgForm, status: organizationDetails.status } },
+      );
+      setOrganizationDetails(response.organization);
+      setOrganizations(current => current.map(org => org._id === response.organization._id ? response.organization : org));
+      setEditingOrganization(false);
+      setMessage('Organization updated.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to update organization.');
+    } finally {
+      setSavingOrganization(false);
+    }
+  };
 
   const createOrganization = async (event: FormEvent) => {
     event.preventDefault(); setMessage(''); setCreatingOrganization(true);
@@ -168,29 +191,6 @@ export function SuperAdminPage() {
 
       <div className="management-grid super-admin-provisioning-grid">
         <section className="management-card">
-          <div className="management-card-heading"><div><p className="eyebrow">STEP 1</p><h2>Create organization</h2></div></div>
-          <p className="section-description">Set the basic company identity and contact details.</p>
-          <form onSubmit={createOrganization} className="management-form super-admin-form">
-            <div className="form-field-group">
-              <h3>Company information</h3>
-              <div className="form-grid">
-                <label className="field-control"><span>Organization name</span><input value={orgForm.name} required onChange={e => setOrgForm(prev => ({ ...prev, name: e.target.value }))} /></label>
-                <label className="field-control"><span>Slug <em>(optional)</em></span><input value={orgForm.slug} onChange={e => setOrgForm(prev => ({ ...prev, slug: e.target.value }))} placeholder="e.g. acme-salon" /></label>
-              </div>
-            </div>
-            <div className="form-field-group">
-              <h3>Contact details</h3>
-              <div className="form-grid">
-                <label className="field-control"><span>Email</span><input type="email" value={orgForm.email} required onChange={e => setOrgForm(prev => ({ ...prev, email: e.target.value }))} /></label>
-                <label className="field-control"><span>Phone</span><input value={orgForm.phone} required onChange={e => setOrgForm(prev => ({ ...prev, phone: e.target.value }))} /></label>
-                <label className="field-control full-width"><span>Address</span><input value={orgForm.address} required onChange={e => setOrgForm(prev => ({ ...prev, address: e.target.value }))} /></label>
-              </div>
-            </div>
-            <button type="submit" className="primary-button" disabled={creatingOrganization}>{creatingOrganization ? 'Creating…' : 'Create organization'}</button>
-          </form>
-        </section>
-
-        <section className="management-card">
           <div className="management-card-heading">
             <div><p className="eyebrow">STEP 2</p><h2>Branches ({selectedOrg ? branches.length : 0})</h2></div>
             {selectedOrg ? <button type="button" className="secondary-button" onClick={() => void loadOrgData(selectedOrgId)} disabled={loadingOrgData}>{loadingOrgData ? 'Refreshing…' : 'Refresh'}</button> : null}
@@ -215,15 +215,45 @@ export function SuperAdminPage() {
       </div>
 
       {organizationDetails ? (
-        <div className="super-admin-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setOrganizationDetails(null); }}>
+        <div className="super-admin-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !savingOrganization) { setEditingOrganization(false); setOrganizationDetails(null); } }}>
           <section className="super-admin-modal" role="dialog" aria-modal="true" aria-labelledby="organization-details-heading">
-            <div className="management-card-heading"><div><p className="eyebrow">ORGANIZATION DETAILS</p><h2 id="organization-details-heading">{organizationDetails.name}</h2></div><button type="button" className="modal-close-button" onClick={() => setOrganizationDetails(null)} aria-label="Close organization details">×</button></div>
-            <div className="organization-detail-grid">
-              <div><span>Organization name</span><strong>{organizationDetails.name}</strong></div><div><span>Slug</span><strong>{organizationDetails.slug ? `/${organizationDetails.slug}` : '—'}</strong></div>
-              <div><span>Email</span><strong>{organizationDetails.email}</strong></div><div><span>Phone</span><strong>{organizationDetails.phone}</strong></div>
-              <div className="organization-detail-full"><span>Address</span><strong>{organizationDetails.address}</strong></div><div><span>Status</span><strong>{organizationDetails.status}</strong></div>
+            <div className="management-card-heading">
+              <div><p className="eyebrow">{editingOrganization ? 'MANAGE ORGANIZATION' : 'ORGANIZATION DETAILS'}</p><h2 id="organization-details-heading">{editingOrganization ? 'Edit organization' : organizationDetails.name}</h2></div>
+              <button type="button" className="modal-close-button" onClick={() => { setEditingOrganization(false); setOrganizationDetails(null); }} disabled={savingOrganization} aria-label="Close organization details">×</button>
             </div>
-            <div className="form-actions"><button type="button" className="primary-button" onClick={() => { setSelectedOrgId(organizationDetails._id); setOrganizationDetails(null); }}>Manage organization</button></div>
+            {editingOrganization ? (
+              <form onSubmit={saveOrganization} className="management-form super-admin-form">
+                <div className="form-field-group">
+                  <h3>Company information</h3>
+                  <div className="form-grid">
+                    <label className="field-control"><span>Organization name</span><input autoFocus value={orgForm.name} required onChange={e => setOrgForm(prev => ({ ...prev, name: e.target.value }))} /></label>
+                    <label className="field-control"><span>Slug <em>(optional)</em></span><input value={orgForm.slug} onChange={e => setOrgForm(prev => ({ ...prev, slug: e.target.value }))} /></label>
+                  </div>
+                </div>
+                <div className="form-field-group">
+                  <h3>Contact details</h3>
+                  <div className="form-grid">
+                    <label className="field-control"><span>Email</span><input type="email" value={orgForm.email} required onChange={e => setOrgForm(prev => ({ ...prev, email: e.target.value }))} /></label>
+                    <label className="field-control"><span>Phone</span><input value={orgForm.phone} required onChange={e => setOrgForm(prev => ({ ...prev, phone: e.target.value }))} /></label>
+                    <label className="field-control full-width"><span>Address</span><input value={orgForm.address} required onChange={e => setOrgForm(prev => ({ ...prev, address: e.target.value }))} /></label>
+                    <label className="field-control"><span>Status</span><select value={organizationDetails.status} onChange={e => setOrganizationDetails(prev => prev ? ({ ...prev, status: e.target.value as Organization['status'] }) : prev)}><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option></select></label>
+                  </div>
+                </div>
+                <div className="form-actions">
+                  <button type="button" className="secondary-button" onClick={() => { setEditingOrganization(false); setOrgForm({ name: organizationDetails.name, slug: organizationDetails.slug ?? '', email: organizationDetails.email, phone: organizationDetails.phone, address: organizationDetails.address }); }} disabled={savingOrganization}>Cancel</button>
+                  <button type="submit" className="primary-button" disabled={savingOrganization}>{savingOrganization ? 'Saving…' : 'Save changes'}</button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <div className="organization-detail-grid">
+                  <div><span>Organization name</span><strong>{organizationDetails.name}</strong></div><div><span>Slug</span><strong>{organizationDetails.slug ? `/${organizationDetails.slug}` : '—'}</strong></div>
+                  <div><span>Email</span><strong>{organizationDetails.email}</strong></div><div><span>Phone</span><strong>{organizationDetails.phone}</strong></div>
+                  <div className="organization-detail-full"><span>Address</span><strong>{organizationDetails.address}</strong></div><div><span>Status</span><strong>{organizationDetails.status}</strong></div>
+                </div>
+                <div className="form-actions"><button type="button" className="primary-button" onClick={() => { setSelectedOrgId(organizationDetails._id); setOrgForm({ name: organizationDetails.name, slug: organizationDetails.slug ?? '', email: organizationDetails.email, phone: organizationDetails.phone, address: organizationDetails.address }); setEditingOrganization(true); }}>Manage organization</button></div>
+              </>
+            )}
           </section>
         </div>
       ) : null}
