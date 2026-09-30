@@ -65,13 +65,15 @@ export function ServiceListPage() {
   const [branchId, setBranchId] = useState('');
   const [category, setCategory] = useState('');
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
 
   const categories = useMemo(() => Array.from(new Set(services.map(service => service.category).filter(Boolean) as string[])).sort(), [services]);
 
   async function loadServices() {
     setLoading(true); setError(null);
     try {
-      const params = new URLSearchParams({ status: 'ACTIVE', page: '1', limit: '100' });
+      const params = new URLSearchParams({ page: '1', limit: '100' });
+      if (status !== 'ALL') params.set('status', status);
       if (branchId) params.set('branchId', branchId);
       if (category) params.set('category', category);
       if (search.trim()) params.set('search', search.trim());
@@ -81,7 +83,7 @@ export function ServiceListPage() {
     finally { setLoading(false); }
   }
 
-  useEffect(() => { if (user) void loadServices(); }, [user, branchId, category]);
+  useEffect(() => { if (user) void loadServices(); }, [user, branchId, category, status]);
 
   if (isLoading) return <p className="management-state" role="status">Checking service access…</p>;
   if (!user) return null;
@@ -97,7 +99,7 @@ export function ServiceListPage() {
       <section className="management-filters service-filters" aria-label="Service filters">
         <label className="field-control"><span>Branch</span><select value={branchId} onChange={e => setBranchId(e.currentTarget.value)}><option value="">All accessible branches</option>{branchesQuery.result.data.filter(b => b.status === 'ACTIVE').map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</select></label>
         <label className="field-control"><span>Category</span><select value={category} onChange={e => setCategory(e.currentTarget.value)}><option value="">All categories</option>{categories.map(item => <option key={item} value={item}>{item}</option>)}</select></label>
-        <label className="field-control service-search"><span>Search</span><input value={search} onChange={e => setSearch(e.currentTarget.value)} onKeyDown={e => { if (e.key === 'Enter') void loadServices(); }} placeholder="Name, code, category…" /></label>
+        <label className="field-control"><span>Status</span><select value={status} onChange={e => setStatus(e.currentTarget.value as typeof status)}><option value="ALL">All statuses</option><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option></select></label><label className="field-control service-search"><span>Search</span><input value={search} onChange={e => setSearch(e.currentTarget.value)} onKeyDown={e => { if (e.key === 'Enter') void loadServices(); }} placeholder="Name, code, category…" /></label>
         <button className="primary-button" type="button" onClick={() => void loadServices()}>Search</button>
       </section>
 
@@ -111,7 +113,7 @@ export function ServiceListPage() {
           return <article className="service-admin-card" key={id || service.name}>
             <div className="service-admin-image">{service.imageUrl ? <img src={service.imageUrl} alt="" /> : <div className="service-image-placeholder">No image</div>}</div>
             <div className="service-admin-body">
-              <div className="service-card-meta"><span>{service.category || 'Uncategorized'}</span><span>{branchName(service.branchId)}</span></div>
+              <div className="service-card-meta"><span>{service.category || 'Uncategorized'}</span><span>{service.status} · {branchName(service.branchId)}</span></div>
               <h2>{service.name}</h2>
               {service.description ? <p>{service.description}</p> : null}
               <div className="service-admin-price"><strong>{money(service.price)}</strong><span>{service.durationMinutes} min</span></div>
