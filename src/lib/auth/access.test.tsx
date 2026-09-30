@@ -27,12 +27,12 @@ describe('authorization display helpers', () => {
     expect(canAccessBranch(cashier, 'branch-b')).toBe(false);
   });
 
-  it('requires both effective module permission and an implemented route', () => {
+  it('requires an effective module permission and an allowed role for implemented routes', () => {
     expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['BILLING'] }, 'BILLING')).toBe(true);
     expect(canAccessModuleRoute({ ...cashier, role: 'CASHIER', modulePermissions: ['BILLING'] }, 'BILLING')).toBe(false);
     expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['POS'] }, 'POS')).toBe(true);
     expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['SALES'] }, 'SALES')).toBe(true);
-    expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['BILLING'] }, 'POS')).toBe(false);
+    expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['BILLING'] }, 'POS')).toBe(true);
   });
 
   it('recognizes active status and owner-wide branch access', () => {
