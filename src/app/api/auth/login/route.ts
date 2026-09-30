@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_SESSION_SECONDS, AUTH_TOKEN_COOKIE, AUTH_USER_COOKIE } from '@/lib/auth/cookies';
-import type { AuthUser } from '@/types/auth';
+import type { AuthIdentity, AuthUser } from '@/types/auth';
 
 interface BackendLoginResponse {
   success?: boolean;
@@ -22,9 +22,22 @@ const safeLoginError = (message: unknown, status: number) => {
   return { code: 'AUTH_SERVICE_ERROR', message: 'Unable to sign in right now. Try again shortly.' };
 };
 
-const toPublicUser = (value: unknown): AuthUser | null => {
+const toPublicUser = (value: unknown): AuthIdentity | null => {
   if (typeof value !== 'object' || value === null) return null;
   const user = value as Record<string, unknown>;
+  if (user.scope === 'PLATFORM_ADMIN' && user.role === 'PLATFORM_ADMIN'
+    && typeof user.email === 'string' && typeof user.name === 'string'
+    && user.status === 'ACTIVE') {
+    return {
+      _id: 'platform-admin',
+      name: user.name,
+      email: user.email,
+      role: 'PLATFORM_ADMIN',
+      scope: 'PLATFORM_ADMIN',
+      status: 'ACTIVE',
+    };
+  }
+
   if (typeof user._id !== 'string' || typeof user.organizationId !== 'string'
     || typeof user.name !== 'string' || typeof user.email !== 'string'
     || (user.role !== 'OWNER' && user.role !== 'MANAGER' && user.role !== 'CASHIER')
