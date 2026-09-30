@@ -135,6 +135,7 @@ export function ServiceFormPage({ serviceId }: { serviceId?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [imageData, setImageData] = useState<string | undefined>();
   const [removeImage, setRemoveImage] = useState(false);
+  const displayImage = imageData !== undefined ? imageData : (removeImage ? undefined : service?.imageUrl);
 
   useEffect(() => {
     if (!serviceId || !user) return;
@@ -191,7 +192,7 @@ export function ServiceFormPage({ serviceId }: { serviceId?: string }) {
 
       <form className="service-form" onSubmit={submit}>
         <section className="service-form-main">
-          <div className="form-section"><h2>Service image</h2><ServiceImageField value={imageData || service?.imageUrl} onChange={value => { setImageData(value); setRemoveImage(!value); }} onRemove={() => setRemoveImage(true)} /></div>
+          <div className="form-section"><h2>Service image</h2><ServiceImageField value={displayImage} onChange={value => { setImageData(value); setRemoveImage(!value); }} onRemove={() => { setImageData(undefined); setRemoveImage(true); }} /></div>
           <div className="form-section"><h2>Details</h2><div className="form-grid">
             <label className="field-control"><span>Service name *</span><input name="name" required defaultValue={service?.name} placeholder="e.g. Laptop Cleaning" /></label>
             <label className="field-control"><span>Service code</span><input name="code" defaultValue={service?.code} placeholder="e.g. SVC-001" /></label>
@@ -205,7 +206,7 @@ export function ServiceFormPage({ serviceId }: { serviceId?: string }) {
           {error ? <p className="management-error" role="alert">{error}</p> : null}
           <div className="form-actions"><Link className="secondary-button" href="/app/services">Cancel</Link><button className="primary-button" type="submit" disabled={saving}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Create service'}</button></div>
         </section>
-        {editing ? <aside className="service-form-side"><div className="service-side-card"><span className="eyebrow">POS PREVIEW</span><div className="service-pos-preview">{(imageData || service?.imageUrl) ? <img src={imageData || service?.imageUrl} alt="" /> : <div className="service-image-placeholder">No image</div>}<strong>{service?.name || 'Service name'}</strong><span>{service ? money(service.price) : '₱0.00'} · {service?.durationMinutes || 30} min</span></div><button className="secondary-button danger-button" type="button" onClick={() => void deactivate()} disabled={saving}>Deactivate service</button></div></aside> : null}
+        {editing ? <aside className="service-form-side"><div className="service-side-card"><span className="eyebrow">POS PREVIEW</span><div className="service-pos-preview">{displayImage ? <img src={displayImage} alt="" /> : <div className="service-image-placeholder">No image</div>}<strong>{service?.name || 'Service name'}</strong><span>{service ? money(service.price) : '₱0.00'} · {service?.durationMinutes || 30} min</span></div><button className="secondary-button danger-button" type="button" onClick={() => void deactivate()} disabled={saving}>Deactivate service</button></div></aside> : null}
       </form>
     </section>
   );
