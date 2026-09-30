@@ -16,14 +16,14 @@ describe('frontend module registry', () => {
     expect(MODULES).not.toContain('SUPER_ADMIN');
   });
 
-  it('has stable labels and only registers the implemented Billing and Appointments routes', () => {
+  it('has stable labels and registers the currently implemented module routes', () => {
     expect(MODULE_REGISTRY).toEqual([
       { key: 'POS', label: 'Point of sale', route: '/app/pos' },
-      { key: 'SALES', label: 'Sales', route: null },
+      { key: 'SALES', label: 'Sales', route: '/app/sales' },
       { key: 'APPOINTMENTS', label: 'Appointments', route: '/app/appointments' },
-      { key: 'CUSTOMERS', label: 'Customers', route: null },
+      { key: 'CUSTOMERS', label: 'Customers', route: '/app/customers' },
       { key: 'REPORTS', label: 'Reports', route: null },
-      { key: 'STAFF', label: 'Staff', route: null },
+      { key: 'STAFF', label: 'Staff', route: '/app/staff' },
       { key: 'BILLING', label: 'Billing', route: '/app/billing', allowedRoles: ['OWNER', 'MANAGER'] },
     ]);
   });
