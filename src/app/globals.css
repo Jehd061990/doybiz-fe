@@ -955,3 +955,5 @@ button { cursor: pointer; }
   .pos-service-filters{flex-direction:column}
   .pos-service-filters .field-control{min-width:0}
 }
+
+.service-image-controls{display:grid;gap:12px;min-width:0}.service-image-source-options{display:flex;flex-wrap:wrap;gap:8px 18px}.service-image-source-options .check-option{min-height:30px}.service-image-url-control{max-width:620px}.field-optional{color:var(--ink-soft);font-size:11px;font-weight:500}.service-image-preview img,.service-admin-image img,.pos-service-card-image img{background:var(--mint)}
