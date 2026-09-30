@@ -142,7 +142,7 @@ export function ServiceListPage() {
 
       {loading ? <p className="management-state" role="status">Loading services…</p> : null}
       {error ? <p className="management-error" role="alert">{error}</p> : null}
-      {!loading && !error && services.length === 0 ? <div className="empty-state"><h2>No active services yet.</h2><p>Create a service with an image, price, duration, category, and branch assignment.</p><Link className="secondary-button" href="/app/services/create">Create service</Link></div> : null}
+      {!loading && !error && services.length === 0 ? <div className="empty-state"><h2>No active services yet.</h2><p>Create a service with a price, duration, category, and optional image or image URL.</p><Link className="secondary-button" href="/app/services/create">Create service</Link></div> : null}
 
       {services.length ? <div className="service-admin-grid">
         {services.map(service => {
