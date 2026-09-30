@@ -23,6 +23,9 @@ function BranchManagementGate({
   if (error || !session.authenticated || !session.user) {
     return <p className="management-error" role="alert">Your session could not be verified. Sign in again.</p>;
   }
+  if (session.user.role === 'PLATFORM_ADMIN') {
+    return <p className="management-error" role="alert">Branch management is available only inside a tenant organization.</p>;
+  }
   if (ownerOnly && session.user.role !== 'OWNER') {
     return <section className="management-state" role="alert">
       <h1>Branch creation unavailable</h1>
