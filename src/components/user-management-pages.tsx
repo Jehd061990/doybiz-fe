@@ -3,14 +3,26 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCreate, useList, useOne, useUpdate, type HttpError } from '@refinedev/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ROLES, type UserRole } from '@/config/roles';
 import { useBranches } from '@/lib/branches/use-branches';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
 import { getUserManagementErrorMessage } from '@/lib/users/errors';
+import { apiRequest } from '@/lib/api/client';
 import type { AuthUser } from '@/types/auth';
 import type { CreateOrganizationUserValues, OrganizationUser, UpdateOrganizationUserValues } from '@/types/user-management';
 import { UserForm } from './user-form';
+
+
+type SeatSummary = {
+  activeBranches: number;
+  activeUsers: number;
+  includedUserSeats: number;
+  availableSeats: number;
+  additionalUserCount: number;
+  includedBranchCount: number;
+  additionalUserSeatsPerBranch: number;
+};
 
 function UserManagementGate({ children }: { children: (user: AuthUser) => React.ReactNode }) {
   const { session, isLoading, error } = useAuthSession();
@@ -28,12 +40,20 @@ function UserManagementGate({ children }: { children: (user: AuthUser) => React.
   return children(session.user);
 }
 
-function UserListContent() {
+function UserListContent({ organizationId }: { organizationId: string }) {
   const usersQuery = useList<OrganizationUser>({ resource: 'users', pagination: { mode: 'off' } });
   const branchesQuery = useBranches();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
+  const [seatSummary, setSeatSummary] = useState<SeatSummary | null>(null);
+
+  useEffect(() => {
+    if (usersQuery.query.isLoading || branchesQuery.query.isLoading) return;
+    void apiRequest<{ success: true; seatSummary: SeatSummary }>('/users/seat-summary')
+      .then(response => setSeatSummary(response.seatSummary))
+      .catch(() => setSeatSummary(null));
+  }, [organizationId, usersQuery.query.isLoading, branchesQuery.query.isLoading]);
 
   if (usersQuery.query.isLoading || branchesQuery.query.isLoading) {
     return <p className="management-state" role="status">Loading organization users…</p>;
@@ -66,6 +86,15 @@ function UserListContent() {
         </div>
         <Link className="primary-action-link" href="/app/users/create">Create user</Link>
       </header>
+
+      {seatSummary ? (
+        <div className="user-seat-summary" aria-label="User seat usage">
+          <div><span>User seats</span><strong>{seatSummary.activeUsers} / {seatSummary.includedUserSeats}</strong><small>included seats used</small></div>
+          <div><span>Available</span><strong>{seatSummary.availableSeats}</strong><small>{seatSummary.additionalUserCount ? 'additional seats in use' : 'included capacity available'}</small></div>
+          <div><span>Active branches</span><strong>{seatSummary.activeBranches}</strong><small>+{seatSummary.additionalUserSeatsPerBranch} seats per additional branch</small></div>
+          {seatSummary.availableSeats === 0 ? <p>Add another branch to unlock {seatSummary.additionalUserSeatsPerBranch} more included user seats.</p> : null}
+        </div>
+      ) : null}
 
       <div className="user-list-toolbar" aria-label="Filter users">
         <label className="field-control search-control">
@@ -241,7 +270,7 @@ function UserEditContent({ organizationId }: { organizationId: string }) {
 }
 
 export function UserListPage() {
-  return <UserManagementGate>{() => <UserListContent />}</UserManagementGate>;
+  return <UserManagementGate>{user => <UserListContent organizationId={user.organizationId} />}</UserManagementGate>;
 }
 
 export function UserCreatePage() {
