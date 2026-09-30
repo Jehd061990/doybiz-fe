@@ -18,6 +18,9 @@ export function BillingGate({ ownerOnly = false, children }: BillingGateProps) {
     return <p className="management-error" role="alert">Your session could not be verified. Sign in again.</p>;
   }
 
+  if (session.user.role === 'PLATFORM_ADMIN') {
+    return <p className="management-error" role="alert">Billing is available only inside a tenant organization.</p>;
+  }
   const user = session.user;
   if (!canAccessModuleRoute(user, 'BILLING')) {
     return <section className="management-state" role="alert">
