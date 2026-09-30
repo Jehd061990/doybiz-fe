@@ -80,7 +80,7 @@ function StaffListContent() {
     {query.query.isLoading ? <p className="management-state" role="status">Loading staff…</p> : null}
     {query.query.isError ? <p className="management-error" role="alert">{getStaffErrorMessage(query.query.error)}</p> : null}
     {!query.query.isLoading && !query.query.isError && staff.length === 0 ? <p className="billing-empty-note">No staff found.</p> : null}
-    {staff.length ? <div className="user-table-scroll"><table className="user-table"><thead><tr><th>Name</th><th>Branch</th><th>Position</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody>{staff.map(member => { const id=idOf(member); return <tr key={id}><td><strong>{member.firstName} {member.lastName}</strong><span className="table-secondary">{member.email || '—'}</span></td><td>{branchName(member.branchId)}</td><td>{member.position}</td><td>{member.phone}</td><td><span className={`status-label status-label-${member.status.toLowerCase()}`}>{member.status}</span></td><td><Link className="table-action" href={`/app/staff/${encodeURIComponent(id)}`}>{canManage ? 'View / edit' : 'View'}</Link></td></tr>);})}</tbody></table></div> : null}
+    {staff.length ? <div className="user-table-scroll"><table className="user-table"><thead><tr><th>Name</th><th>Branch</th><th>Position</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody>{staff.map(member => { const id=idOf(member); return <tr key={id}><td><strong>{member.firstName} {member.lastName}</strong><span className="table-secondary">{member.email || '—'}</span></td><td>{branchName(member.branchId)}</td><td>{member.position}</td><td>{member.phone}</td><td><span className={`status-label status-label-${member.status.toLowerCase()}`}>{member.status}</span></td><td><Link className="table-action" href={`/app/staff/${encodeURIComponent(id)}`}>{canManage ? 'View / edit' : 'View'}</Link></td></tr>; })}</tbody></table></div> : null}
     {pagination && pagination.totalPages > 1 ? <div className="pos-pagination"><button className="secondary-button" disabled={page<=1} onClick={()=>setPage(p=>p-1)}>Previous</button><span>Page {pagination.page} of {pagination.totalPages}</span><button className="secondary-button" disabled={page>=pagination.totalPages} onClick={()=>setPage(p=>p+1)}>Next</button></div> : null}
   </section>;
 }
@@ -101,7 +101,6 @@ function StaffEditContent() {
   if(query.query.isLoading) return <p className="management-state" role="status">Loading staff…</p>;
   if(query.query.isError||!query.result) return <p className="management-error" role="alert">{getStaffErrorMessage(query.query.error)}</p>;
   const staff=query.result;
-  const branchId=typeof staff.branchId==='object' ? idOf(staff.branchId) : staff.branchId;
   const canAssign=canManage;
   async function save(values:StaffFormValues){setError(null);try{await mutateAsync({resource:'staff',id:staffId,values});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'update'));return false}}
   async function deactivate(){if(staff.status==='INACTIVE'||!window.confirm('Deactivate this staff member?'))return;setError(null);try{await deleteMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}`,method:'delete',values:{}});router.replace('/app/staff')}catch(e){setError(getStaffErrorMessage(e,'delete'))}}
