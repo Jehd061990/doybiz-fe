@@ -420,6 +420,9 @@ export function PosPage() {
   if (error || !session.authenticated || !session.user) {
     return <p className="management-error" role="alert">Your session could not be verified. Sign in again.</p>;
   }
+  if (session.user.role === 'PLATFORM_ADMIN') {
+    return <p className="management-error" role="alert">POS is available only inside a tenant organization.</p>;
+  }
   if (!hasModuleAccess(session.user, 'POS')) {
     return (
       <section className="management-state" role="alert">
