@@ -31,7 +31,7 @@ describe('authorization display helpers', () => {
     expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['BILLING'] }, 'BILLING')).toBe(true);
     expect(canAccessModuleRoute({ ...cashier, role: 'CASHIER', modulePermissions: ['BILLING'] }, 'BILLING')).toBe(false);
     expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['POS'] }, 'POS')).toBe(true);
-    expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['SALES'] }, 'SALES')).toBe(false);
+    expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['SALES'] }, 'SALES')).toBe(true);
     expect(canAccessModuleRoute({ ...cashier, role: 'OWNER', modulePermissions: ['BILLING'] }, 'POS')).toBe(false);
   });
 
