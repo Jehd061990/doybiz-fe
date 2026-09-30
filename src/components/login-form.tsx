@@ -43,11 +43,11 @@ export function LoginForm({ onLogin }: { onLogin: (credentials: LoginCredentials
           type={showPassword ? 'text' : 'password'}
           autoComplete="current-password"
           required
-          style={{ paddingRight: '48px' }}
+          className="login-password-input"
         />
         <button
           type="button"
-          onClick={() => setShowPassword((current) => !current)}
+          onMouseDown={(event) => event.preventDefault()}\n          onClick={() => setShowPassword((current) => !current)}
           aria-label={showPassword ? 'Hide password' : 'Show password'}
           title={showPassword ? 'Hide password' : 'Show password'}
           style={{
