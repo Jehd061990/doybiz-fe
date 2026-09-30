@@ -91,7 +91,7 @@ button { cursor: pointer; }
   background: var(--white);
   color: var(--ink);
 }
-.login-form input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgb(23 107 82 / 12%); }
+.login-form input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgb(23 107 82 / 12%); }\n.login-password-input { padding-right: 48px !important; }\n.login-password-toggle { z-index: 2; pointer-events: auto; }\n.login-password-toggle:hover { background: var(--mint) !important; color: var(--green) !important; }\n.login-password-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
 .primary-button {
   min-height: 50px;
   margin-top: 18px;
