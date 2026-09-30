@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { useCustom, useCustomMutation, type HttpError } from '@refinedev/core';
 import { useBranches } from '@/lib/branches/use-branches';
 import { hasModuleAccess } from '@/lib/auth/access';
@@ -117,6 +117,8 @@ function PosWorkspace({ user }: { user: AuthUser }) {
   const branchesQuery = useBranches();
   const [selectedBranchId, setSelectedBranchId] = useState('');
   const [servicePage, setServicePage] = useState(1);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [serviceCategory, setServiceCategory] = useState('');
   const [cart, setCart] = useState<CartEntry[]>([]);
   const [sale, setSale] = useState<PosSale | null>(null);
   const [saleError, setSaleError] = useState<string | null>(null);
@@ -128,14 +130,13 @@ function PosWorkspace({ user }: { user: AuthUser }) {
   const [paymentReference, setPaymentReference] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
 
-  const appointmentPermission = hasModuleAccess(user, 'APPOINTMENTS');
   const serviceUrl = selectedBranchId
-    ? `/services?branchId=${encodeURIComponent(selectedBranchId)}&status=ACTIVE&page=${servicePage}&limit=100`
+    ? `/services?branchId=${encodeURIComponent(selectedBranchId)}&status=ACTIVE&page=${servicePage}&limit=100${serviceSearch.trim() ? `&search=${encodeURIComponent(serviceSearch.trim())}` : ''}${serviceCategory ? `&category=${encodeURIComponent(serviceCategory)}` : ''}`
     : '/services';
   const servicesQuery = useCustom<PosServiceListResponse>({
     url: serviceUrl,
     method: 'get',
-    queryOptions: { enabled: Boolean(selectedBranchId && appointmentPermission && !sale) },
+    queryOptions: { enabled: Boolean(selectedBranchId && !sale) },
   });
   const createSaleMutation = useCustomMutation<PosCreateSaleResponse, HttpError, CreateSaleValues>({
     mutationOptions: { gcTime: 0 },
@@ -154,6 +155,7 @@ function PosWorkspace({ user }: { user: AuthUser }) {
   const activeBranches = branchesQuery.result.data.filter(branch => branch.status === 'ACTIVE');
   const catalog = servicesQuery.result.data?.data || [];
   const pagination = servicesQuery.result.data?.pagination;
+  const serviceCategories = useMemo(() => Array.from(new Set(catalog.map(service => service.category).filter(Boolean) as string[])).sort(), [catalog]);
   const canChangeBranch = cart.length === 0;
 
   function changeBranch(nextBranchId: string) {
@@ -321,20 +323,20 @@ function PosWorkspace({ user }: { user: AuthUser }) {
                 </select>
               </label>
               {!canChangeBranch ? <p className="field-help">Clear the cart before changing branch.</p> : null}
-              {selectedBranchId && !appointmentPermission ? (
-                <p className="pos-contract-notice" role="status">
-                  The backend service catalog requires the APPOINTMENTS module. Your POS permission allows sale creation, but this account cannot load selectable services.
-                </p>
-              ) : null}
+
               {!activeBranches.length ? <p className="billing-empty-note">No active branches are available to your account.</p> : null}
             </section>
 
-            {selectedBranchId && appointmentPermission ? (
+            {selectedBranchId ? (
               <section className="pos-service-panel" aria-labelledby="pos-services-heading">
                 <div className="pos-service-heading">
                   <div>
                     <h2 id="pos-services-heading">Services</h2>
-                    <p className="field-help">Prices and service availability come from the backend.</p>
+                    <p className="field-help">Select a service card to add it to the current sale.</p>
+                  </div>
+                  <div className="pos-service-filters">
+                    <label className="field-control"><span>Search</span><input value={serviceSearch} onChange={event => { setServiceSearch(event.currentTarget.value); setServicePage(1); }} placeholder="Search services…" /></label>
+                    <label className="field-control"><span>Category</span><select value={serviceCategory} onChange={event => { setServiceCategory(event.currentTarget.value); setServicePage(1); }}><option value="">All categories</option>{serviceCategories.map(category => <option key={category} value={category}>{category}</option>)}</select></label>
                   </div>
                 </div>
                 {servicesQuery.query.isLoading ? <p className="management-state" role="status">Loading branch services…</p> : null}
@@ -343,21 +345,22 @@ function PosWorkspace({ user }: { user: AuthUser }) {
                   <p className="billing-empty-note">No active services are available at this branch.</p>
                 ) : null}
                 {catalog.length ? (
-                  <div className="pos-service-list">
+                  <div className="pos-service-grid">
                     {catalog.map((service, index) => {
                       const id = serviceId(service);
                       const existing = cart.find(item => item.serviceId === id);
                       return (
-                        <article className="pos-service-row" key={id || `${service.name}-${index}`}>
-                          <div>
+                        <article className="pos-service-card" key={id || service.name} onClick={() => id && addService(service)}>
+                          <div className="pos-service-card-image">{service.imageUrl ? <img src={service.imageUrl} alt="" loading="lazy" /> : <div className="service-image-placeholder">No image</div>}</div>
+                          <div className="pos-service-card-body">
+                            <div className="service-card-meta"><span>{service.category || 'Service'}</span>{serviceBranchName(service) ? <span>{serviceBranchName(service)}</span> : null}</div>
                             <h3>{service.name}</h3>
                             {service.description ? <p>{service.description}</p> : null}
-                            <span>{amountLabel(service.price)} · {service.durationMinutes} min</span>
-                            {serviceBranchName(service) ? <small>{serviceBranchName(service)}</small> : null}
+                            <div className="pos-service-card-footer"><strong>{amountLabel(service.price)}</strong><span>{service.durationMinutes} min</span></div>
+                            <button className="secondary-button" type="button" onClick={event => { event.stopPropagation(); addService(service); }} disabled={!id}>
+                              {existing ? `Add another (${existing.quantity})` : 'Add service'}
+                            </button>
                           </div>
-                          <button className="secondary-button" type="button" onClick={() => addService(service)} disabled={!id}>
-                            {existing ? `Add another (${existing.quantity})` : 'Add service'}
-                          </button>
                         </article>
                       );
                     })}
