@@ -40,6 +40,7 @@ export function SuperAdminPage() {
   const [organizationDetails, setOrganizationDetails] = useState<Organization | null>(null);
   const [editingOrganization, setEditingOrganization] = useState(false);
   const [savingOrganization, setSavingOrganization] = useState(false);
+  const [organizationEditStatus, setOrganizationEditStatus] = useState<Organization['status']>('ACTIVE');
   const [orgForm, setOrgForm] = useState({ name: '', slug: '', email: '', phone: '', address: '' });
   const [branchForm, setBranchForm] = useState({ name: '', address: '', contactNumber: '' });
   const [userForm, setUserForm] = useState({
@@ -87,9 +88,10 @@ export function SuperAdminPage() {
     try {
       const response = await apiRequest<{ success: true; organization: Organization }>(
         `/platform/organizations/${organizationDetails._id}`,
-        { method: 'PATCH', body: { ...orgForm, status: organizationDetails.status } },
+        { method: 'PATCH', body: { ...orgForm, status: organizationEditStatus } },
       );
       setOrganizationDetails(response.organization);
+      setOrganizationEditStatus(response.organization.status);
       setOrganizations(current => current.map(org => org._id === response.organization._id ? response.organization : org));
       setEditingOrganization(false);
       setMessage('Organization updated.');
@@ -236,11 +238,11 @@ export function SuperAdminPage() {
                     <label className="field-control"><span>Email</span><input type="email" value={orgForm.email} required onChange={e => setOrgForm(prev => ({ ...prev, email: e.target.value }))} /></label>
                     <label className="field-control"><span>Phone</span><input value={orgForm.phone} required onChange={e => setOrgForm(prev => ({ ...prev, phone: e.target.value }))} /></label>
                     <label className="field-control full-width"><span>Address</span><input value={orgForm.address} required onChange={e => setOrgForm(prev => ({ ...prev, address: e.target.value }))} /></label>
-                    <label className="field-control"><span>Status</span><select value={organizationDetails.status} onChange={e => setOrganizationDetails(prev => prev ? ({ ...prev, status: e.target.value as Organization['status'] }) : prev)}><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option></select></label>
+                    <label className="field-control"><span>Status</span><select value={organizationEditStatus} onChange={e => setOrganizationEditStatus(e.target.value as Organization['status'])}><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option></select></label>
                   </div>
                 </div>
                 <div className="form-actions">
-                  <button type="button" className="secondary-button" onClick={() => { setEditingOrganization(false); setOrgForm({ name: organizationDetails.name, slug: organizationDetails.slug ?? '', email: organizationDetails.email, phone: organizationDetails.phone, address: organizationDetails.address }); }} disabled={savingOrganization}>Cancel</button>
+                  <button type="button" className="secondary-button" onClick={() => { setEditingOrganization(false); setOrganizationEditStatus(organizationDetails.status); setOrgForm({ name: organizationDetails.name, slug: organizationDetails.slug ?? '', email: organizationDetails.email, phone: organizationDetails.phone, address: organizationDetails.address }); }} disabled={savingOrganization}>Cancel</button>
                   <button type="submit" className="primary-button" disabled={savingOrganization}>{savingOrganization ? 'Saving…' : 'Save changes'}</button>
                 </div>
               </form>
@@ -251,7 +253,7 @@ export function SuperAdminPage() {
                   <div><span>Email</span><strong>{organizationDetails.email}</strong></div><div><span>Phone</span><strong>{organizationDetails.phone}</strong></div>
                   <div className="organization-detail-full"><span>Address</span><strong>{organizationDetails.address}</strong></div><div><span>Status</span><strong>{organizationDetails.status}</strong></div>
                 </div>
-                <div className="form-actions"><button type="button" className="primary-button" onClick={() => { setSelectedOrgId(organizationDetails._id); setOrgForm({ name: organizationDetails.name, slug: organizationDetails.slug ?? '', email: organizationDetails.email, phone: organizationDetails.phone, address: organizationDetails.address }); setEditingOrganization(true); }}>Manage organization</button></div>
+                <div className="form-actions"><button type="button" className="primary-button" onClick={() => { setSelectedOrgId(organizationDetails._id); setOrgForm({ name: organizationDetails.name, slug: organizationDetails.slug ?? '', email: organizationDetails.email, phone: organizationDetails.phone, address: organizationDetails.address }); setOrganizationEditStatus(organizationDetails.status); setEditingOrganization(true); }}>Manage organization</button></div>
               </>
             )}
           </section>
