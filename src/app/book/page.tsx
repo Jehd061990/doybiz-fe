@@ -1,4 +1,4 @@
-import { ClientLandingPage } from '@/components/public/client-landing-page';
+import { redirect } from 'next/navigation';
 
 export default async function BookingPage({
   searchParams,
@@ -7,6 +7,5 @@ export default async function BookingPage({
 }) {
   const params = await searchParams;
   const tenant = Array.isArray(params.tenant) ? params.tenant[0] : params.tenant;
-
-  return <ClientLandingPage developmentTenant={tenant || undefined} bookingOnly />;
+  redirect(tenant ? `/site/book?tenant=${encodeURIComponent(tenant)}` : '/site/book');
 }
