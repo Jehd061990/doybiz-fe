@@ -322,7 +322,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false }: { 
         </div>
       </section>}
 
-      {!bookingOnly && <footer className={styles.footer}><span>{organization.name}</span><span>Powered by DoyBiz</span></footer>
+      {!bookingOnly && <footer className={styles.footer}><span>{organization.name}</span><span>Powered by DoyBiz</span></footer>}
 
       {bookingOpen && (
         <div className={bookingOnly ? styles.bookingPageContainer : styles.modalBackdrop} role="presentation" onMouseDown={() => !bookingOnly && setBookingOpen(false)}>
@@ -351,7 +351,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false }: { 
                     <label>Staff<select value={staffId} onChange={event => { setStaffId(event.target.value); setTime(''); }}><option value="">Any available staff</option>{staff.map(member => <option key={member.id} value={member.id}>{member.firstName} {member.lastName}{member.position ? ` — ${member.position}` : ''}</option>)}</select></label>
                     <div className={styles.slotField}><span>Available times</span><div className={styles.slotGrid}>{availability?.slots.length ? availability.slots.map(slot => <button key={slot.time} type="button" className={time === slot.time ? styles.selectedSlot : styles.slot} onClick={() => setTime(slot.time)}>{slot.time}</button>) : <small>{selectedService ? 'No available slots for this date.' : 'Select a service to see available times.'}</small>}</div></div>
                     {bookingError && <div className={styles.error}>{bookingError}</div>}
-                    <div className={styles.formActions}><button type="button" className={styles.secondaryButton} onClick={() => setBookingOpen(false)}>Cancel</button><button type="button" className={styles.primaryButton} disabled={!time} onClick={() => setBookingStep(2)}>Continue</button></div>
+                    <div className={styles.formActions}><button type="button" className={styles.secondaryButton} onClick={() => bookingOnly ? window.location.reload() : setBookingOpen(false)}>Cancel</button><button type="button" className={styles.primaryButton} disabled={!time} onClick={() => setBookingStep(2)}>Continue</button></div>
                   </div>
                 ) : (
                   <div className={styles.formGrid}>
