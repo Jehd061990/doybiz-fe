@@ -64,7 +64,7 @@ const publicRequest = async <T,>(path: string, options?: RequestInit): Promise<T
 
 const today = new Date().toISOString().slice(0, 10);
 
-export function ClientLandingPage({ developmentTenant, bookingOnly = false }: { developmentTenant?: string; bookingOnly?: boolean }) {
+export function ClientLandingPage({ developmentTenant, bookingOnly = false, openBookingOnLoad = false }: { developmentTenant?: string; bookingOnly?: boolean; openBookingOnLoad?: boolean }) {
   const tenantQuery = developmentTenant ? `?tenant=${encodeURIComponent(developmentTenant)}` : '';
 
   const [site, setSite] = useState<SiteResponse['site'] | null>(null);
@@ -121,8 +121,8 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false }: { 
   }, [tenantQuery]);
 
   useEffect(() => {
-    if (bookingOnly) setBookingOpen(true);
-  }, [bookingOnly]);
+    if (bookingOnly || openBookingOnLoad) setBookingOpen(true);
+  }, [bookingOnly, openBookingOnLoad]);
 
   const visibleServices = useMemo(
     () => selectedBranch ? services.filter(service => !service.branchId || service.branchId === selectedBranch) : services,
@@ -246,7 +246,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false }: { 
 
   return (
     <main className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}>
-      {!bookingOnly && <header className={styles.header}>
+      <header className={styles.header}>
         <a href="#top" className={styles.brand}>{organization.name}</a>
         <nav className={styles.nav}>
           <a href="#services">Services</a>
@@ -254,7 +254,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false }: { 
           <a href="#contact">Contact</a>
           <button type="button" className={styles.navButton} onClick={() => openBooking()}>Book now</button>
         </nav>
-      </header>}
+      </header>
 
       {!bookingOnly && <section id="top" className={styles.hero}>
         <div className={styles.heroCopy}>
