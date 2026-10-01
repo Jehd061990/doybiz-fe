@@ -64,7 +64,7 @@ const publicRequest = async <T,>(path: string, options?: RequestInit): Promise<T
 
 const today = new Date().toISOString().slice(0, 10);
 
-export function ClientLandingPage({ developmentTenant }: { developmentTenant?: string }) {
+export function ClientLandingPage({ developmentTenant, bookingOnly = false }: { developmentTenant?: string; bookingOnly?: boolean }) {
   const tenantQuery = developmentTenant ? `?tenant=${encodeURIComponent(developmentTenant)}` : '';
 
   const [site, setSite] = useState<SiteResponse['site'] | null>(null);
@@ -74,7 +74,7 @@ export function ClientLandingPage({ developmentTenant }: { developmentTenant?: s
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(bookingOnly);
   const [bookingStep, setBookingStep] = useState(1);
   const [bookingError, setBookingError] = useState('');
   const [confirmation, setConfirmation] = useState('');
@@ -119,6 +119,10 @@ export function ClientLandingPage({ developmentTenant }: { developmentTenant?: s
     void load();
     return () => { cancelled = true; };
   }, [tenantQuery]);
+
+  useEffect(() => {
+    if (bookingOnly) setBookingOpen(true);
+  }, [bookingOnly]);
 
   const visibleServices = useMemo(
     () => selectedBranch ? services.filter(service => !service.branchId || service.branchId === selectedBranch) : services,
@@ -241,8 +245,8 @@ export function ClientLandingPage({ developmentTenant }: { developmentTenant?: s
   const organization = site.organization;
 
   return (
-    <main className={styles.page}>
-      <header className={styles.header}>
+    <main className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}>
+      {!bookingOnly && <header className={styles.header}>
         <a href="#top" className={styles.brand}>{organization.name}</a>
         <nav className={styles.nav}>
           <a href="#services">Services</a>
@@ -250,9 +254,9 @@ export function ClientLandingPage({ developmentTenant }: { developmentTenant?: s
           <a href="#contact">Contact</a>
           <button type="button" className={styles.navButton} onClick={() => openBooking()}>Book now</button>
         </nav>
-      </header>
+      </header>}
 
-      <section id="top" className={styles.hero}>
+      {!bookingOnly && <section id="top" className={styles.hero}>
         <div className={styles.heroCopy}>
           <span className={styles.eyebrow}>WELCOME</span>
           <h1>Quality service, made easy to book.</h1>
@@ -267,9 +271,9 @@ export function ClientLandingPage({ developmentTenant }: { developmentTenant?: s
           <span>ONLINE RESERVATIONS</span>
           <strong>Choose your service.<br />Pick your schedule.</strong>
         </div>
-      </section>
+      </section>}
 
-      <section id="services" className={styles.section}>
+      {!bookingOnly && <section id="services" className={styles.section}>
         <div className={styles.sectionHeading}>
           <div><span className={styles.eyebrow}>OUR SERVICES</span><h2>Services & pricing</h2></div>
           {branches.length > 1 && (
@@ -293,9 +297,9 @@ export function ClientLandingPage({ developmentTenant }: { developmentTenant?: s
             ))}
           </div>
         ) : <p className={styles.empty}>No services are currently available.</p>}
-      </section>
+      </section>}
 
-      <section id="branches" className={styles.sectionAlt}>
+      {!bookingOnly && <section id="branches" className={styles.sectionAlt}>
         <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>LOCATIONS</span><h2>Visit us</h2></div></div>
         <div className={styles.branchGrid}>
           {branches.map(branch => (
@@ -307,25 +311,25 @@ export function ClientLandingPage({ developmentTenant }: { developmentTenant?: s
             </article>
           ))}
         </div>
-      </section>
+      </section>}
 
-      <section id="contact" className={styles.contactSection}>
+      {!bookingOnly && <section id="contact" className={styles.contactSection}>
         <div><span className={styles.eyebrow}>GET IN TOUCH</span><h2>Ready when you are.</h2><p>{organization.address}</p></div>
         <div className={styles.contactDetails}>
           {organization.phone && <a href={`tel:${organization.phone}`}>{organization.phone}</a>}
           {organization.email && <a href={`mailto:${organization.email}`}>{organization.email}</a>}
           <button type="button" className={styles.primaryButton} onClick={() => openBooking()}>Book now</button>
         </div>
-      </section>
+      </section>}
 
-      <footer className={styles.footer}><span>{organization.name}</span><span>Powered by DoyBiz</span></footer>
+      {!bookingOnly && <footer className={styles.footer}><span>{organization.name}</span><span>Powered by DoyBiz</span></footer>
 
       {bookingOpen && (
-        <div className={styles.modalBackdrop} role="presentation" onMouseDown={() => setBookingOpen(false)}>
-          <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Book an appointment" onMouseDown={event => event.stopPropagation()}>
+        <div className={bookingOnly ? styles.bookingPageContainer : styles.modalBackdrop} role="presentation" onMouseDown={() => !bookingOnly && setBookingOpen(false)}>
+          <div className={bookingOnly ? `${styles.modal} ${styles.bookingPageCard}` : styles.modal} role="dialog" aria-modal="true" aria-label="Book an appointment" onMouseDown={event => event.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div><span className={styles.eyebrow}>ONLINE BOOKING</span><h2>{bookingStep === 3 ? 'Reservation received' : 'Book an appointment'}</h2></div>
-              <button type="button" className={styles.closeButton} onClick={() => setBookingOpen(false)} aria-label="Close">×</button>
+              {!bookingOnly && <button type="button" className={styles.closeButton} onClick={() => setBookingOpen(false)} aria-label="Close">×</button>}
             </div>
 
             {bookingStep === 3 ? (
@@ -334,7 +338,7 @@ export function ClientLandingPage({ developmentTenant }: { developmentTenant?: s
                 <h3>Your reservation is pending.</h3>
                 <p>Please keep this confirmation reference:</p>
                 <code>{confirmation}</code>
-                <button type="button" className={styles.primaryButton} onClick={() => setBookingOpen(false)}>Done</button>
+                <button type="button" className={styles.primaryButton} onClick={() => bookingOnly ? window.location.reload() : setBookingOpen(false)}>Done</button>
               </div>
             ) : (
               <form onSubmit={submitBooking}>
