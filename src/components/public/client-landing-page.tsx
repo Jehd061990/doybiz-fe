@@ -109,7 +109,14 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         setSite(siteResult.site);
         setBranches(branchResult.branches);
         setServices(serviceResult.services);
-        setSelectedBranch(branchResult.branches[0]?.id || '');
+        const firstBranchId = branchResult.branches[0]?.id || '';
+        setSelectedBranch(firstBranchId);
+        if (bookingOnly) {
+          const firstService = serviceResult.services.find(
+            service => !service.branchId || service.branchId === firstBranchId,
+          );
+          setServiceId(firstService?.id || '');
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Unable to load this website.');
       } finally {
@@ -118,7 +125,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
     };
     void load();
     return () => { cancelled = true; };
-  }, [tenantQuery]);
+  }, [tenantQuery, bookingOnly]);
 
   useEffect(() => {
     if (bookingOnly || openBookingOnLoad) setBookingOpen(true);
@@ -243,15 +250,16 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   }
 
   const organization = site.organization;
+  const landingPageHref = tenantQuery ? `/site${tenantQuery}` : '/site';
 
   return (
     <main className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}>
       <header className={styles.header}>
-        <a href="#top" className={styles.brand}>{organization.name}</a>
+        <a href={bookingOnly ? `${landingPageHref}#top` : '#top'} className={styles.brand}>{organization.name}</a>
         <nav className={styles.nav}>
-          <a href="#services">Services</a>
-          <a href="#branches">Branches</a>
-          <a href="#contact">Contact</a>
+          <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>
+          <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>
+          <a href={bookingOnly ? `${landingPageHref}#contact` : '#contact'}>Contact</a>
           <button type="button" className={styles.navButton} onClick={() => openBooking()}>Book now</button>
         </nav>
       </header>
