@@ -11,7 +11,7 @@ export default async function PublicBookingPage({
   return (
     <ClientLandingPage
       developmentTenant={tenant || undefined}
-      openBookingOnLoad
+      bookingOnly
     />
   );
 }
