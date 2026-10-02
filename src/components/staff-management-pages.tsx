@@ -12,8 +12,9 @@ import type { Staff, StaffFormValues, StaffListResponse, StaffService, StaffServ
 const idOf = (v: { id?: string; _id?: string }) => v.id || v._id || '';
 const branchName = (value: Staff['branchId']) => typeof value === 'object' && value ? value.name || 'Assigned branch' : 'Assigned branch';
 
-function StaffForm({ initial, saving, error, onSubmit }: { initial?: Staff; saving: boolean; error: string | null; onSubmit: (v: StaffFormValues) => Promise<boolean> }) {
+function StaffForm({ initial, saving, error, onSubmit }: { initial?: Staff; saving: boolean; error: string | null; onSubmit: (v: StaffFormValues & { serviceIds?: string[] }) => Promise<boolean> }) {
   const branches = useBranches();
+  const availableServices = useCustom<{ success: boolean; data: StaffService[] }>({ url: '/services?status=ACTIVE&limit=100', method: 'get' });
   const [branchId, setBranchId] = useState(() => typeof initial?.branchId === 'object' ? idOf(initial.branchId) : initial?.branchId || '');
   const [firstName, setFirstName] = useState(initial?.firstName || '');
   const [lastName, setLastName] = useState(initial?.lastName || '');
@@ -21,14 +22,21 @@ function StaffForm({ initial, saving, error, onSubmit }: { initial?: Staff; savi
   const [email, setEmail] = useState(initial?.email || '');
   const [position, setPosition] = useState(initial?.position || '');
   const [status, setStatus] = useState<StaffStatus>(initial?.status || 'ACTIVE');
+  const [serviceIds, setServiceIds] = useState<string[]>([]);
 
   if (branches.query.isLoading) return <p className="management-state" role="status">Loading branches…</p>;
   if (branches.query.isError) return <p className="management-error" role="alert">Unable to load organization branches.</p>;
   const activeBranches = branches.result.data.filter(b => b.status === 'ACTIVE');
+  const activeServicesForBranch = (availableServices.result.data?.data || []).filter(service => {
+    if (service.status !== 'ACTIVE') return false;
+    if (!service.branchId) return true;
+    const serviceBranchId = typeof service.branchId === 'object' ? idOf(service.branchId) : service.branchId;
+    return serviceBranchId === branchId;
+  });
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    await onSubmit({ branchId, firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(), ...(email.trim() ? { email: email.trim() } : {}), position: position.trim(), status });
+    await onSubmit({ branchId, firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(), ...(email.trim() ? { email: email.trim() } : {}), position: position.trim(), status, ...(!initial ? { serviceIds } : {}) });
   }
 
   return <form className="management-form" onSubmit={submit}>
@@ -40,6 +48,7 @@ function StaffForm({ initial, saving, error, onSubmit }: { initial?: Staff; savi
       <label className="field-control"><span>Email</span><input type="email" value={email} onChange={e => setEmail(e.currentTarget.value)} /></label>
       <label className="field-control"><span>Position *</span><input required value={position} onChange={e => setPosition(e.currentTarget.value)} placeholder="e.g. Stylist" /></label>
       <label className="field-control"><span>Status</span><select value={status} onChange={e => setStatus(e.currentTarget.value as StaffStatus)}><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option></select></label>
+      {!initial ? <label className="field-control"><span>Assign services</span><select multiple size={Math.min(Math.max(activeServicesForBranch.length, 3), 6)} value={serviceIds} onChange={e => setServiceIds(Array.from(e.currentTarget.selectedOptions, option => option.value))} disabled={!branchId || availableServices.query.isLoading} aria-describedby="staff-services-help">{activeServicesForBranch.map(service => <option key={idOf(service)} value={idOf(service)}>{service.name} — ₱{service.price}</option>)}</select><small id="staff-services-help">Optional. Select multiple services using Ctrl (Windows) or Cmd (Mac). Only active services available at the selected branch are listed.</small>{availableServices.query.isError ? <small className="management-error">Unable to load active services. You can assign them later from the staff details page.</small> : null}{!availableServices.query.isLoading && !availableServices.query.isError && branchId && activeServicesForBranch.length === 0 ? <small>No active services are available for this branch.</small> : null}</label> : null}
     </div>
     {error ? <p className="management-error" role="alert">{error}</p> : null}
     <div className="form-actions"><Link className="secondary-button" href="/app/staff">Cancel</Link><button className="primary-button" type="submit" disabled={saving}>{saving ? 'Saving…' : initial ? 'Save changes' : 'Create staff'}</button></div>
@@ -102,7 +111,7 @@ function StaffEditContent() {
   if(query.query.isError||!query.result.data?.staff) return <p className="management-error" role="alert">{getStaffErrorMessage(query.query.error)}</p>;
   const staff=query.result.data.staff;
   const canAssign=canManage;
-  async function save(values:StaffFormValues){setError(null);try{await updateMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}`,method:'put',values});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'update'));return false}}
+  async function save(values:StaffFormValues & {serviceIds?:string[]}){setError(null);const {serviceIds:_serviceIds,...staffValues}=values;try{await updateMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}`,method:'put',values:staffValues});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'update'));return false}}
   async function deactivate(){if(staff.status==='INACTIVE'||!window.confirm('Deactivate this staff member?'))return;setError(null);try{await deleteMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}`,method:'delete',values:{}});router.replace('/app/staff')}catch(e){setError(getStaffErrorMessage(e,'delete'))}}
   async function assignService(){if(!serviceId)return;setAssignmentError(null);try{await assignmentMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}/services/${encodeURIComponent(serviceId)}`,method:'post',values:{}});setServiceId('');await servicesQuery.query.refetch();}catch(e){setAssignmentError(getStaffErrorMessage(e,'assignment'))}}
   return <section className="management-page" aria-labelledby="staff-detail-heading"><header className="management-page-header"><div><p className="eyebrow">STAFF</p><h1 id="staff-detail-heading">{staff.firstName} {staff.lastName}</h1><p className="management-description">{staff.position} · {branchName(staff.branchId)}</p></div><Link className="secondary-button" href="/app/staff">Back</Link></header>
@@ -117,5 +126,5 @@ function StaffEditContent() {
   </section>;
 }
 export function StaffListPage(){return <StaffListContent/>}
-export function StaffCreatePage(){const router=useRouter();const createMutation=useCustomMutation<{success:boolean;staff:Staff},HttpError,StaffFormValues>({mutationOptions:{gcTime:0}});const [error,setError]=useState<string|null>(null);async function save(v:StaffFormValues){setError(null);try{await createMutation.mutateAsync({url:'/staff',method:'post',values:v});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'create'));return false}}return <section className="management-page"><header className="management-page-header"><div><p className="eyebrow">STAFF</p><h1>Create staff</h1></div></header><StaffForm saving={createMutation.mutation.isPending} error={error} onSubmit={save}/></section>}
+export function StaffCreatePage(){const router=useRouter();const createMutation=useCustomMutation<{success:boolean;staff:Staff},HttpError,StaffFormValues>({mutationOptions:{gcTime:0}});const assignmentMutation=useCustomMutation({mutationOptions:{gcTime:0}});const [error,setError]=useState<string|null>(null);async function save(v:StaffFormValues & {serviceIds?:string[]}){setError(null);const {serviceIds=[],...staffValues}=v;try{const response=await createMutation.mutateAsync({url:'/staff',method:'post',values:staffValues});const staff=response.data?.staff;const staffId=staff ? idOf(staff) : '';if(staffId&&serviceIds.length){for(const serviceId of serviceIds){await assignmentMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}/services/${encodeURIComponent(serviceId)}`,method:'post',values:{}})}}router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,assignmentMutation.mutation.isError?'assignment':'create'));return false}}return <section className="management-page"><header className="management-page-header"><div><p className="eyebrow">STAFF</p><h1>Create staff</h1></div></header><StaffForm saving={createMutation.mutation.isPending||assignmentMutation.mutation.isPending} error={error} onSubmit={save}/></section>}
 export function StaffEditPage(){return <StaffEditContent/>}
