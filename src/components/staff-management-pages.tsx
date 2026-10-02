@@ -12,6 +12,37 @@ import type { Staff, StaffFormValues, StaffListResponse, StaffService, StaffServ
 const idOf = (v: { id?: string; _id?: string }) => v.id || v._id || '';
 const branchName = (value: Staff['branchId']) => typeof value === 'object' && value ? value.name || 'Assigned branch' : 'Assigned branch';
 
+function ServiceMultiSelect({ services, selectedIds, loading, disabled, error, helpText, onChange }: { services: StaffService[]; selectedIds: string[]; loading: boolean; disabled: boolean; error: boolean; helpText: string; onChange: (ids: string[]) => void }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const selectedServices = services.filter(service => selectedIds.includes(idOf(service)));
+  const filteredServices = services.filter(service => service.name.toLowerCase().includes(search.trim().toLowerCase()));
+
+  function toggle(serviceId: string) {
+    onChange(selectedIds.includes(serviceId) ? selectedIds.filter(id => id !== serviceId) : [...selectedIds, serviceId]);
+  }
+
+  return <div className="field-control">
+    <span>Assign services</span>
+    <div style={{ position: 'relative', marginTop: 6 }}>
+      <button type="button" className="service-multi-trigger" onClick={() => !disabled && !loading && setOpen(value => !value)} disabled={disabled || loading} aria-expanded={open} aria-haspopup="listbox">
+        {selectedServices.length ? <span className="service-multi-selected">{selectedServices.map(service => <span className="service-multi-chip" key={idOf(service)}>{service.name}<span aria-hidden="true">✓</span></span>)}</span> : <span className="service-multi-placeholder">{disabled ? 'Select a branch first' : loading ? 'Loading services…' : 'Select services'}</span>}
+        <span aria-hidden="true">⌄</span>
+      </button>
+      {open ? <div className="service-multi-menu">
+        <input autoFocus type="search" value={search} onChange={e => setSearch(e.currentTarget.value)} placeholder="Search services…" aria-label="Search services" />
+        <div role="listbox" aria-multiselectable="true" className="service-multi-options">
+          {filteredServices.length ? filteredServices.map(service => { const serviceId = idOf(service); const selected = selectedIds.includes(serviceId); return <button type="button" role="option" aria-selected={selected} className={"service-multi-option" + (selected ? ' selected' : '')} key={serviceId} onClick={() => toggle(serviceId)}><span className="service-multi-check" aria-hidden="true">{selected ? '✓' : ''}</span><span>{service.name}</span><small>₱{service.price}</small></button>; }) : <small className="service-multi-empty">No matching services.</small>}
+        </div>
+        <div className="service-multi-footer"><span>{selectedIds.length} selected</span><button type="button" className="secondary-button" onClick={() => setOpen(false)}>Done</button></div>
+      </div> : null}
+    </div>
+    <small id="staff-services-help">{helpText}</small>
+    {selectedServices.length ? <small aria-live="polite">{selectedServices.length} service{selectedServices.length === 1 ? '' : 's'} selected.</small> : <small aria-live="polite">No services selected.</small>}
+    {error ? <small className="management-error">Unable to load active services. You can assign them later from the staff details page.</small> : null}
+  </div>;
+}
+
 function StaffForm({ initial, saving, error, created = false, onSubmit }: { initial?: Staff; saving: boolean; error: string | null; created?: boolean; onSubmit: (v: StaffFormValues & { serviceIds?: string[] }) => Promise<boolean> }) {
   const branches = useBranches();
   const availableServices = useCustom<{ success: boolean; data: StaffService[] }>({ url: '/services?status=ACTIVE&limit=100', method: 'get' });
@@ -48,7 +79,7 @@ function StaffForm({ initial, saving, error, created = false, onSubmit }: { init
       <label className="field-control"><span>Email</span><input type="email" value={email} onChange={e => setEmail(e.currentTarget.value)} /></label>
       <label className="field-control"><span>Position *</span><input required value={position} onChange={e => setPosition(e.currentTarget.value)} placeholder="e.g. Stylist" /></label>
       <label className="field-control"><span>Status</span><select value={status} onChange={e => setStatus(e.currentTarget.value as StaffStatus)}><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option></select></label>
-      {!initial ? <div className="field-control"><span>Assign services</span><div role="group" aria-describedby="staff-services-help" style={{ display: 'grid', gap: 8, marginTop: 6, maxHeight: 260, overflowY: 'auto', padding: 4 }} aria-disabled={!branchId || availableServices.query.isLoading}>{!branchId ? <small>Select a branch first to see available services.</small> : availableServices.query.isLoading ? <small>Loading active services…</small> : activeServicesForBranch.length === 0 ? <small>No active services are available for this branch.</small> : activeServicesForBranch.map(service => { const serviceId = idOf(service); const selected = serviceIds.includes(serviceId); return <label key={serviceId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid', borderRadius: 10, cursor: 'pointer' }}><input type="checkbox" checked={selected} disabled={!branchId || availableServices.query.isLoading} onChange={() => setServiceIds(current => selected ? current.filter(id => id !== serviceId) : [...current, serviceId])} /><span style={{ flex: 1 }}>{service.name} — ₱{service.price}</span>{selected ? <span aria-hidden="true" style={{ fontWeight: 700 }}>✓</span> : null}</label>; })}</div><small id="staff-services-help">Optional. Check the services this staff member can perform. A ✓ confirms each selected service.</small><small aria-live="polite">{serviceIds.length ? `${serviceIds.length} service${serviceIds.length === 1 ? '' : 's'} selected.` : 'No services selected.'}</small>{availableServices.query.isError ? <small className="management-error">Unable to load active services. You can assign them later from the staff details page.</small> : null}</div> : null}
+      {!initial ? <ServiceMultiSelect services={activeServicesForBranch} selectedIds={serviceIds} loading={availableServices.query.isLoading} disabled={!branchId} onChange={setServiceIds} error={availableServices.query.isError} helpText="Search and select the services this staff member can perform. Selected services stay visible above the search." /> : null}</label>; })}</div><small id="staff-services-help">Optional. Check the services this staff member can perform. A ✓ confirms each selected service.</small><small aria-live="polite">{serviceIds.length ? `${serviceIds.length} service${serviceIds.length === 1 ? '' : 's'} selected.` : 'No services selected.'}</small>{availableServices.query.isError ? <small className="management-error">Unable to load active services. You can assign them later from the staff details page.</small> : null}</div> : null}
     </div>
     {error ? <p className="management-error" role="alert">{error}</p> : null}
     <div className="form-actions"><Link className="secondary-button" href="/app/staff">Cancel</Link><button className="primary-button" type="submit" disabled={saving}>{saving ? 'Saving…' : initial ? 'Save changes' : created ? 'Retry service assignments' : 'Create staff'}</button></div>
