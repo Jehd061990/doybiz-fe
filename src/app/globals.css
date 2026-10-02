@@ -957,3 +957,21 @@ button { cursor: pointer; }
 }
 
 .service-image-controls{display:grid;gap:12px;min-width:0}.service-image-source-options{display:flex;flex-wrap:wrap;gap:8px 18px}.service-image-source-options .check-option{min-height:30px}.service-image-url-control{max-width:620px}.field-optional{color:var(--ink-soft);font-size:11px;font-weight:500}.service-image-preview img,.service-admin-image img,.pos-service-card-image img{background:var(--mint)}
+
+
+/* Staff service multi-select */
+.service-multi-trigger{width:100%;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--ink);text-align:left}
+.service-multi-trigger:disabled{opacity:.65;cursor:not-allowed}
+.service-multi-selected{display:flex;flex-wrap:wrap;gap:5px;min-width:0}
+.service-multi-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:var(--mint);font-size:12px;line-height:1.2}
+.service-multi-placeholder{color:var(--ink-soft);font-size:13px}
+.service-multi-menu{position:absolute;z-index:30;top:calc(100% + 6px);left:0;right:0;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--white);box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.service-multi-menu>input{width:100%;height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:7px;outline:none}
+.service-multi-options{display:grid;gap:2px;max-height:210px;overflow-y:auto;margin-top:7px}
+.service-multi-option{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;padding:8px 9px;border:0;border-radius:7px;background:transparent;color:var(--ink);text-align:left;cursor:pointer;font-size:13px}
+.service-multi-option:hover,.service-multi-option.selected{background:var(--mint)}
+.service-multi-option small{color:var(--ink-soft);font-size:11px}
+.service-multi-check{display:grid;place-items:center;width:18px;height:18px;border:1px solid var(--line);border-radius:4px;font-size:12px;font-weight:700}
+.service-multi-option.selected .service-multi-check{background:var(--ink);color:var(--white)}
+.service-multi-empty{padding:12px;color:var(--ink-soft)}
+.service-multi-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding-top:7px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-soft)}
