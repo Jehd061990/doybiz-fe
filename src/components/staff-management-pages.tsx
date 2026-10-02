@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useCreate, useCustom, useCustomMutation, useOne, useUpdate, type HttpError } from '@refinedev/core';
+import { useCustom, useCustomMutation, type HttpError } from '@refinedev/core';
 import { useState, type FormEvent } from 'react';
 import { useBranches } from '@/lib/branches/use-branches';
 import { useAuthSession } from '@/lib/auth/use-auth-session';
@@ -87,9 +87,9 @@ function StaffListContent() {
 
 function StaffEditContent() {
   const router = useRouter(); const params = useParams<{id:string}>(); const staffId=params.id;
-  const query=useOne<Staff>({resource:'staff',id:staffId});
+  const query=useCustom<{success:boolean;staff:Staff}>({url:`/staff/${encodeURIComponent(staffId)}`,method:'get'});
   const {session}=useAuthSession(); const canManage=session.user?.role==='OWNER'||session.user?.role==='MANAGER';
-  const {mutateAsync,mutation}=useUpdate<Staff,HttpError,StaffFormValues>({resource:'staff',id:staffId});
+  const updateMutation=useCustomMutation<{success:boolean;staff:Staff},HttpError,StaffFormValues>({mutationOptions:{gcTime:0}});
   const deleteMutation=useCustomMutation<{success:boolean;staff:Staff},HttpError,Record<string,never>>({mutationOptions:{gcTime:0}});
   const assignmentMutation=useCustomMutation({mutationOptions:{gcTime:0}});
   const servicesQuery=useCustom<StaffServiceListResponse>({url:`/staff/${encodeURIComponent(staffId)}/services`,method:'get'});
@@ -99,14 +99,14 @@ function StaffEditContent() {
   const [serviceId,setServiceId]=useState('');
   const availableServices=useCustom<{success:boolean;data:StaffService[]}>({url:'/services?status=ACTIVE&limit=100',method:'get'});
   if(query.query.isLoading) return <p className="management-state" role="status">Loading staff…</p>;
-  if(query.query.isError||!query.result) return <p className="management-error" role="alert">{getStaffErrorMessage(query.query.error)}</p>;
-  const staff=query.result;
+  if(query.query.isError||!query.result.data?.staff) return <p className="management-error" role="alert">{getStaffErrorMessage(query.query.error)}</p>;
+  const staff=query.result.data.staff;
   const canAssign=canManage;
-  async function save(values:StaffFormValues){setError(null);try{await mutateAsync({resource:'staff',id:staffId,values});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'update'));return false}}
+  async function save(values:StaffFormValues){setError(null);try{await updateMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}`,method:'put',values});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'update'));return false}}
   async function deactivate(){if(staff.status==='INACTIVE'||!window.confirm('Deactivate this staff member?'))return;setError(null);try{await deleteMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}`,method:'delete',values:{}});router.replace('/app/staff')}catch(e){setError(getStaffErrorMessage(e,'delete'))}}
   async function assignService(){if(!serviceId)return;setAssignmentError(null);try{await assignmentMutation.mutateAsync({url:`/staff/${encodeURIComponent(staffId)}/services/${encodeURIComponent(serviceId)}`,method:'post',values:{}});setServiceId('');await servicesQuery.query.refetch();}catch(e){setAssignmentError(getStaffErrorMessage(e,'assignment'))}}
   return <section className="management-page" aria-labelledby="staff-detail-heading"><header className="management-page-header"><div><p className="eyebrow">STAFF</p><h1 id="staff-detail-heading">{staff.firstName} {staff.lastName}</h1><p className="management-description">{staff.position} · {branchName(staff.branchId)}</p></div><Link className="secondary-button" href="/app/staff">Back</Link></header>
-    <StaffForm initial={staff} saving={mutation.isPending||deleteMutation.mutation.isPending} error={error} onSubmit={save}/>
+    <StaffForm initial={staff} saving={updateMutation.mutation.isPending||deleteMutation.mutation.isPending} error={error} onSubmit={save}/>
     <section className="management-panel"><h2>Assigned services</h2><p className="management-description">Services this staff member is qualified to perform.</p>
       {servicesQuery.query.isLoading?<p className="management-state">Loading assigned services…</p>:null}
       {servicesQuery.query.isError?<p className="management-error">{getStaffErrorMessage(servicesQuery.query.error,'assignment')}</p>:null}
@@ -117,5 +117,5 @@ function StaffEditContent() {
   </section>;
 }
 export function StaffListPage(){return <StaffListContent/>}
-export function StaffCreatePage(){const router=useRouter();const {mutateAsync,mutation}=useCreate<Staff,HttpError,StaffFormValues>({resource:'staff',mutationOptions:{gcTime:0}});const [error,setError]=useState<string|null>(null);async function save(v:StaffFormValues){setError(null);try{await mutateAsync({resource:'staff',values:v});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'create'));return false}}return <section className="management-page"><header className="management-page-header"><div><p className="eyebrow">STAFF</p><h1>Create staff</h1></div></header><StaffForm saving={mutation.isPending} error={error} onSubmit={save}/></section>}
+export function StaffCreatePage(){const router=useRouter();const createMutation=useCustomMutation<{success:boolean;staff:Staff},HttpError,StaffFormValues>({mutationOptions:{gcTime:0}});const [error,setError]=useState<string|null>(null);async function save(v:StaffFormValues){setError(null);try{await createMutation.mutateAsync({url:'/staff',method:'post',values:v});router.replace('/app/staff');return true}catch(e){setError(getStaffErrorMessage(e,'create'));return false}}return <section className="management-page"><header className="management-page-header"><div><p className="eyebrow">STAFF</p><h1>Create staff</h1></div></header><StaffForm saving={createMutation.mutation.isPending} error={error} onSubmit={save}/></section>}
 export function StaffEditPage(){return <StaffEditContent/>}
