@@ -43,6 +43,12 @@ export function WebsiteManagementPage() {
   const [media, setMedia] = useState<MediaAsset[]>([]);
   const [mediaLoading, setMediaLoading] = useState(false);
   const [mediaUploading, setMediaUploading] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Record<WebsiteSectionKey, boolean>>({
+    HERO: true,
+    SERVICES: true,
+    BRANCHES: false,
+    CONTACT: false,
+  });
 
   useEffect(() => {
     if (query.result.data?.draft) setDraft(clone(query.result.data.draft));
@@ -120,6 +126,8 @@ export function WebsiteManagementPage() {
   const updateSection = (key: keyof WebsiteValue['sections'], field: 'enabled' | 'eyebrow' | 'title', value: boolean | string) =>
     setDraft(current => current ? ({ ...current, sections: { ...current.sections, [key]: { ...current.sections[key], [field]: value } } }) : current);
   const sectionLabels: Record<WebsiteSectionKey, string> = { HERO: 'Hero', SERVICES: 'Services', BRANCHES: 'Branches', CONTACT: 'Contact' };
+  const sectionKeys: WebsiteSectionKey[] = ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'];
+  const toggleSectionExpanded = (key: WebsiteSectionKey) => setExpandedSections(current => ({ ...current, [key]: !current[key] }));
   const sectionEnabled = (key: WebsiteSectionKey) => key === 'HERO' ? true : draft?.sections[key.toLowerCase() as keyof WebsiteValue['sections']].enabled ?? false;
   const setSectionEnabled = (key: WebsiteSectionKey, enabled: boolean) => {
     if (!draft || key === 'HERO') return;
@@ -280,42 +288,58 @@ export function WebsiteManagementPage() {
 
         <section className="billing-section">
           <div className="billing-section-heading"><h2>Section Builder</h2></div>
-          <p>Reorder sections and choose which sections appear on the public website. Changes stay in the draft until you save.</p>
+          <p>Arrange sections, control visibility, and edit each section from its own card. Changes stay in the draft until you save.</p>
           <div style={{ display: 'grid', gap: 10 }}>
             {draft.sectionOrder.map((key, index) => (
-              <div key={key} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto', gap: 8, alignItems: 'center', padding: 12, border: '1px solid #e5e5e5', borderRadius: 10 }}>
-                <strong>{index + 1}. {sectionLabels[key]}</strong>
-                {key !== 'HERO' ? (
-                  <>
+              <div key={key} style={{ border: '1px solid #e5e5e5', borderRadius: 10, overflow: 'hidden' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto auto', gap: 8, alignItems: 'center', padding: 12 }}>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => toggleSectionExpanded(key)}
+                    aria-expanded={expandedSections[key]}
+                    aria-controls={`website-section-content-${key.toLowerCase()}`}
+                  >
+                    {expandedSections[key] ? 'Collapse' : 'Edit'} {index + 1}. {sectionLabels[key]}
+                  </button>
+                  {key !== 'HERO' ? (
                     <label><input type="checkbox" checked={sectionEnabled(key)} onChange={event => setSectionEnabled(key, event.target.checked)} /> Enabled</label>
-                    <button type="button" className="secondary-button" onClick={() => removeSection(key)}>Remove</button>
-                  </>
-                ) : <span>Core section</span>}
-                <button type="button" className="secondary-button" onClick={() => moveSection(key, -1)} disabled={index === 0}>Move up</button>
-                <button type="button" className="secondary-button" onClick={() => moveSection(key, 1)} disabled={index === draft.sectionOrder.length - 1}>Move down</button>
+                  ) : <span>Core section</span>}
+                  {key !== 'HERO' ? <button type="button" className="secondary-button" onClick={() => removeSection(key)}>Remove</button> : <span />}
+                  <button type="button" className="secondary-button" onClick={() => moveSection(key, -1)} disabled={index === 0}>Move up</button>
+                  <button type="button" className="secondary-button" onClick={() => moveSection(key, 1)} disabled={index === draft.sectionOrder.length - 1}>Move down</button>
+                  <span aria-label={sectionEnabled(key) ? 'Visible' : 'Hidden'}>{sectionEnabled(key) ? 'Visible' : 'Hidden'}</span>
+                </div>
+                {expandedSections[key] && (
+                  <div id={`website-section-content-${key.toLowerCase()}`} style={{ borderTop: '1px solid #e5e5e5', padding: 12 }}>
+                    {key === 'HERO' ? (
+                      <div className="form-grid">
+                        <label className="field-control"><span>Eyebrow</span><input aria-label="Hero eyebrow" value={draft.hero.eyebrow} onChange={event => updateHero('eyebrow', event.target.value)} /></label>
+                        <label className="field-control"><span>Headline</span><input aria-label="Hero headline" value={draft.hero.title} onChange={event => updateHero('title', event.target.value)} /></label>
+                        <label className="field-control"><span>Description</span><textarea aria-label="Hero description" rows={3} value={draft.hero.description} onChange={event => updateHero('description', event.target.value)} /></label>
+                        <label className="field-control"><span>Booking card label</span><input aria-label="Hero card label" value={draft.hero.cardLabel} onChange={event => updateHero('cardLabel', event.target.value)} /></label>
+                        <label className="field-control"><span>Booking card title</span><input aria-label="Hero card title" value={draft.hero.cardTitle} onChange={event => updateHero('cardTitle', event.target.value)} /></label>
+                        <label className="field-control"><span>Hero image URL (optional)</span><input aria-label="Hero image URL" type="url" value={draft.hero.backgroundImageUrl} onChange={event => updateHero('backgroundImageUrl', event.target.value)} placeholder="https://…" /></label>
+                      </div>
+                    ) : (
+                      <div className="form-grid">
+                        <label className="field-control"><span><input type="checkbox" checked={sectionEnabled(key)} onChange={event => setSectionEnabled(key, event.target.checked)} /> Show {sectionLabels[key]}</span></label>
+                        <label className="field-control"><span>Eyebrow</span><input aria-label={`${sectionLabels[key]} eyebrow`} value={draft.sections[key.toLowerCase() as keyof WebsiteValue['sections']].eyebrow} onChange={event => updateSection(key.toLowerCase() as keyof WebsiteValue['sections'], 'eyebrow', event.target.value)} /></label>
+                        <label className="field-control"><span>Title</span><input aria-label={`${sectionLabels[key]} title`} value={draft.sections[key.toLowerCase() as keyof WebsiteValue['sections']].title} onChange={event => updateSection(key.toLowerCase() as keyof WebsiteValue['sections'], 'title', event.target.value)} /></label>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
-            {(['SERVICES', 'BRANCHES', 'CONTACT'] as const).filter(key => !draft.sectionOrder.includes(key)).length ? (
+            {sectionKeys.filter(key => key !== 'HERO' && !draft.sectionOrder.includes(key)).length ? (
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
-                {(['SERVICES', 'BRANCHES', 'CONTACT'] as const).filter(key => !draft.sectionOrder.includes(key)).map(key => (
+                {sectionKeys.filter(key => key !== 'HERO' && !draft.sectionOrder.includes(key)).map(key => (
                   <button key={key} type="button" className="secondary-button" onClick={() => addSection(key)}>Add {sectionLabels[key]}</button>
                 ))}
               </div>
             ) : null}
           </div>
-        </section>
-
-        <section className="billing-section">
-          <div className="billing-section-heading"><h2>Section Content</h2></div>
-          {(['services', 'branches', 'contact'] as const).map(key => (
-            <div key={key} style={{ display: 'grid', gap: 10, padding: '12px 0', borderBottom: '1px solid #e5e5e5' }}>
-              <label className="field-control"><span><input type="checkbox" checked={draft.sections[key].enabled} onChange={event => updateSection(key, 'enabled', event.target.checked)} /> Show {key}</span></label>
-              <div className="form-grid">
-                <label className="field-control"><span>Eyebrow</span><input value={draft.sections[key].eyebrow} onChange={event => updateSection(key, 'eyebrow', event.target.value)} /></label>
-                <label className="field-control"><span>Title</span><input value={draft.sections[key].title} onChange={event => updateSection(key, 'title', event.target.value)} /></label>
-              </div>
-            </div>
-          ))}
         </section>
 
         <section className="billing-section">
