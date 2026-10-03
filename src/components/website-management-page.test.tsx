@@ -124,9 +124,9 @@ describe('WebsiteManagementPage', () => {
   it('reorders and removes a section, then adds it back before saving', async () => {
     await renderWebsiteManagementPage();
 
-    const heroRow = screen.getByText('1. Hero').parentElement!;
+    const heroRow = screen.getByRole('button', { name: 'Collapse 1. Hero' }).parentElement!;
     fireEvent.click(within(heroRow).getByRole('button', { name: 'Move down' }));
-    const servicesRow = screen.getByText('1. Services').parentElement!;
+    const servicesRow = screen.getByRole('button', { name: 'Collapse 2. Services' }).parentElement!;
     fireEvent.click(within(servicesRow).getByRole('button', { name: 'Remove' }));
     expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Add Services' }));
