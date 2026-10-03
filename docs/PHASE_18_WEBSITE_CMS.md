@@ -2,7 +2,7 @@
 
 ## Status
 
-IMPLEMENTED FOUNDATION. The first Website CMS editor is connected to the backend WebsiteConfig draft/published contract. Advanced page-builder features remain future work.
+IMPLEMENTED FOUNDATION. The Website CMS editor is connected to the backend WebsiteConfig draft/published contract. The current implementation also includes booking CTA configuration, draft preview, and a Hero Media Library.
 
 ## Purpose
 
@@ -24,8 +24,10 @@ The frontend reaches these endpoints through the existing same-origin backend pr
 
 - Branding: primary, accent, background, and text colors.
 - Hero: eyebrow, headline, description, booking card label/title, background image URL.
+- Booking CTA: enabled/disabled, label, and modal vs dedicated booking-page behavior.
 - Sections: Services, Branches, and Contact visibility plus eyebrow/title.
 - Footer: powered-by text.
+- Hero Media Library: JPG/PNG/WebP upload up to 5 MB, organization-scoped media selection.
 
 ## Draft / Publish model
 
@@ -48,19 +50,25 @@ The page is wrapped in the existing `ModuleRouteGuard` with `WEBSITE`. Backend `
 
 The public landing page consumes the published WebsiteConfig while continuing to use existing DoyBiz data for services, branches, staff, availability, and booking. CMS content must not duplicate or mutate those operational resources.
 
-## Draft preview behavior
+## Public booking experience
 
-The CMS editor provides two distinct preview/live actions:
+The existing public site supports two booking entry points without duplicating booking logic:
 
-- **Preview draft** — previews the current unsaved editor state in the same browser.
-- **Live website** — opens the normal public website, which uses only the published WebsiteConfig.
+- Normal landing page: `/site?tenant=<slug>`
+- Dedicated booking page: `/site/book?tenant=<slug>`
 
-Draft preview uses a short-lived browser-side handoff key (`doybiz:website-preview-draft`). The public backend API is not changed to return draft configuration. Operational data such as services, branches, staff, availability, and reservations continues to come from the existing public APIs.
+The dedicated booking page keeps the public landing-page header/navigation visible, while the booking flow is the primary page content. Navigation links point back to the corresponding landing-page sections. The same schedule, availability, customer-details, reservation, and confirmation flow is reused.
+
+When Booking CTA mode is `page`, CTA clicks from the landing page preserve the tenant query and navigate to `/site/book?tenant=<slug>`. When mode is `modal`, the existing booking modal is used.
+
+## Testing
+
+Public Website behavior is covered by frontend Jest/React Testing Library tests in `src/components/public/client-landing-page.test.tsx`. Coverage includes landing-page rendering, tenant-aware navigation, dedicated booking-page navigation, CTA mode behavior, and availability loading.
+
+CMS behavior is covered by `src/components/website-management-page.test.tsx`.
 
 ## Current limitations / future scope
 
-- No media upload/media library yet.
-- Hero image currently accepts a URL rather than an uploaded asset.
 - No drag-and-drop section ordering.
 - No visual canvas/live inline editor.
 - No SEO settings.
@@ -80,17 +88,4 @@ npm test -- --runInBand
 npm run build
 ```
 
-Then verify the public landing page and booking flow manually with a tenant query such as `/site?tenant=onepiecesalon` and the dedicated booking page.
-
-
-### Booking CTA customization
-
-The Website CMS now exposes organization-scoped booking CTA controls:
-
-- Show/hide the public booking CTA.
-- Customize the CTA label.
-- Choose between the existing homepage booking modal or the dedicated `/site/book` booking page.
-- Tenant query parameters are preserved when navigating to the dedicated booking page.
-- Draft Preview uses the current unsaved CTA configuration.
-- Publish is still required before the saved CTA configuration becomes live.
-- The underlying public booking APIs and reservation flow remain unchanged.
+Then verify the public landing page and booking flow manually with a tenant query such as `/site?tenant=onepiecesalon` and the dedicated booking page `/site/book?tenant=onepiecesalon`.
