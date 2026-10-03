@@ -60,9 +60,11 @@ describe('WebsiteManagementPage', () => {
     await renderWebsiteManagementPage();
     expect(screen.getByRole('heading', { name: 'Website' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Branding' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Hero section' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Booking CTA' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Section Builder' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Collapse 1. Hero' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Hero headline')).toBeInTheDocument();
+    expect(screen.getByText('Media Library')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Footer' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Publish' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Preview draft' })).toBeInTheDocument();
