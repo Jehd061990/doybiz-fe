@@ -31,7 +31,7 @@ function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page' } = {}) {
     bookingCta: { ...website.bookingCta, mode: options.bookingCtaMode ?? website.bookingCta.mode },
   };
 
-  jest.spyOn(global, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+  const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
     const url = String(input);
     if (url.includes('/api/public/site')) {
       return new Response(JSON.stringify({ ...sitePayload, site: { ...sitePayload.site, website: currentWebsite } }), { status: 200 });
@@ -57,6 +57,12 @@ function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page' } = {}) {
       }), { status: 200 });
     }
     return new Response(JSON.stringify({ success: true }), { status: 200 });
+  });
+
+  Object.defineProperty(global, 'fetch', {
+    configurable: true,
+    writable: true,
+    value: fetchMock,
   });
 }
 
