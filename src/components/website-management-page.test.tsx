@@ -188,10 +188,11 @@ describe('WebsiteManagementPage', () => {
     const servicesTitle = screen.getByLabelText('Services title');
     fireEvent.change(servicesTitle, { target: { value: 'Our signature services' } });
 
-    const servicesCard = servicesTitle.closest('div[class*="billing"]') ?? servicesTitle.parentElement?.parentElement?.parentElement;
+    const servicesToggle = screen.getByRole('button', { name: 'Collapse 2. Services' });
+    const servicesCard = servicesToggle.parentElement?.parentElement;
     expect(servicesCard).toBeTruthy();
 
-    fireEvent.click(within(servicesCard!).getByRole('button', { name: 'Remove' }));
+    fireEvent.click(within(servicesCard as HTMLElement).getByRole('button', { name: 'Remove' }));
 
     expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Add Services' }));
