@@ -333,10 +333,14 @@ export function WebsiteManagementPage() {
               </div>
             ))}
             {sectionKeys.filter(key => key !== 'HERO' && !draft.sectionOrder.includes(key)).length ? (
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
-                {sectionKeys.filter(key => key !== 'HERO' && !draft.sectionOrder.includes(key)).map(key => (
-                  <button key={key} type="button" className="secondary-button" onClick={() => addSection(key)}>Add {sectionLabels[key]}</button>
-                ))}
+              <div style={{ marginTop: 4, padding: 12, border: '1px dashed #d4d4d4', borderRadius: 10 }}>
+                <h3 style={{ margin: '0 0 6px' }}>Add Section</h3>
+                <p style={{ margin: '0 0 10px' }}>Add a removed section back to the page. Its saved content will be restored.</p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {sectionKeys.filter(key => key !== 'HERO' && !draft.sectionOrder.includes(key)).map(key => (
+                    <button key={key} type="button" className="secondary-button" onClick={() => addSection(key)}>Add {sectionLabels[key]}</button>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>
