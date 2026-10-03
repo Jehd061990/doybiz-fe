@@ -81,7 +81,9 @@ const getLocalToday = () => {
 
 const today = getLocalToday();
 
-export function ClientLandingPage({ developmentTenant, bookingOnly = false, openBookingOnLoad = false }: { developmentTenant?: string; bookingOnly?: boolean; openBookingOnLoad?: boolean }) {
+const PREVIEW_STORAGE_KEY = 'doybiz:website-preview-draft';
+
+export function ClientLandingPage({ developmentTenant, bookingOnly = false, openBookingOnLoad = false, previewDraft = false }: { developmentTenant?: string; bookingOnly?: boolean; openBookingOnLoad?: boolean; previewDraft?: boolean }) {
   const tenantQuery = developmentTenant ? `?tenant=${encodeURIComponent(developmentTenant)}` : '';
 
   const [site, setSite] = useState<SiteResponse['site'] | null>(null);
@@ -123,7 +125,16 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
           publicRequest<{ success: true; services: Service[] }>(`services${tenantQuery}`),
         ]);
         if (cancelled) return;
-        setSite(siteResult.site);
+        let website = siteResult.site.website;
+        if (previewDraft && typeof window !== 'undefined') {
+          try {
+            const storedDraft = window.localStorage.getItem(PREVIEW_STORAGE_KEY);
+            if (storedDraft) website = JSON.parse(storedDraft) as WebsiteValue;
+          } catch {
+            // Ignore malformed preview data and fall back to the published website.
+          }
+        }
+        setSite({ ...siteResult.site, website });
         setBranches(branchResult.branches);
         setServices(serviceResult.services);
         const firstBranchId = branchResult.branches[0]?.id || '';
