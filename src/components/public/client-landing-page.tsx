@@ -286,6 +286,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   const website = site.website;
   const landingPageHref = tenantQuery ? `/site${tenantQuery}` : '/site';
   const bookingPageHref = tenantQuery ? `/site/book${tenantQuery}` : '/site/book';
+  const sectionOrderIndex = (key: 'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT') => website.sectionOrder?.indexOf(key) ?? -1;
   const handleBookingCta = () => {
     if (website.bookingCta.mode === 'page') {
       navigateTo(bookingPageHref);
@@ -301,8 +302,8 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   } as CSSProperties;
 
   return (
-    <main style={themeStyle} className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}>
-      <header className={styles.header}>
+    <main style={{ ...themeStyle, display: 'flex', flexDirection: 'column' }} className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}>
+      <header className={styles.header} style={{ order: 0 }}>
         <a href={bookingOnly ? `${landingPageHref}#top` : '#top'} className={styles.brand}>{organization.name}</a>
         <nav className={styles.nav}>
           {website.sections.services.enabled && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
@@ -312,7 +313,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         </nav>
       </header>
 
-      {!bookingOnly && <section id="top" className={styles.hero}>
+      {!bookingOnly && <section id="top" className={styles.hero} style={{ order: sectionOrderIndex('HERO') + 1 }}>
         <div className={styles.heroCopy}>
           <span className={styles.eyebrow}>{website.hero.eyebrow}</span>
           <h1>{website.hero.title}</h1>
@@ -329,7 +330,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         </div>
       </section>}
 
-      {!bookingOnly && website.sections.services.enabled && <section id="services" className={styles.section}>
+      {!bookingOnly && website.sections.services.enabled && <section id="services" className={styles.section} style={{ order: sectionOrderIndex('SERVICES') + 1 }}>
         <div className={styles.sectionHeading}>
           <div><span className={styles.eyebrow}>{website.sections.services.eyebrow}</span><h2>{website.sections.services.title}</h2></div>
           {branches.length > 1 && (
@@ -355,7 +356,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         ) : <p className={styles.empty}>No services are currently available.</p>}
       </section>}
 
-      {!bookingOnly && website.sections.branches.enabled && <section id="branches" className={styles.sectionAlt}>
+      {!bookingOnly && website.sections.branches.enabled && <section id="branches" className={styles.sectionAlt} style={{ order: sectionOrderIndex('BRANCHES') + 1 }}>
         <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>{website.sections.branches.eyebrow}</span><h2>{website.sections.branches.title}</h2></div></div>
         <div className={styles.branchGrid}>
           {branches.map(branch => (
@@ -369,7 +370,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         </div>
       </section>}
 
-      {!bookingOnly && website.sections.contact.enabled && <section id="contact" className={styles.contactSection}>
+      {!bookingOnly && website.sections.contact.enabled && <section id="contact" className={styles.contactSection} style={{ order: sectionOrderIndex('CONTACT') + 1 }}>
         <div><span className={styles.eyebrow}>{website.sections.contact.eyebrow}</span><h2>{website.sections.contact.title}</h2><p>{organization.address}</p></div>
         <div className={styles.contactDetails}>
           {organization.phone && <a href={`tel:${organization.phone}`}>{organization.phone}</a>}
@@ -378,10 +379,10 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         </div>
       </section>}
 
-      {!bookingOnly && <footer className={styles.footer}><span>{organization.name}</span><span>{website.footer.poweredByText}</span></footer>}
+      {!bookingOnly && <footer className={styles.footer} style={{ order: 10 }}><span>{organization.name}</span><span>{website.footer.poweredByText}</span></footer>}
 
       {bookingOpen && (
-        <div className={bookingOnly ? styles.bookingPageContainer : styles.modalBackdrop} role="presentation" onMouseDown={() => !bookingOnly && setBookingOpen(false)}>
+        <div className={bookingOnly ? styles.bookingPageContainer : styles.modalBackdrop} style={{ order: 100 }} role="presentation" onMouseDown={() => !bookingOnly && setBookingOpen(false)}>
           <div className={bookingOnly ? `${styles.modal} ${styles.bookingPageCard}` : styles.modal} role="dialog" aria-modal="true" aria-label="Book an appointment" onMouseDown={event => event.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div><span className={styles.eyebrow}>ONLINE BOOKING</span><h2>{bookingStep === 3 ? 'Reservation received' : 'Book an appointment'}</h2></div>
