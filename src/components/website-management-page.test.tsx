@@ -11,6 +11,7 @@ const mockMutation = jest.fn((args: { url: string; method: string; values: unkno
 const draft = {
   branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
   hero: { eyebrow: 'WELCOME', title: 'Test title', description: 'Test description', cardLabel: 'ONLINE RESERVATIONS', cardTitle: 'Choose your service.', backgroundImageUrl: '' },
+  bookingCta: { enabled: true, label: 'Book an appointment', mode: 'modal' },
   sections: {
     services: { enabled: true, eyebrow: 'OUR SERVICES', title: 'Services & pricing' },
     branches: { enabled: true, eyebrow: 'LOCATIONS', title: 'Visit us' },
@@ -45,6 +46,7 @@ describe('WebsiteManagementPage', () => {
     expect(screen.getByRole('heading', { name: 'Website' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Branding' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Hero section' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Booking CTA' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Sections' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Footer' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Publish' })).toBeInTheDocument();
@@ -77,6 +79,8 @@ describe('WebsiteManagementPage', () => {
     expect(headline).toHaveValue('New salon headline');
     expect(mockMutate).not.toHaveBeenCalled();
 
+    fireEvent.change(screen.getByLabelText('Button text'), { target: { value: 'Reserve your time' } });
+    fireEvent.change(screen.getByLabelText('Booking behavior'), { target: { value: 'page' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
 
     await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
@@ -84,6 +88,7 @@ describe('WebsiteManagementPage', () => {
       method: 'put',
       values: expect.objectContaining({
         hero: expect.objectContaining({ title: 'New salon headline' }),
+        bookingCta: expect.objectContaining({ label: 'Reserve your time', mode: 'page' }),
       }),
     })));
     expect(mockPublish).not.toHaveBeenCalled();
