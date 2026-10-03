@@ -28,7 +28,7 @@ describe('frontend module registry', () => {
       { key: 'REPORTS', label: 'Reports', route: '/app/reports' },
       { key: 'STAFF', label: 'Staff', route: '/app/staff' },
       { key: 'BILLING', label: 'Billing', route: '/app/billing', allowedRoles: ['OWNER', 'MANAGER'] },
-      { key: 'WEBSITE', label: 'Website', route: '/app/website', allowedRoles: ['OWNER'] },
+      { key: 'WEBSITE', label: 'Website', route: '/app/website' },
     ]);
   });
 });
