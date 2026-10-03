@@ -56,7 +56,7 @@ describe('WebsiteManagementPage', () => {
     mockMutation.mockClear();
   });
 
-  it('renders the Website CMS editor', () => {
+  it('renders the Website CMS editor', async () => {
     await renderWebsiteManagementPage();
     expect(screen.getByRole('heading', { name: 'Website' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Branding' })).toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('WebsiteManagementPage', () => {
     jest.restoreAllMocks();
   });
 
-  it('previews the current draft locally without saving or publishing', () => {
+  it('previews the current draft locally without saving or publishing', async () => {
     await renderWebsiteManagementPage();
     const headline = screen.getByLabelText('Headline');
     fireEvent.change(headline, { target: { value: 'Preview headline' } });
