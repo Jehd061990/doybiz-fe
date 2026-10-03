@@ -73,7 +73,13 @@ const publicRequest = async <T,>(path: string, options?: RequestInit): Promise<T
   return payload as T;
 };
 
-const today = new Date().toISOString().slice(0, 10);
+const getLocalToday = () => {
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60_000;
+  return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10);
+};
+
+const today = getLocalToday();
 
 export function ClientLandingPage({ developmentTenant, bookingOnly = false, openBookingOnLoad = false }: { developmentTenant?: string; bookingOnly?: boolean; openBookingOnLoad?: boolean }) {
   const tenantQuery = developmentTenant ? `?tenant=${encodeURIComponent(developmentTenant)}` : '';
@@ -150,9 +156,12 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   const selectedService = services.find(service => service.id === serviceId);
 
   const openBooking = (service?: Service) => {
-    const initialService = service || visibleServices[0];
+    const initialBranch = selectedBranch || branches[0]?.id || '';
+    const initialService = service && (!service.branchId || service.branchId === initialBranch)
+      ? service
+      : visibleServices.find(item => !item.branchId || item.branchId === initialBranch);
     setServiceId(initialService?.id || '');
-    setSelectedBranch(selectedBranch || branches[0]?.id || '');
+    setSelectedBranch(initialBranch);
     setStaffId('');
     setDate(today);
     setTime('');
@@ -371,7 +380,15 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
                 <div className={styles.steps}><span className={bookingStep >= 1 ? styles.activeStep : ''}>1 Schedule</span><span className={bookingStep >= 2 ? styles.activeStep : ''}>2 Your details</span></div>
                 {bookingStep === 1 ? (
                   <div className={styles.formGrid}>
-                    <label>Branch<select value={selectedBranch} onChange={event => { setSelectedBranch(event.target.value); setTime(''); }} required><option value="">Select branch</option>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
+                    <label>Branch<select value={selectedBranch} onChange={event => {
+                      const nextBranchId = event.target.value;
+                      const nextServices = services.filter(service => !service.branchId || service.branchId === nextBranchId);
+                      setSelectedBranch(nextBranchId);
+                      setServiceId(nextServices[0]?.id || '');
+                      setStaffId('');
+                      setTime('');
+                      setAvailability(null);
+                    }} required><option value="">Select branch</option>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
                     <label>Service<select value={serviceId} onChange={event => { setServiceId(event.target.value); setTime(''); }} required><option value="">Select service</option>{visibleServices.map(service => <option key={service.id} value={service.id}>{service.name} — ₱{service.price.toLocaleString()}</option>)}</select></label>
                     <label>Date<input type="date" min={today} value={date} onChange={event => setDate(event.target.value)} required /></label>
                     <label>Staff<select value={staffId} onChange={event => { setStaffId(event.target.value); setTime(''); }}><option value="">Any available staff</option>{staff.map(member => <option key={member.id} value={member.id}>{member.firstName} {member.lastName}{member.position ? ` — ${member.position}` : ''}</option>)}</select></label>
