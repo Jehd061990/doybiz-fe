@@ -128,8 +128,11 @@ describe('ClientLandingPage', () => {
     render(<ClientLandingPage developmentTenant="onepiecesalon" />);
 
     await screen.findByRole('heading', { name: 'Test title' });
-    const ids = Array.from(document.querySelectorAll('main > section')).map(section => section.id);
-    expect(ids).toEqual(['top', 'contact', 'services', 'branches']);
+    const sections = Array.from(document.querySelectorAll('main > section')) as HTMLElement[];
+    const orderedIds = sections
+      .sort((a, b) => Number(a.style.order) - Number(b.style.order))
+      .map(section => section.id);
+    expect(orderedIds).toEqual(['top', 'contact', 'services', 'branches']);
   });
 
   it('opens the booking modal when the CTA mode is modal', async () => {
