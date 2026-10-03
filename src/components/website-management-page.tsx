@@ -232,43 +232,6 @@ export function WebsiteManagementPage() {
           </div>
         </section>
 
-        <section className="billing-section">
-          <div className="billing-section-heading"><h2>Hero section</h2></div>
-          <div className="form-grid">
-            <label className="field-control"><span>Eyebrow</span><input value={draft.hero.eyebrow} onChange={event => updateHero('eyebrow', event.target.value)} /></label>
-            <label className="field-control"><span>Headline</span><input value={draft.hero.title} onChange={event => updateHero('title', event.target.value)} /></label>
-            <label className="field-control"><span>Description</span><textarea rows={3} value={draft.hero.description} onChange={event => updateHero('description', event.target.value)} /></label>
-            <label className="field-control"><span>Booking card label</span><input value={draft.hero.cardLabel} onChange={event => updateHero('cardLabel', event.target.value)} /></label>
-            <label className="field-control"><span>Booking card title</span><input value={draft.hero.cardTitle} onChange={event => updateHero('cardTitle', event.target.value)} /></label>
-            <label className="field-control"><span>Hero image URL (optional)</span><input type="url" value={draft.hero.backgroundImageUrl} onChange={event => updateHero('backgroundImageUrl', event.target.value)} placeholder="https://…" /></label>
-            <div className="field-control" style={{ gridColumn: '1 / -1' }}>
-              <span>Media Library</span>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                <label className="secondary-button" style={{ cursor: mediaUploading ? 'wait' : 'pointer' }}>
-                  {mediaUploading ? 'Uploading…' : 'Upload image'}
-                  <input type="file" accept="image/jpeg,image/png,image/webp" disabled={mediaUploading} hidden onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void uploadMedia(file); }} />
-                </label>
-                <small>JPG, PNG, or WebP · max 5 MB</small>
-              </div>
-              {mediaLoading ? <p>Loading media…</p> : media.length ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12, marginTop: 12 }}>
-                  {media.map(asset => (
-                    <div key={asset._id} style={{ border: '1px solid #e5e5e5', borderRadius: 10, overflow: 'hidden' }}>
-                      <img src={asset.url} alt={asset.originalName} style={{ width: '100%', height: 100, objectFit: 'cover', display: 'block' }} />
-                      <div style={{ padding: 8, display: 'grid', gap: 6 }}>
-                        <small style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{asset.originalName}</small>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <button type="button" className="secondary-button" onClick={() => selectHeroImage(asset.url)}>Use for hero</button>
-                          <button type="button" className="secondary-button" onClick={() => void deleteMedia(asset._id)}>Delete</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : <p>No uploaded images yet.</p>}
-            </div>
-          </div>
-        </section>
 
         <section className="billing-section">
           <div className="billing-section-heading"><h2>Booking CTA</h2></div>
@@ -324,6 +287,32 @@ export function WebsiteManagementPage() {
                         <label className="field-control"><span>Booking card label</span><input aria-label="Hero card label" value={draft.hero.cardLabel} onChange={event => updateHero('cardLabel', event.target.value)} /></label>
                         <label className="field-control"><span>Booking card title</span><input aria-label="Hero card title" value={draft.hero.cardTitle} onChange={event => updateHero('cardTitle', event.target.value)} /></label>
                         <label className="field-control"><span>Hero image URL (optional)</span><input aria-label="Hero image URL" type="url" value={draft.hero.backgroundImageUrl} onChange={event => updateHero('backgroundImageUrl', event.target.value)} placeholder="https://…" /></label>
+                        <div className="field-control" style={{ gridColumn: '1 / -1' }}>
+                          <span>Media Library</span>
+                          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                            <label className="secondary-button" style={{ cursor: mediaUploading ? 'wait' : 'pointer' }}>
+                              {mediaUploading ? 'Uploading…' : 'Upload image'}
+                              <input type="file" accept="image/jpeg,image/png,image/webp" disabled={mediaUploading} hidden onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void uploadMedia(file); }} />
+                            </label>
+                            <small>JPG, PNG, or WebP · max 5 MB</small>
+                          </div>
+                          {mediaLoading ? <p>Loading media…</p> : media.length ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12, marginTop: 12 }}>
+                              {media.map(asset => (
+                                <div key={asset._id} style={{ border: '1px solid #e5e5e5', borderRadius: 10, overflow: 'hidden' }}>
+                                  <img src={asset.url} alt={asset.originalName} style={{ width: '100%', height: 100, objectFit: 'cover', display: 'block' }} />
+                                  <div style={{ padding: 8, display: 'grid', gap: 6 }}>
+                                    <small style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{asset.originalName}</small>
+                                    <div style={{ display: 'flex', gap: 6 }}>
+                                      <button type="button" className="secondary-button" onClick={() => selectHeroImage(asset.url)}>Use for hero</button>
+                                      <button type="button" className="secondary-button" onClick={() => void deleteMedia(asset._id)}>Delete</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : <p>No uploaded images yet.</p>}
+                        </div>
                       </div>
                     ) : (
                       <div className="form-grid">
