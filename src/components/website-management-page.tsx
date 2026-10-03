@@ -126,6 +126,24 @@ export function WebsiteManagementPage() {
     const sectionKey = key.toLowerCase() as keyof WebsiteValue['sections'];
     setDraft(current => current ? ({ ...current, sections: { ...current.sections, [sectionKey]: { ...current.sections[sectionKey], enabled } } }) : current);
   };
+  const removeSection = (key: WebsiteSectionKey) => {
+    if (!draft || key === 'HERO') return;
+    const sectionKey = key.toLowerCase() as keyof WebsiteValue['sections'];
+    setDraft(current => current ? ({
+      ...current,
+      sectionOrder: current.sectionOrder.filter(item => item !== key),
+      sections: { ...current.sections, [sectionKey]: { ...current.sections[sectionKey], enabled: false } },
+    }) : current);
+  };
+  const addSection = (key: WebsiteSectionKey) => {
+    if (!draft || key === 'HERO' || draft.sectionOrder.includes(key)) return;
+    const sectionKey = key.toLowerCase() as keyof WebsiteValue['sections'];
+    setDraft(current => current ? ({
+      ...current,
+      sectionOrder: [...current.sectionOrder, key],
+      sections: { ...current.sections, [sectionKey]: { ...current.sections[sectionKey], enabled: true } },
+    }) : current);
+  };
   const moveSection = (key: WebsiteSectionKey, direction: -1 | 1) => setDraft(current => {
     if (!current) return current;
     const order = [...current.sectionOrder];
@@ -265,15 +283,25 @@ export function WebsiteManagementPage() {
           <p>Reorder sections and choose which sections appear on the public website. Changes stay in the draft until you save.</p>
           <div style={{ display: 'grid', gap: 10 }}>
             {draft.sectionOrder.map((key, index) => (
-              <div key={key} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 8, alignItems: 'center', padding: 12, border: '1px solid #e5e5e5', borderRadius: 10 }}>
+              <div key={key} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto', gap: 8, alignItems: 'center', padding: 12, border: '1px solid #e5e5e5', borderRadius: 10 }}>
                 <strong>{index + 1}. {sectionLabels[key]}</strong>
                 {key !== 'HERO' ? (
-                  <label><input type="checkbox" checked={sectionEnabled(key)} onChange={event => setSectionEnabled(key, event.target.checked)} /> Enabled</label>
+                  <>
+                    <label><input type="checkbox" checked={sectionEnabled(key)} onChange={event => setSectionEnabled(key, event.target.checked)} /> Enabled</label>
+                    <button type="button" className="secondary-button" onClick={() => removeSection(key)}>Remove</button>
+                  </>
                 ) : <span>Core section</span>}
                 <button type="button" className="secondary-button" onClick={() => moveSection(key, -1)} disabled={index === 0}>Move up</button>
                 <button type="button" className="secondary-button" onClick={() => moveSection(key, 1)} disabled={index === draft.sectionOrder.length - 1}>Move down</button>
               </div>
             ))}
+            {(['SERVICES', 'BRANCHES', 'CONTACT'] as const).filter(key => !draft.sectionOrder.includes(key)).length ? (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                {(['SERVICES', 'BRANCHES', 'CONTACT'] as const).filter(key => !draft.sectionOrder.includes(key)).map(key => (
+                  <button key={key} type="button" className="secondary-button" onClick={() => addSection(key)}>Add {sectionLabels[key]}</button>
+                ))}
+              </div>
+            ) : null}
           </div>
         </section>
 
