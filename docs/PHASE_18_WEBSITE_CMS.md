@@ -31,8 +31,11 @@ The frontend reaches these endpoints through the existing same-origin backend pr
 
 - Loading the page starts from the backend draft.
 - Field changes are local until Save Draft is selected.
+- Preview Draft stores the current editor state in browser local storage and opens `/site?preview=draft`.
+- Draft preview is browser-local only; it does not call the backend or expose draft data through the public API.
 - Save Draft updates the backend draft only.
 - Publish promotes the saved draft to the backend published version.
+- Live Website opens the normal published `/site` experience.
 - The public landing page must consume only the published configuration.
 
 This prevents an unfinished edit from becoming public accidentally.
@@ -44,6 +47,15 @@ The page is wrapped in the existing `ModuleRouteGuard` with `WEBSITE`. Backend `
 ## Public-site integration
 
 The public landing page consumes the published WebsiteConfig while continuing to use existing DoyBiz data for services, branches, staff, availability, and booking. CMS content must not duplicate or mutate those operational resources.
+
+## Draft preview behavior
+
+The CMS editor provides two distinct preview/live actions:
+
+- **Preview draft** — previews the current unsaved editor state in the same browser.
+- **Live website** — opens the normal public website, which uses only the published WebsiteConfig.
+
+Draft preview uses a short-lived browser-side handoff key (`doybiz:website-preview-draft`). The public backend API is not changed to return draft configuration. Operational data such as services, branches, staff, availability, and reservations continues to come from the existing public APIs.
 
 ## Current limitations / future scope
 
