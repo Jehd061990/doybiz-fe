@@ -214,6 +214,44 @@ describe('WebsiteManagementPage', () => {
     })));
   });
 
+  it('preserves section content when a section is disabled and re-enabled', async () => {
+    await renderWebsiteManagementPage();
+
+    const servicesTitle = screen.getByLabelText('Services title');
+    fireEvent.change(servicesTitle, { target: { value: 'Our signature services' } });
+    expect(servicesTitle).toHaveValue('Our signature services');
+
+    const servicesCard = screen.getByRole('button', { name: 'Collapse 2. Services' }).parentElement?.parentElement;
+    expect(servicesCard).toBeTruthy();
+
+    const enabledCheckbox = within(servicesCard as HTMLElement).getByRole('checkbox', { name: /Enabled/i });
+    fireEvent.click(enabledCheckbox);
+
+    expect(within(servicesCard as HTMLElement).getByText('Hidden')).toBeInTheDocument();
+    expect(screen.getByLabelText('Services title')).toHaveValue('Our signature services');
+    expect(mockMutate).not.toHaveBeenCalled();
+
+    fireEvent.click(enabledCheckbox);
+
+    expect(within(servicesCard as HTMLElement).getByText('Visible')).toBeInTheDocument();
+    expect(screen.getByLabelText('Services title')).toHaveValue('Our signature services');
+    expect(mockMutate).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      values: expect.objectContaining({
+        sectionOrder: expect.arrayContaining(['SERVICES']),
+        sections: expect.objectContaining({
+          services: expect.objectContaining({
+            enabled: true,
+            title: 'Our signature services',
+          }),
+        }),
+      }),
+    })));
+  });
+
   it('surfaces a Save Draft failure', async () => {
     mockMutate.mockRejectedValueOnce(new Error('Save failed'));
     await renderWebsiteManagementPage();
