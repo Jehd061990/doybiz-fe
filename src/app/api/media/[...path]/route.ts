@@ -5,13 +5,16 @@ interface RouteContext {
 }
 
 export async function GET(request: NextRequest, context: RouteContext) {
-  const backendApiUrl = process.env.DOYBIZ_API_URL?.replace(/\/+$/, '');
+  const backendApiUrl = process.env.DOYBIZ_API_URL?.replace(/\\/+$/, '');
   if (!backendApiUrl) return NextResponse.json({ success: false, message: 'Backend API URL is not configured.' }, { status: 500 });
 
+  // DOYBIZ_API_URL includes the /api prefix for JSON endpoints, but uploaded
+  // files are served by Express at /uploads/media (outside the /api namespace).
+  const backendOrigin = backendApiUrl.replace(/\\/api$/i, '');
   const { path } = await context.params;
   const safePath = path.map(segment => encodeURIComponent(segment)).join('/');
   try {
-    const upstream = await fetch(`${backendApiUrl}/uploads/media/${safePath}`, {
+    const upstream = await fetch(`${backendOrigin}/uploads/media/${safePath}`, {
       cache: 'no-store',
       redirect: 'manual',
     });
