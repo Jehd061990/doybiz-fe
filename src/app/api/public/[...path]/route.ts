@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next';
 
 interface RouteContext {
   params: Promise<{ path: string[] }>;
@@ -36,6 +36,9 @@ async function proxyPublicRequest(request: NextRequest, context: RouteContext) {
     const responseHeaders = new Headers();
     const upstreamContentType = upstream.headers.get('content-type');
     if (upstreamContentType) responseHeaders.set('content-type', upstreamContentType);
+    responseHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    responseHeaders.set('Pragma', 'no-cache');
+    responseHeaders.set('Expires', '0');
 
     return new NextResponse(upstream.body, {
       status: upstream.status,
