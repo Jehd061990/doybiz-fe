@@ -307,7 +307,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
           {website.sections.services.enabled && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
           {website.sections.branches.enabled && <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>}
           {website.sections.contact.enabled && <a href={bookingOnly ? `${landingPageHref}#contact` : '#contact'}>Contact</a>}
-          {website.bookingCta.enabled && <button type="button" className={styles.navButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
+          {website.bookingCta.enabled && !bookingOnly && <button type="button" className={styles.navButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
         </nav>
       </header>
 
