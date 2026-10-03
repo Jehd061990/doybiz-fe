@@ -6,6 +6,7 @@ import { useCustom, useCustomMutation, type HttpError } from '@refinedev/core';
 type WebsiteValue = {
   branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
+  bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
   sections: {
     services: { enabled: boolean; eyebrow: string; title: string };
     branches: { enabled: boolean; eyebrow: string; title: string };
@@ -111,6 +112,26 @@ export function WebsiteManagementPage() {
             <label className="field-control"><span>Booking card label</span><input value={draft.hero.cardLabel} onChange={event => updateHero('cardLabel', event.target.value)} /></label>
             <label className="field-control"><span>Booking card title</span><input value={draft.hero.cardTitle} onChange={event => updateHero('cardTitle', event.target.value)} /></label>
             <label className="field-control"><span>Hero image URL</span><input type="url" value={draft.hero.backgroundImageUrl} onChange={event => updateHero('backgroundImageUrl', event.target.value)} placeholder="https://…" /></label>
+          </div>
+        </section>
+
+        <section className="billing-section">
+          <div className="billing-section-heading"><h2>Booking CTA</h2></div>
+          <div className="form-grid">
+            <label className="field-control">
+              <span><input type="checkbox" checked={draft.bookingCta.enabled} onChange={event => setDraft(current => current ? ({ ...current, bookingCta: { ...current.bookingCta, enabled: event.target.checked } }) : current)} /> Show booking CTA</span>
+            </label>
+            <label className="field-control">
+              <span>Button text</span>
+              <input value={draft.bookingCta.label} onChange={event => setDraft(current => current ? ({ ...current, bookingCta: { ...current.bookingCta, label: event.target.value } }) : current)} />
+            </label>
+            <label className="field-control">
+              <span>Booking behavior</span>
+              <select value={draft.bookingCta.mode} onChange={event => setDraft(current => current ? ({ ...current, bookingCta: { ...current.bookingCta, mode: event.target.value as 'modal' | 'page' } }) : current)}>
+                <option value="modal">Open booking modal</option>
+                <option value="page">Open dedicated booking page</option>
+              </select>
+            </label>
           </div>
         </section>
 
