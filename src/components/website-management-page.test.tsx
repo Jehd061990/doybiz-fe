@@ -252,6 +252,30 @@ describe('WebsiteManagementPage', () => {
     })));
   });
 
+  it('keeps Hero as the mandatory core section', async () => {
+    await renderWebsiteManagementPage();
+
+    const heroCard = screen.getByRole('button', { name: 'Collapse 1. Hero' }).parentElement?.parentElement;
+    expect(heroCard).toBeTruthy();
+    expect(within(heroCard as HTMLElement).getByText('Core section')).toBeInTheDocument();
+    expect(within(heroCard as HTMLElement).queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add Hero' })).not.toBeInTheDocument();
+  });
+
+  it('shows a clear Add Section area only after a section is removed', async () => {
+    await renderWebsiteManagementPage();
+
+    expect(screen.queryByRole('heading', { name: 'Add Section' })).not.toBeInTheDocument();
+
+    const servicesCard = screen.getByRole('button', { name: 'Collapse 2. Services' }).parentElement?.parentElement;
+    expect(servicesCard).toBeTruthy();
+    fireEvent.click(within(servicesCard as HTMLElement).getByRole('button', { name: 'Remove' }));
+
+    expect(screen.getByRole('heading', { name: 'Add Section' })).toBeInTheDocument();
+    expect(screen.getByText('Add a removed section back to the page. Its saved content will be restored.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
+  });
+
   it('surfaces a Save Draft failure', async () => {
     mockMutate.mockRejectedValueOnce(new Error('Save failed'));
     await renderWebsiteManagementPage();
