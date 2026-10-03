@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useCustom, useCustomMutation, type HttpError } from '@refinedev/core';
 
+type WebsiteSectionKey = 'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT';
 type WebsiteValue = {
+  sectionOrder: WebsiteSectionKey[];
   branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
   bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
@@ -22,6 +24,7 @@ const clone = (value: WebsiteValue): WebsiteValue => {
   const cloned = JSON.parse(JSON.stringify(value)) as WebsiteValue & { bookingCta?: Partial<WebsiteValue['bookingCta']> };
   return {
     ...cloned,
+    sectionOrder: Array.isArray(cloned.sectionOrder) ? [...new Set(cloned.sectionOrder)].filter((key): key is WebsiteSectionKey => ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'].includes(key)) : ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
     bookingCta: {
       enabled: cloned.bookingCta?.enabled ?? true,
       label: cloned.bookingCta?.label || 'Book an appointment',
@@ -116,6 +119,22 @@ export function WebsiteManagementPage() {
     setDraft(current => current ? ({ ...current, hero: { ...current.hero, [key]: value } }) : current);
   const updateSection = (key: keyof WebsiteValue['sections'], field: 'enabled' | 'eyebrow' | 'title', value: boolean | string) =>
     setDraft(current => current ? ({ ...current, sections: { ...current.sections, [key]: { ...current.sections[key], [field]: value } } }) : current);
+  const sectionLabels: Record<WebsiteSectionKey, string> = { HERO: 'Hero', SERVICES: 'Services', BRANCHES: 'Branches', CONTACT: 'Contact' };
+  const sectionEnabled = (key: WebsiteSectionKey) => key === 'HERO' ? true : draft?.sections[key.toLowerCase() as keyof WebsiteValue['sections']].enabled ?? false;
+  const setSectionEnabled = (key: WebsiteSectionKey, enabled: boolean) => {
+    if (!draft || key === 'HERO') return;
+    const sectionKey = key.toLowerCase() as keyof WebsiteValue['sections'];
+    setDraft(current => current ? ({ ...current, sections: { ...current.sections, [sectionKey]: { ...current.sections[sectionKey], enabled } } }) : current);
+  };
+  const moveSection = (key: WebsiteSectionKey, direction: -1 | 1) => setDraft(current => {
+    if (!current) return current;
+    const order = [...current.sectionOrder];
+    const index = order.indexOf(key);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= order.length) return current;
+    [order[index], order[nextIndex]] = [order[nextIndex], order[index]];
+    return { ...current, sectionOrder: order };
+  });
 
   const publicTenantQuery = query.result.data?.organizationSlug
     ? `?tenant=${encodeURIComponent(query.result.data.organizationSlug)}`
@@ -242,7 +261,24 @@ export function WebsiteManagementPage() {
         </section>
 
         <section className="billing-section">
-          <div className="billing-section-heading"><h2>Sections</h2></div>
+          <div className="billing-section-heading"><h2>Section Builder</h2></div>
+          <p>Reorder sections and choose which sections appear on the public website. Changes stay in the draft until you save.</p>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {draft.sectionOrder.map((key, index) => (
+              <div key={key} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 8, alignItems: 'center', padding: 12, border: '1px solid #e5e5e5', borderRadius: 10 }}>
+                <strong>{index + 1}. {sectionLabels[key]}</strong>
+                {key !== 'HERO' ? (
+                  <label><input type="checkbox" checked={sectionEnabled(key)} onChange={event => setSectionEnabled(key, event.target.checked)} /> Enabled</label>
+                ) : <span>Core section</span>}
+                <button type="button" className="secondary-button" onClick={() => moveSection(key, -1)} disabled={index === 0}>Move up</button>
+                <button type="button" className="secondary-button" onClick={() => moveSection(key, 1)} disabled={index === draft.sectionOrder.length - 1}>Move down</button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="billing-section">
+          <div className="billing-section-heading"><h2>Section Content</h2></div>
           {(['services', 'branches', 'contact'] as const).map(key => (
             <div key={key} style={{ display: 'grid', gap: 10, padding: '12px 0', borderBottom: '1px solid #e5e5e5' }}>
               <label className="field-control"><span><input type="checkbox" checked={draft.sections[key].enabled} onChange={event => updateSection(key, 'enabled', event.target.checked)} /> Show {key}</span></label>
