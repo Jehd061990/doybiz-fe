@@ -95,7 +95,7 @@ describe('ClientLandingPage', () => {
     expect(screen.getByRole('link', { name: 'Services' })).toHaveAttribute('href', '#services');
     expect(screen.getByRole('link', { name: 'Branches' })).toHaveAttribute('href', '#branches');
     expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '#contact');
-    expect(screen.getByText('Haircut')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Haircut' })).toBeInTheDocument();
 
     const requests = (global.fetch as jest.Mock).mock.calls.map(([input]) => String(input));
     expect(requests.some(url => url.includes('/api/public/site?tenant=onepiecesalon'))).toBe(true);
