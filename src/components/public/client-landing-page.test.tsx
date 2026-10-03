@@ -3,6 +3,7 @@ import { ClientLandingPage } from './client-landing-page';
 import { navigateTo } from './navigation';
 
 const website = {
+  sectionOrder: ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
   branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
   hero: { eyebrow: 'WELCOME', title: 'Test title', description: 'Test description', cardLabel: 'ONLINE RESERVATIONS', cardTitle: 'Choose your service.', backgroundImageUrl: '' },
   bookingCta: { enabled: true, label: 'Book now', mode: 'modal' as const },
