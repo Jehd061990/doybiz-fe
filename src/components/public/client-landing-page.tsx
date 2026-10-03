@@ -15,6 +15,7 @@ type Organization = {
 type WebsiteValue = {
   branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
+  bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
   sections: {
     services: { enabled: boolean; eyebrow: string; title: string };
     branches: { enabled: boolean; eyebrow: string; title: string };
@@ -283,6 +284,14 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   const organization = site.organization;
   const website = site.website;
   const landingPageHref = tenantQuery ? `/site${tenantQuery}` : '/site';
+  const bookingPageHref = tenantQuery ? `/site/book${tenantQuery}` : '/site/book';
+  const handleBookingCta = () => {
+    if (website.bookingCta.mode === 'page') {
+      window.location.assign(bookingPageHref);
+      return;
+    }
+    openBooking();
+  };
   const themeStyle = {
     '--site-primary': website.branding.primaryColor,
     '--site-accent': website.branding.accentColor,
@@ -298,7 +307,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
           {website.sections.services.enabled && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
           {website.sections.branches.enabled && <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>}
           {website.sections.contact.enabled && <a href={bookingOnly ? `${landingPageHref}#contact` : '#contact'}>Contact</a>}
-          <button type="button" className={styles.navButton} onClick={() => openBooking()}>Book now</button>
+          {website.bookingCta.enabled && <button type="button" className={styles.navButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
         </nav>
       </header>
 
@@ -308,7 +317,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
           <h1>{website.hero.title}</h1>
           <p>{website.hero.description}</p>
           <div className={styles.heroActions}>
-            <button type="button" className={styles.primaryButton} onClick={() => openBooking()}>Book an appointment</button>
+            {website.bookingCta.enabled && <button type="button" className={styles.primaryButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
             <a href="#services" className={styles.secondaryButton}>View services</a>
           </div>
         </div>
@@ -337,7 +346,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
                 <div className={styles.serviceBody}>
                   <div className={styles.serviceTop}><h3>{service.name}</h3><span>₱{service.price.toLocaleString()}</span></div>
                   {service.description && <p>{service.description}</p>}
-                  <div className={styles.serviceMeta}>{service.durationMinutes} min <button type="button" onClick={() => openBooking(service)}>Book</button></div>
+                  <div className={styles.serviceMeta}>{service.durationMinutes} min {website.bookingCta.enabled && <button type="button" onClick={() => website.bookingCta.mode === 'page' ? window.location.assign(bookingPageHref) : openBooking(service)}>{website.bookingCta.label}</button>}</div>
                 </div>
               </article>
             ))}
@@ -364,7 +373,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         <div className={styles.contactDetails}>
           {organization.phone && <a href={`tel:${organization.phone}`}>{organization.phone}</a>}
           {organization.email && <a href={`mailto:${organization.email}`}>{organization.email}</a>}
-          <button type="button" className={styles.primaryButton} onClick={() => openBooking()}>Book now</button>
+          {website.bookingCta.enabled && <button type="button" className={styles.primaryButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
         </div>
       </section>}
 
