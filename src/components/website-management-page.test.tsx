@@ -32,6 +32,8 @@ jest.mock('@refinedev/core', () => ({
 
 describe('WebsiteManagementPage', () => {
   beforeEach(() => {
+    jest.spyOn(window, 'open').mockImplementation(() => null);
+    window.localStorage.clear();
     mockRefetch.mockReset();
     mockMutate.mockReset().mockResolvedValue({});
     mockPublish.mockReset().mockResolvedValue({});
@@ -46,7 +48,25 @@ describe('WebsiteManagementPage', () => {
     expect(screen.getByRole('heading', { name: 'Sections' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Footer' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Publish' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Preview website' })).toHaveAttribute('href', '/site');
+    expect(screen.getByRole('button', { name: 'Preview draft' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Live website' })).toHaveAttribute('href', '/site');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('previews the current draft locally without saving or publishing', () => {
+    render(<WebsiteManagementPage />);
+    const headline = screen.getByLabelText('Headline');
+    fireEvent.change(headline, { target: { value: 'Preview headline' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Preview draft' }));
+
+    expect(window.localStorage.getItem('doybiz:website-preview-draft')).toContain('Preview headline');
+    expect(window.open).toHaveBeenCalledWith('/site?preview=draft', '_blank', 'noopener,noreferrer');
+    expect(mockMutate).not.toHaveBeenCalled();
+    expect(mockPublish).not.toHaveBeenCalled();
   });
 
   it('keeps edits local until Save Draft and sends the edited configuration', async () => {
