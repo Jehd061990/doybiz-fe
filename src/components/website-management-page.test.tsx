@@ -185,8 +185,13 @@ describe('WebsiteManagementPage', () => {
   it('preserves section content when a section is removed and added back', async () => {
     await renderWebsiteManagementPage();
 
-    fireEvent.change(screen.getByLabelText('Services title'), { target: { value: 'Our signature services' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+    const servicesTitle = screen.getByLabelText('Services title');
+    fireEvent.change(servicesTitle, { target: { value: 'Our signature services' } });
+
+    const servicesCard = servicesTitle.closest('div[class*="billing"]') ?? servicesTitle.parentElement?.parentElement?.parentElement;
+    expect(servicesCard).toBeTruthy();
+
+    fireEvent.click(within(servicesCard!).getByRole('button', { name: 'Remove' }));
 
     expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Add Services' }));
