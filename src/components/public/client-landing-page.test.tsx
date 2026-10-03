@@ -33,10 +33,11 @@ const mockResponse = (payload: unknown, status = 200) => ({
   json: async () => payload,
 });
 
-function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page' } = {}) {
+function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[] } = {}) {
   const currentWebsite = {
     ...website,
     bookingCta: { ...website.bookingCta, mode: options.bookingCtaMode ?? website.bookingCta.mode },
+    sectionOrder: options.sectionOrder ?? website.sectionOrder,
   };
 
   const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
@@ -119,6 +120,16 @@ describe('ClientLandingPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: '10:00' })).toBeInTheDocument();
     });
+  });
+
+  it('renders enabled public sections in the configured order', async () => {
+    mockPublicApi({ sectionOrder: ['HERO', 'CONTACT', 'SERVICES', 'BRANCHES'] });
+
+    render(<ClientLandingPage developmentTenant="onepiecesalon" />);
+
+    await screen.findByRole('heading', { name: 'Test title' });
+    const ids = Array.from(document.querySelectorAll('main > section')).map(section => section.id);
+    expect(ids).toEqual(['top', 'contact', 'services', 'branches']);
   });
 
   it('opens the booking modal when the CTA mode is modal', async () => {
