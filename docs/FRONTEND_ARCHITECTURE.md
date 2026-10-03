@@ -12,7 +12,7 @@
 
 The app uses Next App Router files under `src/app`. `/app/*` is protected by a server layout that checks the cookie-backed session and redirects unauthenticated requests to `/login`. `/` redirects to `/app`, and an authenticated user visiting `/login` is redirected to `/app`. Authentication endpoints are Next route handlers under `/api/auth/*`; the authenticated backend proxy is `/api/backend/[...path]`.
 
-Refine is mounted once in `src/app/providers.tsx`. Its router provider comes from the public `@refinedev/nextjs-router/app` entry. The current resource registry contains only actual backend resources: `users`, `branches`, and `billing`. Unsupported CRUD operations fail explicitly rather than inventing endpoints.
+Refine is mounted once in `src/app/providers.tsx`. Its router provider comes from the public `@refinedev/nextjs-router/app` entry. The current resource registry contains only actual backend resources used through Refine: `users`, `branches`, and `billing`. Website CMS uses `useCustom`/`useCustomMutation` because its draft/publish operations are custom actions rather than a CRUD resource. Unsupported CRUD operations fail explicitly rather than inventing endpoints.
 
 ## Backend and API Client
 
@@ -61,6 +61,16 @@ The selected branch ID is explicit in sale creation. Branch options come from th
 The backend currently guards `GET /api/services` with `APPOINTMENTS`, while sale creation requires either `POS` or `SALES`. Therefore POS-only users without APPOINTMENTS can enter the POS module but cannot load the service catalog. The UI shows this limitation instead of inventing a catalog endpoint or bypassing permissions. A future backend change should expose a read-only POS catalog with current organization/branch-access checks, or allow POS on the GET service routes without widening service mutation access.
 
 No product/inventory/stock API, POS-specific transaction resource, POS history, refund workflow, or printer contract is present in the inspected backend. The UI uses the existing sale and service models only and does not add these features.
+
+## Website CMS
+
+The Website module is available at `/app/website` and is protected by the existing `ModuleRouteGuard` using the backend `WEBSITE` module permission. The page is implemented by `WebsiteManagementPage` and uses the centralized same-origin API client through Refine custom hooks.
+
+Website editing is tenant-scoped by the authenticated organization. The backend `WebsiteConfig` stores two versions of the same normalized configuration: `draft` and `published`. `GET /api/website` returns both; `PUT /api/website` updates only the draft; `POST /api/website/publish` copies the draft to published and records `publishedAt`. The public site reads only the published configuration through the existing public-site contract.
+
+The current CMS editor supports branding colors, hero copy/image URL, visibility and labels for Services/Branches/Contact sections, footer text, draft saving, publishing, and a public-site preview link. It deliberately does not edit booking data, services, branches, staff, or availability; those remain existing DoyBiz resources consumed by the public landing page. Image upload/media library, section drag-and-drop, SEO controls, additional pages, and advanced templates are future CMS work.
+
+The CMS is configuration-driven rather than tenant-specific duplicated code. Custom client designs should extend supported shared sections/components where possible, while bespoke components can be added later without creating a separate frontend project per tenant.
 
 ## Authentication
 
