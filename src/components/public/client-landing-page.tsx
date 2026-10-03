@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ServiceImage } from '@/components/services/service-image';
 import styles from './client-landing-page.module.css';
+import { navigateTo } from './navigation';
 
 type Organization = {
   id: string;
@@ -287,7 +288,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   const bookingPageHref = tenantQuery ? `/site/book${tenantQuery}` : '/site/book';
   const handleBookingCta = () => {
     if (website.bookingCta.mode === 'page') {
-      window.location.assign(bookingPageHref);
+      navigateTo(bookingPageHref);
       return;
     }
     openBooking();
@@ -346,7 +347,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
                 <div className={styles.serviceBody}>
                   <div className={styles.serviceTop}><h3>{service.name}</h3><span>₱{service.price.toLocaleString()}</span></div>
                   {service.description && <p>{service.description}</p>}
-                  <div className={styles.serviceMeta}>{service.durationMinutes} min {website.bookingCta.enabled && <button type="button" onClick={() => website.bookingCta.mode === 'page' ? window.location.assign(bookingPageHref) : openBooking(service)}>{website.bookingCta.label}</button>}</div>
+                  <div className={styles.serviceMeta}>{service.durationMinutes} min {website.bookingCta.enabled && <button type="button" onClick={() => website.bookingCta.mode === 'page' ? navigateTo(bookingPageHref) : openBooking(service)}>{website.bookingCta.label}</button>}</div>
                 </div>
               </article>
             ))}
@@ -414,7 +415,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
                     <label>Staff<select value={staffId} onChange={event => { setStaffId(event.target.value); setTime(''); }}><option value="">Any available staff</option>{staff.map(member => <option key={member.id} value={member.id}>{member.firstName} {member.lastName}{member.position ? ` — ${member.position}` : ''}</option>)}</select></label>
                     <div className={styles.slotField}><span>Available times</span><div className={styles.slotGrid}>{availability?.slots.length ? availability.slots.map(slot => <button key={slot.time} type="button" className={time === slot.time ? styles.selectedSlot : styles.slot} onClick={() => setTime(slot.time)}>{slot.time}</button>) : <small>{selectedService ? 'No available slots for this date.' : 'Select a service to see available times.'}</small>}</div></div>
                     {bookingError && <div className={styles.error}>{bookingError}</div>}
-                    <div className={styles.formActions}><button type="button" className={styles.secondaryButton} onClick={() => bookingOnly ? window.location.assign(`${landingPageHref}#top`) : setBookingOpen(false)}>Cancel</button><button type="button" className={styles.primaryButton} disabled={!time} onClick={() => setBookingStep(2)}>Continue</button></div>
+                    <div className={styles.formActions}><button type="button" className={styles.secondaryButton} onClick={() => bookingOnly ? navigateTo(`${landingPageHref}#top`) : setBookingOpen(false)}>Cancel</button><button type="button" className={styles.primaryButton} disabled={!time} onClick={() => setBookingStep(2)}>Continue</button></div>
                   </div>
                 ) : (
                   <div className={styles.formGrid}>
