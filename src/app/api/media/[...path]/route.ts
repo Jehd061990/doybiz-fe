@@ -13,14 +13,15 @@ export async function GET(request: NextRequest, context: RouteContext) {
     );
   }
 
-  // DOYBIZ_API_URL includes the /api prefix for JSON endpoints, but uploaded
-  // files are served by Express at /uploads/media (outside the /api namespace).
+  // JSON API requests use the /api prefix, while uploaded files are served
+  // by Express at /uploads/media.
   const backendOrigin = backendApiUrl.replace(/\/api$/i, '');
   const { path } = await context.params;
-  const safePath = path.map(segment => encodeURIComponent(segment)).join('/');
+  const safePath = path.map((segment) => encodeURIComponent(segment)).join('/');
+  const upstreamUrl = `${backendOrigin}/uploads/media/${safePath}`;
 
   try {
-    const upstream = await fetch(\`\${backendOrigin}/uploads/media/\${safePath}\`, {
+    const upstream = await fetch(upstreamUrl, {
       cache: 'no-store',
       redirect: 'manual',
     });
