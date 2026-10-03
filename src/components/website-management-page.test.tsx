@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { WebsiteManagementPage } from './website-management-page';
 
 const mockRefetch = jest.fn();
@@ -35,6 +35,15 @@ jest.mock('@refinedev/core', () => ({
 describe('WebsiteManagementPage', () => {
   beforeEach(() => {
     jest.spyOn(window, 'open').mockImplementation(() => null);
+    Object.defineProperty(global, 'fetch', {
+      configurable: true,
+      writable: true,
+      value: jest.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true, assets: [] }),
+      })),
+    });
     window.localStorage.clear();
     mockRefetch.mockReset();
     mockMutate.mockReset().mockResolvedValue({});
@@ -48,7 +57,7 @@ describe('WebsiteManagementPage', () => {
     expect(screen.getByRole('heading', { name: 'Branding' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Hero section' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Booking CTA' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Sections' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Section Builder' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Footer' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Publish' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Preview draft' })).toBeInTheDocument();
@@ -110,8 +119,10 @@ describe('WebsiteManagementPage', () => {
   it('reorders and removes a section, then adds it back before saving', async () => {
     render(<WebsiteManagementPage />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Move down' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+    const heroRow = screen.getByText('1. Hero').parentElement!;
+    fireEvent.click(within(heroRow).getByRole('button', { name: 'Move down' }));
+    const servicesRow = screen.getByText('2. Services').parentElement!;
+    fireEvent.click(within(servicesRow).getByRole('button', { name: 'Remove' }));
     expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Add Services' }));
 
