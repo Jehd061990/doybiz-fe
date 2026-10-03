@@ -1,6 +1,12 @@
 # Phase 19 — Website Media Library
 
-The Website CMS now includes a Media Library for Hero images.
+## Status
+
+IMPLEMENTED
+
+## Purpose
+
+Provide organization-scoped media management for Website CMS assets, currently used by the public Hero section.
 
 ## Behavior
 
@@ -12,11 +18,16 @@ The Website CMS now includes a Media Library for Hero images.
 - Publish promotes the draft Hero image to the live website.
 - Existing external Hero image URLs remain supported.
 - Draft Preview uses the same selected media URL.
+- Media can be deleted from the CMS.
 
 ## API flow
 
-The browser uploads through the authenticated `/api/backend/website/media` proxy. The backend stores the file and metadata. Public image rendering uses the same-origin `/api/media/...` proxy so the landing page does not need to know the backend host.
+The frontend CMS uploads through the authenticated same-origin backend media proxy. The backend stores the file and metadata. Public image rendering uses the media URL returned by the backend.
 
 ## Storage limitation
 
 The current backend storage provider is local filesystem storage. It is suitable for local development and a single persistent server. Production deployments with multiple instances should migrate the storage provider to persistent object storage.
+
+## Verification
+
+Run the Website CMS Jest suite, typecheck, and build, then manually verify upload, select, save draft, preview, publish, and live Hero rendering.
