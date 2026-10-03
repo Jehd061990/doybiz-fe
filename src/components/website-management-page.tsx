@@ -15,7 +15,8 @@ type WebsiteValue = {
   footer: { poweredByText: string };
 };
 
-type WebsiteResponse = { success: true; organizationSlug?: string | null; draft: WebsiteValue; published: WebsiteValue; publishedAt: string | null };\ntype MediaAsset = { _id: string; originalName: string; mimeType: string; size: number; url: string; createdAt: string };
+type WebsiteResponse = { success: true; organizationSlug?: string | null; draft: WebsiteValue; published: WebsiteValue; publishedAt: string | null };
+type MediaAsset = { _id: string; originalName: string; mimeType: string; size: number; url: string; createdAt: string };
 
 const clone = (value: WebsiteValue): WebsiteValue => {
   const cloned = JSON.parse(JSON.stringify(value)) as WebsiteValue & { bookingCta?: Partial<WebsiteValue['bookingCta']> };
@@ -35,11 +36,75 @@ export function WebsiteManagementPage() {
   const { mutateAsync: publishAsync, mutation: publishMutation } = useCustomMutation<WebsiteResponse, HttpError, Record<string, never>>({ mutationOptions: { gcTime: 0 } });
   const [draft, setDraft] = useState<WebsiteValue | null>(null);
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');\n  const [media, setMedia] = useState<MediaAsset[]>([]);\n  const [mediaLoading, setMediaLoading] = useState(false);\n  const [mediaUploading, setMediaUploading] = useState(false);
+  const [error, setError] = useState('');
+  const [media, setMedia] = useState<MediaAsset[]>([]);
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [mediaUploading, setMediaUploading] = useState(false);
 
   useEffect(() => {
     if (query.result.data?.draft) setDraft(clone(query.result.data.draft));
   }, [query.result.data?.draft]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadMedia() {
+      setMediaLoading(true);
+      try {
+        const response = await fetch('/api/backend/website/media', { cache: 'no-store' });
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.message || 'Unable to load media library.');
+        if (!cancelled) setMedia(Array.isArray(body.assets) ? body.assets : []);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Unable to load media library.');
+      } finally {
+        if (!cancelled) setMediaLoading(false);
+      }
+    }
+    void loadMedia();
+    return () => { cancelled = true; };
+  }, []);
+
+  async function uploadMedia(file: File) {
+    setError('');
+    setMessage('');
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be 5 MB or smaller.');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    setMediaUploading(true);
+    try {
+      const response = await fetch('/api/backend/website/media', { method: 'POST', body: formData });
+      const body = await response.json();
+      if (!response.ok || !body.asset) throw new Error(body.message || 'Unable to upload image.');
+      setMedia(current => [body.asset as MediaAsset, ...current]);
+      selectHeroImage((body.asset as MediaAsset).url);
+      setMessage('Image uploaded and selected for the hero. Save draft to keep the change.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to upload image.');
+    } finally {
+      setMediaUploading(false);
+    }
+  }
+
+  function selectHeroImage(url: string) {
+    setDraft(current => current ? ({ ...current, hero: { ...current.hero, backgroundImageUrl: url } }) : current);
+  }
+
+  async function deleteMedia(id: string) {
+    setError('');
+    setMessage('');
+    try {
+      const response = await fetch(`/api/backend/website/media/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.message || 'Unable to delete image.');
+      setMedia(current => current.filter(asset => asset._id !== id));
+      setMessage('Image deleted.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete image.');
+    }
+  }
 
   if (query.query.isLoading || !draft) return <p className="management-state" role="status">Loading website settings…</p>;
   if (query.query.isError) return <p className="management-error" role="alert">Unable to load website settings.</p>;
@@ -126,7 +191,33 @@ export function WebsiteManagementPage() {
             <label className="field-control"><span>Description</span><textarea rows={3} value={draft.hero.description} onChange={event => updateHero('description', event.target.value)} /></label>
             <label className="field-control"><span>Booking card label</span><input value={draft.hero.cardLabel} onChange={event => updateHero('cardLabel', event.target.value)} /></label>
             <label className="field-control"><span>Booking card title</span><input value={draft.hero.cardTitle} onChange={event => updateHero('cardTitle', event.target.value)} /></label>
-            <label className="field-control"><span>Hero image URL (optional)</span><input type="url" value={draft.hero.backgroundImageUrl} onChange={event => updateHero('backgroundImageUrl', event.target.value)} placeholder="https://…" /></label>\n            <div className="field-control" style={{ gridColumn: '1 / -1' }}>\n              <span>Media Library</span>\n              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>\n                <label className="secondary-button" style={{ cursor: mediaUploading ? 'wait' : 'pointer' }}>\n                  {mediaUploading ? 'Uploading…' : 'Upload image'}\n                  <input type="file" accept="image/jpeg,image/png,image/webp" disabled={mediaUploading} hidden onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void uploadMedia(file); }} />\n                </label>\n                <small>JPG, PNG, or WebP · max 5 MB</small>\n              </div>\n              {mediaLoading ? <p>Loading media…</p> : media.length ? (\n                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12, marginTop: 12 }}>\n                  {media.map(asset => (\n                    <div key={asset._id} style={{ border: '1px solid #e5e5e5', borderRadius: 10, overflow: 'hidden' }}>\n                      <img src={asset.url} alt={asset.originalName} style={{ width: '100%', height: 100, objectFit: 'cover', display: 'block' }} />\n                      <div style={{ padding: 8, display: 'grid', gap: 6 }}>\n                        <small style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{asset.originalName}</small>\n                        <div style={{ display: 'flex', gap: 6 }}>\n                          <button type="button" className="secondary-button" onClick={() => selectHeroImage(asset.url)}>Use for hero</button>\n                          <button type="button" className="secondary-button" onClick={() => void deleteMedia(asset._id)}>Delete</button>\n                        </div>\n                      </div>\n                    </div>\n                  ))}\n                </div>\n              ) : <p>No uploaded images yet.</p>}\n            </div>
+            <label className="field-control"><span>Hero image URL (optional)</span><input type="url" value={draft.hero.backgroundImageUrl} onChange={event => updateHero('backgroundImageUrl', event.target.value)} placeholder="https://…" /></label>
+            <div className="field-control" style={{ gridColumn: '1 / -1' }}>
+              <span>Media Library</span>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                <label className="secondary-button" style={{ cursor: mediaUploading ? 'wait' : 'pointer' }}>
+                  {mediaUploading ? 'Uploading…' : 'Upload image'}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" disabled={mediaUploading} hidden onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void uploadMedia(file); }} />
+                </label>
+                <small>JPG, PNG, or WebP · max 5 MB</small>
+              </div>
+              {mediaLoading ? <p>Loading media…</p> : media.length ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12, marginTop: 12 }}>
+                  {media.map(asset => (
+                    <div key={asset._id} style={{ border: '1px solid #e5e5e5', borderRadius: 10, overflow: 'hidden' }}>
+                      <img src={asset.url} alt={asset.originalName} style={{ width: '100%', height: 100, objectFit: 'cover', display: 'block' }} />
+                      <div style={{ padding: 8, display: 'grid', gap: 6 }}>
+                        <small style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{asset.originalName}</small>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button type="button" className="secondary-button" onClick={() => selectHeroImage(asset.url)}>Use for hero</button>
+                          <button type="button" className="secondary-button" onClick={() => void deleteMedia(asset._id)}>Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : <p>No uploaded images yet.</p>}
+            </div>
           </div>
         </section>
 
