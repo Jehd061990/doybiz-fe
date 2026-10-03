@@ -26,6 +26,12 @@ const sitePayload = {
 const branches = [{ id: 'branch-1', name: 'Main Branch', address: 'Davao City', contactNumber: '09170000000' }];
 const services = [{ id: 'service-1', name: 'Haircut', description: 'Classic haircut', price: 500, durationMinutes: 60, branchId: 'branch-1', imageUrl: null }];
 
+const mockResponse = (payload: unknown, status = 200) => ({
+  ok: status >= 200 && status < 300,
+  status,
+  json: async () => payload,
+});
+
 function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page' } = {}) {
   const currentWebsite = {
     ...website,
@@ -35,19 +41,19 @@ function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page' } = {}) {
   const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
     const url = String(input);
     if (url.includes('/api/public/site')) {
-      return new Response(JSON.stringify({ ...sitePayload, site: { ...sitePayload.site, website: currentWebsite } }), { status: 200 });
+      return mockResponse({ ...sitePayload, site: { ...sitePayload.site, website: currentWebsite } });
     }
     if (url.includes('/api/public/branches')) {
-      return new Response(JSON.stringify({ success: true, branches }), { status: 200 });
+      return mockResponse({ success: true, branches });
     }
     if (url.includes('/api/public/services')) {
-      return new Response(JSON.stringify({ success: true, services }), { status: 200 });
+      return mockResponse({ success: true, services });
     }
     if (url.includes('/api/public/staff')) {
-      return new Response(JSON.stringify({ success: true, staff: [] }), { status: 200 });
+      return mockResponse({ success: true, staff: [] });
     }
     if (url.includes('/api/public/availability')) {
-      return new Response(JSON.stringify({
+      return mockResponse({
         success: true,
         availability: {
           branch: { id: 'branch-1', name: 'Main Branch' },
@@ -55,9 +61,9 @@ function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page' } = {}) {
           date: '2099-01-01',
           slots: [{ time: '10:00', staffIds: ['staff-1'] }],
         },
-      }), { status: 200 });
+      });
     }
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    return mockResponse({ success: true });
   });
 
   Object.defineProperty(global, 'fetch', {
