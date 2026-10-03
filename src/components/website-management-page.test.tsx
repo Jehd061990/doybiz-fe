@@ -88,7 +88,7 @@ describe('WebsiteManagementPage', () => {
 
   it('keeps edits local until Save Draft and sends the edited configuration', async () => {
     await renderWebsiteManagementPage();
-    const headline = screen.getByLabelText('Headline');
+    const headline = screen.getByRole('textbox', { name: 'Headline' });
 
     fireEvent.change(headline, { target: { value: 'New salon headline' } });
     expect(headline).toHaveValue('New salon headline');
