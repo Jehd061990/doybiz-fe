@@ -109,16 +109,25 @@ describe('WebsiteManagementPage', () => {
     expect(mockPublish).not.toHaveBeenCalled();
   });
 
-  it('publishes through the dedicated publish action without sending editable fields', async () => {
+  it('publishes the current draft state before the dedicated publish action', async () => {
     await renderWebsiteManagementPage();
+    const headline = screen.getByRole('textbox', { name: 'Headline' });
+    fireEvent.change(headline, { target: { value: 'Published headline' } });
+
     fireEvent.click(screen.getByRole('button', { name: 'Publish' }));
 
-    await waitFor(() => expect(mockPublish).toHaveBeenCalledWith({
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      url: '/website',
+      method: 'put',
+      values: expect.objectContaining({
+        hero: expect.objectContaining({ title: 'Published headline' }),
+      }),
+    })));
+    expect(mockPublish).toHaveBeenCalledWith({
       url: '/website/publish',
       method: 'post',
       values: {},
-    }));
-    expect(mockMutate).not.toHaveBeenCalled();
+    });
   });
 
   it('reorders and removes a section, then adds it back before saving', async () => {
