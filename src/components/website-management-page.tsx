@@ -187,7 +187,11 @@ export function WebsiteManagementPage() {
 
   async function publish() {
     setError(''); setMessage('');
+    if (!draft) return;
     try {
+      // Publish the exact draft currently being edited. This keeps Preview Draft
+      // and Publish in sync even when the user has not clicked Save Draft first.
+      await mutateAsync({ url: '/website', method: 'put', values: draft });
       await publishAsync({ url: '/website/publish', method: 'post', values: {} });
       setMessage('Website changes are now published.');
       await query.query.refetch();
