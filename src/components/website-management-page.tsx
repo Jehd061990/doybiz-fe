@@ -43,6 +43,7 @@ export function WebsiteManagementPage() {
 
   async function saveDraft() {
     setError(''); setMessage('');
+    if (!draft) return;
     try {
       await mutateAsync({ url: '/website', method: 'put', values: draft });
       setMessage('Draft saved. Publish it when you are ready to make the changes live.');
