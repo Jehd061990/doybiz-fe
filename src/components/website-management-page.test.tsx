@@ -140,7 +140,6 @@ describe('WebsiteManagementPage', () => {
     })));
   });
 
-
   it('edits section content from its builder card and keeps the change in draft', async () => {
     await renderWebsiteManagementPage();
 
@@ -181,6 +180,32 @@ describe('WebsiteManagementPage', () => {
     fireEvent.click(within(servicesCard!).getByRole('checkbox', { name: /Enabled/i }));
 
     expect(within(servicesCard!).getByText('Hidden')).toBeInTheDocument();
+  });
+
+  it('preserves section content when a section is removed and added back', async () => {
+    await renderWebsiteManagementPage();
+
+    fireEvent.change(screen.getByLabelText('Services title'), { target: { value: 'Our signature services' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+
+    expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add Services' }));
+
+    expect(screen.getByLabelText('Services title')).toHaveValue('Our signature services');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      values: expect.objectContaining({
+        sectionOrder: expect.arrayContaining(['SERVICES']),
+        sections: expect.objectContaining({
+          services: expect.objectContaining({
+            enabled: true,
+            title: 'Our signature services',
+          }),
+        }),
+      }),
+    })));
   });
 
   it('surfaces a Save Draft failure', async () => {
