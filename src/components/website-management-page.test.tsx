@@ -33,6 +33,11 @@ jest.mock('@refinedev/core', () => ({
 }));
 
 describe('WebsiteManagementPage', () => {
+  async function renderWebsiteManagementPage() {
+    await renderWebsiteManagementPage();
+    await waitFor(() => expect(screen.getByText('No uploaded images yet.')).toBeInTheDocument());
+  }
+
   beforeEach(() => {
     jest.spyOn(window, 'open').mockImplementation(() => null);
     Object.defineProperty(global, 'fetch', {
@@ -52,7 +57,7 @@ describe('WebsiteManagementPage', () => {
   });
 
   it('renders the Website CMS editor', () => {
-    render(<WebsiteManagementPage />);
+    await renderWebsiteManagementPage();
     expect(screen.getByRole('heading', { name: 'Website' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Branding' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Hero section' })).toBeInTheDocument();
@@ -69,7 +74,7 @@ describe('WebsiteManagementPage', () => {
   });
 
   it('previews the current draft locally without saving or publishing', () => {
-    render(<WebsiteManagementPage />);
+    await renderWebsiteManagementPage();
     const headline = screen.getByLabelText('Headline');
     fireEvent.change(headline, { target: { value: 'Preview headline' } });
 
@@ -82,7 +87,7 @@ describe('WebsiteManagementPage', () => {
   });
 
   it('keeps edits local until Save Draft and sends the edited configuration', async () => {
-    render(<WebsiteManagementPage />);
+    await renderWebsiteManagementPage();
     const headline = screen.getByLabelText('Headline');
 
     fireEvent.change(headline, { target: { value: 'New salon headline' } });
@@ -105,7 +110,7 @@ describe('WebsiteManagementPage', () => {
   });
 
   it('publishes through the dedicated publish action without sending editable fields', async () => {
-    render(<WebsiteManagementPage />);
+    await renderWebsiteManagementPage();
     fireEvent.click(screen.getByRole('button', { name: 'Publish' }));
 
     await waitFor(() => expect(mockPublish).toHaveBeenCalledWith({
@@ -117,7 +122,7 @@ describe('WebsiteManagementPage', () => {
   });
 
   it('reorders and removes a section, then adds it back before saving', async () => {
-    render(<WebsiteManagementPage />);
+    await renderWebsiteManagementPage();
 
     const heroRow = screen.getByText('1. Hero').parentElement!;
     fireEvent.click(within(heroRow).getByRole('button', { name: 'Move down' }));
@@ -137,7 +142,7 @@ describe('WebsiteManagementPage', () => {
 
   it('surfaces a Save Draft failure', async () => {
     mockMutate.mockRejectedValueOnce(new Error('Save failed'));
-    render(<WebsiteManagementPage />);
+    await renderWebsiteManagementPage();
 
     fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
 
