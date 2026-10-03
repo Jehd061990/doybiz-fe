@@ -34,7 +34,7 @@ jest.mock('@refinedev/core', () => ({
 
 describe('WebsiteManagementPage', () => {
   async function renderWebsiteManagementPage() {
-    await renderWebsiteManagementPage();
+    render(<WebsiteManagementPage />);
     await waitFor(() => expect(screen.getByText('No uploaded images yet.')).toBeInTheDocument());
   }
 
