@@ -14,6 +14,7 @@ type Organization = {
 };
 
 type WebsiteValue = {
+  sectionOrder: Array<'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT'>;
   branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
   bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
