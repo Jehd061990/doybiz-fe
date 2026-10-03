@@ -115,6 +115,9 @@ describe('ClientLandingPage', () => {
     expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#contact');
     expect(screen.queryByRole('heading', { name: 'Test title' })).not.toBeInTheDocument();
     expect(screen.queryByText('Services & pricing')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '10:00' })).toBeInTheDocument();
+    });
   });
 
   it('opens the booking modal when the CTA mode is modal', async () => {
@@ -159,6 +162,8 @@ describe('ClientLandingPage', () => {
       expect(requests.some(url => url.includes('/api/public/availability?') && url.includes('tenant=onepiecesalon'))).toBe(true);
     });
 
-    expect(screen.getByRole('dialog', { name: 'Book an appointment' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '10:00' })).toBeInTheDocument();
+    });
   });
 });
