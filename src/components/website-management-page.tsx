@@ -15,7 +15,7 @@ type WebsiteValue = {
   footer: { poweredByText: string };
 };
 
-type WebsiteResponse = { success: true; draft: WebsiteValue; published: WebsiteValue; publishedAt: string | null };
+type WebsiteResponse = { success: true; organizationSlug: string | null; draft: WebsiteValue; published: WebsiteValue; publishedAt: string | null };
 
 const clone = (value: WebsiteValue): WebsiteValue => {
   const cloned = JSON.parse(JSON.stringify(value)) as WebsiteValue & { bookingCta?: Partial<WebsiteValue['bookingCta']> };
@@ -52,10 +52,15 @@ export function WebsiteManagementPage() {
   const updateSection = (key: keyof WebsiteValue['sections'], field: 'enabled' | 'eyebrow' | 'title', value: boolean | string) =>
     setDraft(current => current ? ({ ...current, sections: { ...current.sections, [key]: { ...current.sections[key], [field]: value } } }) : current);
 
+  const publicTenantQuery = query.result.data?.organizationSlug
+    ? `?tenant=${encodeURIComponent(query.result.data.organizationSlug)}`
+    : '';
+  const liveWebsiteHref = publicTenantQuery ? `/site${publicTenantQuery}` : '/site';
+
   function previewDraft() {
     if (typeof window === 'undefined' || !draft) return;
     window.localStorage.setItem('doybiz:website-preview-draft', JSON.stringify(draft));
-    window.open('/site?preview=draft', '_blank', 'noopener,noreferrer');
+    window.open(`/site${publicTenantQuery}${publicTenantQuery ? '&' : '?'}preview=draft`, '_blank', 'noopener,noreferrer');
   }
 
   async function saveDraft() {
@@ -91,7 +96,7 @@ export function WebsiteManagementPage() {
         </div>
         <div className="form-actions">
           <button className="secondary-button" type="button" onClick={previewDraft} disabled={saving}>Preview draft</button>
-          <a className="secondary-button" href="/site" target="_blank" rel="noreferrer">Live website</a>
+          <a className="secondary-button" href={liveWebsiteHref} target="_blank" rel="noreferrer">Live website</a>
           <button className="secondary-button" type="button" onClick={saveDraft} disabled={saving}>{mutation.isPending ? 'Saving…' : 'Save draft'}</button>
           <button className="primary-button" type="button" onClick={publish} disabled={saving}>{publishMutation.isPending ? 'Publishing…' : 'Publish'}</button>
         </div>
