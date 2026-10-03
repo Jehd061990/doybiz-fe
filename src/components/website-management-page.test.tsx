@@ -130,7 +130,7 @@ describe('WebsiteManagementPage', () => {
 
     await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
       values: expect.objectContaining({
-        sectionOrder: ['SERVICES', 'HERO', 'BRANCHES', 'CONTACT'],
+        sectionOrder: ['HERO', 'BRANCHES', 'CONTACT', 'SERVICES'],
       }),
     })));
   });
