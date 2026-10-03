@@ -121,7 +121,7 @@ describe('WebsiteManagementPage', () => {
 
     const heroRow = screen.getByText('1. Hero').parentElement!;
     fireEvent.click(within(heroRow).getByRole('button', { name: 'Move down' }));
-    const servicesRow = screen.getByText('2. Services').parentElement!;
+    const servicesRow = screen.getByText('1. Services').parentElement!;
     fireEvent.click(within(servicesRow).getByRole('button', { name: 'Remove' }));
     expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Add Services' }));
