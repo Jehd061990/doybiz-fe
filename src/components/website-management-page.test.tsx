@@ -75,7 +75,7 @@ describe('WebsiteManagementPage', () => {
 
   it('previews the current draft locally without saving or publishing', async () => {
     await renderWebsiteManagementPage();
-    const headline = screen.getByLabelText('Headline');
+    const headline = screen.getByRole('textbox', { name: 'Headline' });
     fireEvent.change(headline, { target: { value: 'Preview headline' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'Preview draft' }));
@@ -126,7 +126,7 @@ describe('WebsiteManagementPage', () => {
 
     const heroRow = screen.getByRole('button', { name: 'Collapse 1. Hero' }).parentElement!;
     fireEvent.click(within(heroRow).getByRole('button', { name: 'Move down' }));
-    const servicesRow = screen.getByRole('button', { name: 'Collapse 2. Services' }).parentElement!;
+    const servicesRow = screen.getByRole('button', { name: 'Collapse 1. Services' }).parentElement!;
     fireEvent.click(within(servicesRow).getByRole('button', { name: 'Remove' }));
     expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Add Services' }));
@@ -180,7 +180,7 @@ describe('WebsiteManagementPage', () => {
     expect(servicesCard).toBeTruthy();
     fireEvent.click(within(servicesCard!).getByRole('checkbox', { name: /Enabled/i }));
 
-    expect(within(servicesCard!).getByLabelText('Hidden')).toBeInTheDocument();
+    expect(within(servicesCard!).getByText('Hidden')).toBeInTheDocument();
   });
 
   it('surfaces a Save Draft failure', async () => {
