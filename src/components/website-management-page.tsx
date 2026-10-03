@@ -17,7 +17,17 @@ type WebsiteValue = {
 
 type WebsiteResponse = { success: true; draft: WebsiteValue; published: WebsiteValue; publishedAt: string | null };
 
-const clone = (value: WebsiteValue): WebsiteValue => JSON.parse(JSON.stringify(value));
+const clone = (value: WebsiteValue): WebsiteValue => {
+  const cloned = JSON.parse(JSON.stringify(value)) as WebsiteValue & { bookingCta?: Partial<WebsiteValue['bookingCta']> };
+  return {
+    ...cloned,
+    bookingCta: {
+      enabled: cloned.bookingCta?.enabled ?? true,
+      label: cloned.bookingCta?.label || 'Book an appointment',
+      mode: cloned.bookingCta?.mode === 'page' ? 'page' : 'modal',
+    },
+  };
+};
 
 export function WebsiteManagementPage() {
   const query = useCustom<WebsiteResponse>({ url: '/website', method: 'get' });
