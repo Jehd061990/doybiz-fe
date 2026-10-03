@@ -41,6 +41,12 @@ export function WebsiteManagementPage() {
   const updateSection = (key: keyof WebsiteValue['sections'], field: 'enabled' | 'eyebrow' | 'title', value: boolean | string) =>
     setDraft(current => current ? ({ ...current, sections: { ...current.sections, [key]: { ...current.sections[key], [field]: value } } }) : current);
 
+  function previewDraft() {
+    if (typeof window === 'undefined' || !draft) return;
+    window.localStorage.setItem('doybiz:website-preview-draft', JSON.stringify(draft));
+    window.open('/site?preview=draft', '_blank', 'noopener,noreferrer');
+  }
+
   async function saveDraft() {
     setError(''); setMessage('');
     if (!draft) return;
@@ -73,7 +79,8 @@ export function WebsiteManagementPage() {
           <p className="management-description">Customize your public landing page without changing your booking system.</p>
         </div>
         <div className="form-actions">
-          <a className="secondary-button" href="/site" target="_blank" rel="noreferrer">Preview website</a>
+          <button className="secondary-button" type="button" onClick={previewDraft} disabled={saving}>Preview draft</button>
+          <a className="secondary-button" href="/site" target="_blank" rel="noreferrer">Live website</a>
           <button className="secondary-button" type="button" onClick={saveDraft} disabled={saving}>{mutation.isPending ? 'Saving…' : 'Save draft'}</button>
           <button className="primary-button" type="button" onClick={publish} disabled={saving}>{publishMutation.isPending ? 'Publishing…' : 'Publish'}</button>
         </div>
