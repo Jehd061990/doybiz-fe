@@ -77,7 +77,7 @@ describe('WebsiteManagementPage', () => {
 
   it('previews the current draft locally without saving or publishing', async () => {
     await renderWebsiteManagementPage();
-    const headline = screen.getByRole('textbox', { name: 'Headline' });
+    const headline = screen.getByRole('textbox', { name: 'Hero headline' });
     fireEvent.change(headline, { target: { value: 'Preview headline' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'Preview draft' }));
@@ -90,7 +90,7 @@ describe('WebsiteManagementPage', () => {
 
   it('keeps edits local until Save Draft and sends the edited configuration', async () => {
     await renderWebsiteManagementPage();
-    const headline = screen.getByRole('textbox', { name: 'Headline' });
+    const headline = screen.getByRole('textbox', { name: 'Hero headline' });
 
     fireEvent.change(headline, { target: { value: 'New salon headline' } });
     expect(headline).toHaveValue('New salon headline');
@@ -113,7 +113,7 @@ describe('WebsiteManagementPage', () => {
 
   it('publishes the current draft state before the dedicated publish action', async () => {
     await renderWebsiteManagementPage();
-    const headline = screen.getByRole('textbox', { name: 'Headline' });
+    const headline = screen.getByRole('textbox', { name: 'Hero headline' });
     fireEvent.change(headline, { target: { value: 'Published headline' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'Publish' }));
