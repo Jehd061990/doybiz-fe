@@ -4,6 +4,9 @@ import { WebsiteManagementPage } from './website-management-page';
 const mockRefetch = jest.fn();
 const mockMutate = jest.fn().mockResolvedValue({});
 const mockPublish = jest.fn().mockResolvedValue({});
+const mockMutation = jest.fn((args: { url: string; method: string; values: unknown }) =>
+  args.url === '/website' ? mockMutate(args) : mockPublish(args),
+);
 
 const draft = {
   branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
@@ -16,28 +19,23 @@ const draft = {
   footer: { poweredByText: 'Powered by DoyBiz' },
 };
 
-let mutationCall = 0;
-
 jest.mock('@refinedev/core', () => ({
   useCustom: () => ({
     result: { data: { success: true, draft, published: { ...draft }, publishedAt: null } },
     query: { isLoading: false, isError: false, refetch: mockRefetch },
   }),
-  useCustomMutation: () => {
-    mutationCall += 1;
-    return {
-      mutateAsync: mutationCall === 1 ? mockMutate : mockPublish,
-      mutation: { isPending: false },
-    };
-  },
+  useCustomMutation: () => ({
+    mutateAsync: mockMutation,
+    mutation: { isPending: false },
+  }),
 }));
 
 describe('WebsiteManagementPage', () => {
   beforeEach(() => {
-    mutationCall = 0;
     mockRefetch.mockReset();
     mockMutate.mockReset().mockResolvedValue({});
     mockPublish.mockReset().mockResolvedValue({});
+    mockMutation.mockClear();
   });
 
   it('renders the Website CMS editor', () => {
