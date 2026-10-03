@@ -107,6 +107,23 @@ describe('WebsiteManagementPage', () => {
     expect(mockMutate).not.toHaveBeenCalled();
   });
 
+  it('reorders and removes a section, then adds it back before saving', async () => {
+    render(<WebsiteManagementPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Move down' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+    expect(screen.getByRole('button', { name: 'Add Services' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add Services' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      values: expect.objectContaining({
+        sectionOrder: ['SERVICES', 'HERO', 'BRANCHES', 'CONTACT'],
+      }),
+    })));
+  });
+
   it('surfaces a Save Draft failure', async () => {
     mockMutate.mockRejectedValueOnce(new Error('Save failed'));
     render(<WebsiteManagementPage />);
