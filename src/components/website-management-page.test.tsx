@@ -9,6 +9,7 @@ const mockMutation = jest.fn((args: { url: string; method: string; values: unkno
 );
 
 const draft = {
+  sectionOrder: ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
   branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
   hero: { eyebrow: 'WELCOME', title: 'Test title', description: 'Test description', cardLabel: 'ONLINE RESERVATIONS', cardTitle: 'Choose your service.', backgroundImageUrl: '' },
   bookingCta: { enabled: true, label: 'Book an appointment', mode: 'modal' },
