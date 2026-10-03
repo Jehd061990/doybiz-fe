@@ -83,8 +83,12 @@ describe('WebsiteManagementPage', () => {
     expect(mockMutate).not.toHaveBeenCalled();
   });
 
-  it('shows loading and error states', () => {
-    const refined = require('@refinedev/core') as { useCustom: jest.Mock };
-    expect(refined.useCustom).toBeDefined();
+  it('surfaces a Save Draft failure', async () => {
+    mockMutate.mockRejectedValueOnce(new Error('Save failed'));
+    render(<WebsiteManagementPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Save failed');
   });
 });
