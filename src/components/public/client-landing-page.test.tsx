@@ -130,6 +130,9 @@ describe('ClientLandingPage', () => {
 
     expect(screen.getByRole('dialog', { name: 'Book an appointment' })).toBeInTheDocument();
     expect(screen.getByText('1 Schedule')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '10:00' })).toBeInTheDocument();
+    });
   });
 
   it('navigates to the dedicated booking page when the CTA mode is page', async () => {
@@ -150,6 +153,9 @@ describe('ClientLandingPage', () => {
 
     await screen.findByRole('heading', { name: 'Book an appointment' });
     expect(screen.queryByRole('button', { name: 'Book now' })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '10:00' })).toBeInTheDocument();
+    });
   });
 
   it('loads availability after selecting the default booking service', async () => {
