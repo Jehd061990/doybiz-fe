@@ -115,12 +115,7 @@ describe('ClientLandingPage', () => {
   it('navigates to the dedicated booking page when the CTA mode is page', async () => {
     mockPublicApi({ bookingCtaMode: 'page' });
 
-    const assign = jest.fn();
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      value: { ...originalLocation, assign },
-    });
+    const assign = jest.spyOn(window.location, 'assign').mockImplementation(() => {});
 
     render(<ClientLandingPage developmentTenant="onepiecesalon" />);
 
