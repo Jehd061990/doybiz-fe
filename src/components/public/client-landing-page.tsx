@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ServiceImage } from '@/components/services/service-image';
 import styles from './client-landing-page.module.css';
 
@@ -12,9 +12,20 @@ type Organization = {
   address?: string;
 };
 
+type WebsiteValue = {
+  branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
+  hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
+  sections: {
+    services: { enabled: boolean; eyebrow: string; title: string };
+    branches: { enabled: boolean; eyebrow: string; title: string };
+    contact: { enabled: boolean; eyebrow: string; title: string };
+  };
+  footer: { poweredByText: string };
+};
+
 type SiteResponse = {
   success: true;
-  site: { organization: Organization; primaryDomain: string | null };
+  site: { organization: Organization; primaryDomain: string | null; website: WebsiteValue };
 };
 
 type Branch = {
@@ -250,40 +261,47 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   }
 
   const organization = site.organization;
+  const website = site.website;
   const landingPageHref = tenantQuery ? `/site${tenantQuery}` : '/site';
+  const themeStyle = {
+    '--site-primary': website.branding.primaryColor,
+    '--site-accent': website.branding.accentColor,
+    '--site-background': website.branding.backgroundColor,
+    '--site-text': website.branding.textColor,
+  } as CSSProperties;
 
   return (
-    <main className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}>
+    <main style={themeStyle} className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}>
       <header className={styles.header}>
         <a href={bookingOnly ? `${landingPageHref}#top` : '#top'} className={styles.brand}>{organization.name}</a>
         <nav className={styles.nav}>
-          <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>
-          <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>
-          <a href={bookingOnly ? `${landingPageHref}#contact` : '#contact'}>Contact</a>
+          {website.sections.services.enabled && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
+          {website.sections.branches.enabled && <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>}
+          {website.sections.contact.enabled && <a href={bookingOnly ? `${landingPageHref}#contact` : '#contact'}>Contact</a>}
           <button type="button" className={styles.navButton} onClick={() => openBooking()}>Book now</button>
         </nav>
       </header>
 
       {!bookingOnly && <section id="top" className={styles.hero}>
         <div className={styles.heroCopy}>
-          <span className={styles.eyebrow}>WELCOME</span>
-          <h1>Quality service, made easy to book.</h1>
-          <p>Explore our services, choose a branch, and reserve your preferred schedule online.</p>
+          <span className={styles.eyebrow}>{website.hero.eyebrow}</span>
+          <h1>{website.hero.title}</h1>
+          <p>{website.hero.description}</p>
           <div className={styles.heroActions}>
             <button type="button" className={styles.primaryButton} onClick={() => openBooking()}>Book an appointment</button>
             <a href="#services" className={styles.secondaryButton}>View services</a>
           </div>
         </div>
-        <div className={styles.heroCard}>
+        <div className={styles.heroCard} style={website.hero.backgroundImageUrl ? { backgroundImage: `linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.35)), url(${website.hero.backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
           <div className={styles.heroOrb} />
-          <span>ONLINE RESERVATIONS</span>
-          <strong>Choose your service.<br />Pick your schedule.</strong>
+          <span>{website.hero.cardLabel}</span>
+          <strong>{website.hero.cardTitle.split('\\n').map((line, index) => <span key={line + index}>{index ? <br /> : null}{line}</span>)}</strong>
         </div>
       </section>}
 
-      {!bookingOnly && <section id="services" className={styles.section}>
+      {!bookingOnly && website.sections.services.enabled && <section id="services" className={styles.section}>
         <div className={styles.sectionHeading}>
-          <div><span className={styles.eyebrow}>OUR SERVICES</span><h2>Services & pricing</h2></div>
+          <div><span className={styles.eyebrow}>{website.sections.services.eyebrow}</span><h2>{website.sections.services.title}</h2></div>
           {branches.length > 1 && (
             <select value={selectedBranch} onChange={event => setSelectedBranch(event.target.value)} className={styles.select}>
               <option value="">All branches</option>
@@ -307,8 +325,8 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         ) : <p className={styles.empty}>No services are currently available.</p>}
       </section>}
 
-      {!bookingOnly && <section id="branches" className={styles.sectionAlt}>
-        <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>LOCATIONS</span><h2>Visit us</h2></div></div>
+      {!bookingOnly && website.sections.branches.enabled && <section id="branches" className={styles.sectionAlt}>
+        <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>{website.sections.branches.eyebrow}</span><h2>{website.sections.branches.title}</h2></div></div>
         <div className={styles.branchGrid}>
           {branches.map(branch => (
             <article className={styles.branchCard} key={branch.id}>
@@ -321,8 +339,8 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         </div>
       </section>}
 
-      {!bookingOnly && <section id="contact" className={styles.contactSection}>
-        <div><span className={styles.eyebrow}>GET IN TOUCH</span><h2>Ready when you are.</h2><p>{organization.address}</p></div>
+      {!bookingOnly && website.sections.contact.enabled && <section id="contact" className={styles.contactSection}>
+        <div><span className={styles.eyebrow}>{website.sections.contact.eyebrow}</span><h2>{website.sections.contact.title}</h2><p>{organization.address}</p></div>
         <div className={styles.contactDetails}>
           {organization.phone && <a href={`tel:${organization.phone}`}>{organization.phone}</a>}
           {organization.email && <a href={`mailto:${organization.email}`}>{organization.email}</a>}
@@ -330,7 +348,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         </div>
       </section>}
 
-      {!bookingOnly && <footer className={styles.footer}><span>{organization.name}</span><span>Powered by DoyBiz</span></footer>}
+      {!bookingOnly && <footer className={styles.footer}><span>{organization.name}</span><span>{website.footer.poweredByText}</span></footer>}
 
       {bookingOpen && (
         <div className={bookingOnly ? styles.bookingPageContainer : styles.modalBackdrop} role="presentation" onMouseDown={() => !bookingOnly && setBookingOpen(false)}>
