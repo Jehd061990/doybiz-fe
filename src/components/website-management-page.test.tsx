@@ -140,6 +140,49 @@ describe('WebsiteManagementPage', () => {
     })));
   });
 
+
+  it('edits section content from its builder card and keeps the change in draft', async () => {
+    await renderWebsiteManagementPage();
+
+    const servicesCard = screen.getByRole('button', { name: 'Collapse 2. Services' }).parentElement?.parentElement;
+    expect(servicesCard).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText('Services title'), { target: { value: 'Our signature services' } });
+    expect(screen.getByLabelText('Services title')).toHaveValue('Our signature services');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      values: expect.objectContaining({
+        sections: expect.objectContaining({
+          services: expect.objectContaining({ title: 'Our signature services' }),
+        }),
+      }),
+    })));
+  });
+
+  it('collapses and expands section content without changing the draft', async () => {
+    await renderWebsiteManagementPage();
+
+    expect(screen.getByLabelText('Services title')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse 2. Services' }));
+    expect(screen.queryByLabelText('Services title')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit 2. Services' }));
+    expect(screen.getByLabelText('Services title')).toBeInTheDocument();
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
+
+  it('shows disabled sections as hidden in the builder', async () => {
+    await renderWebsiteManagementPage();
+
+    const servicesCard = screen.getByRole('button', { name: 'Collapse 2. Services' }).parentElement?.parentElement;
+    expect(servicesCard).toBeTruthy();
+    fireEvent.click(within(servicesCard!).getByRole('checkbox', { name: /Enabled/i }));
+
+    expect(within(servicesCard!).getByLabelText('Hidden')).toBeInTheDocument();
+  });
+
   it('surfaces a Save Draft failure', async () => {
     mockMutate.mockRejectedValueOnce(new Error('Save failed'));
     await renderWebsiteManagementPage();
