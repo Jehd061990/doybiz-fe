@@ -50,7 +50,7 @@ export function WebsiteManagementPage() {
     async function loadMedia() {
       setMediaLoading(true);
       try {
-        const response = await fetch('/api/backend/website/media', { cache: 'no-store' });
+        const response = await fetch('/api/backend/media', { cache: 'no-store' });
         const body = await response.json();
         if (!response.ok) throw new Error(body.message || 'Unable to load media library.');
         if (!cancelled) setMedia(Array.isArray(body.assets) ? body.assets : []);
@@ -75,7 +75,7 @@ export function WebsiteManagementPage() {
     formData.append('file', file);
     setMediaUploading(true);
     try {
-      const response = await fetch('/api/backend/website/media', { method: 'POST', body: formData });
+      const response = await fetch('/api/backend/media', { method: 'POST', body: formData });
       const body = await response.json();
       if (!response.ok || !body.asset) throw new Error(body.message || 'Unable to upload image.');
       setMedia(current => [body.asset as MediaAsset, ...current]);
@@ -96,7 +96,7 @@ export function WebsiteManagementPage() {
     setError('');
     setMessage('');
     try {
-      const response = await fetch(`/api/backend/website/media/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const response = await fetch(`/api/backend/media/${encodeURIComponent(id)}`, { method: 'DELETE' });
       const body = await response.json();
       if (!response.ok) throw new Error(body.message || 'Unable to delete image.');
       setMedia(current => current.filter(asset => asset._id !== id));
