@@ -15,7 +15,7 @@ type WebsiteValue = {
   footer: { poweredByText: string };
 };
 
-type WebsiteResponse = { success: true; organizationSlug: string | null; draft: WebsiteValue; published: WebsiteValue; publishedAt: string | null };
+type WebsiteResponse = { success: true; organizationSlug?: string | null; draft: WebsiteValue; published: WebsiteValue; publishedAt: string | null };
 
 const clone = (value: WebsiteValue): WebsiteValue => {
   const cloned = JSON.parse(JSON.stringify(value)) as WebsiteValue & { bookingCta?: Partial<WebsiteValue['bookingCta']> };
