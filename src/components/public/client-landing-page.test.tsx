@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ClientLandingPage } from './client-landing-page';
+import { navigateTo } from './navigation';
 
 const website = {
   branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
@@ -66,6 +67,10 @@ function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page' } = {}) {
   });
 }
 
+jest.mock('./navigation', () => ({
+  navigateTo: jest.fn(),
+}));
+
 jest.mock('@/components/services/service-image', () => ({
   ServiceImage: ({ alt }: { alt: string }) => <div data-testid="service-image">{alt}</div>,
 }));
@@ -121,14 +126,12 @@ describe('ClientLandingPage', () => {
   it('navigates to the dedicated booking page when the CTA mode is page', async () => {
     mockPublicApi({ bookingCtaMode: 'page' });
 
-    const assign = jest.spyOn(window.location, 'assign').mockImplementation(() => {});
-
     render(<ClientLandingPage developmentTenant="onepiecesalon" />);
 
     await screen.findByRole('heading', { name: 'Test title' });
     fireEvent.click(screen.getAllByRole('button', { name: 'Book now' })[0]);
 
-    expect(assign).toHaveBeenCalledWith('/site/book?tenant=onepiecesalon');
+    expect(navigateTo).toHaveBeenCalledWith('/site/book?tenant=onepiecesalon');
   });
 
   it('does not render a redundant booking CTA button inside the booking page navigation', async () => {
