@@ -287,6 +287,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   const landingPageHref = tenantQuery ? `/site${tenantQuery}` : '/site';
   const bookingPageHref = tenantQuery ? `/site/book${tenantQuery}` : '/site/book';
   const sectionOrderIndex = (key: 'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT') => website.sectionOrder?.indexOf(key) ?? -1;
+  const sectionVisible = (key: 'SERVICES' | 'BRANCHES' | 'CONTACT') => sectionOrderIndex(key) >= 0 && website.sections[key.toLowerCase() as keyof WebsiteValue['sections']].enabled;
   const handleBookingCta = () => {
     if (website.bookingCta.mode === 'page') {
       navigateTo(bookingPageHref);
@@ -306,9 +307,9 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
       <header className={styles.header} style={{ order: 0 }}>
         <a href={bookingOnly ? `${landingPageHref}#top` : '#top'} className={styles.brand}>{organization.name}</a>
         <nav className={styles.nav}>
-          {website.sections.services.enabled && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
-          {website.sections.branches.enabled && <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>}
-          {website.sections.contact.enabled && <a href={bookingOnly ? `${landingPageHref}#contact` : '#contact'}>Contact</a>}
+          {sectionVisible('SERVICES') && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
+          {sectionVisible('BRANCHES') && <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>}
+          {sectionVisible('CONTACT') && <a href={bookingOnly ? `${landingPageHref}#contact` : '#contact'}>Contact</a>}
           {website.bookingCta.enabled && !bookingOnly && <button type="button" className={styles.navButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
         </nav>
       </header>
@@ -330,7 +331,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         </div>
       </section>}
 
-      {!bookingOnly && website.sections.services.enabled && <section id="services" className={styles.section} style={{ order: sectionOrderIndex('SERVICES') + 1 }}>
+      {!bookingOnly && sectionVisible('SERVICES') && <section id="services" className={styles.section} style={{ order: sectionOrderIndex('SERVICES') + 1 }}>
         <div className={styles.sectionHeading}>
           <div><span className={styles.eyebrow}>{website.sections.services.eyebrow}</span><h2>{website.sections.services.title}</h2></div>
           {branches.length > 1 && (
@@ -356,7 +357,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         ) : <p className={styles.empty}>No services are currently available.</p>}
       </section>}
 
-      {!bookingOnly && website.sections.branches.enabled && <section id="branches" className={styles.sectionAlt} style={{ order: sectionOrderIndex('BRANCHES') + 1 }}>
+      {!bookingOnly && sectionVisible('BRANCHES') && <section id="branches" className={styles.sectionAlt} style={{ order: sectionOrderIndex('BRANCHES') + 1 }}>
         <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>{website.sections.branches.eyebrow}</span><h2>{website.sections.branches.title}</h2></div></div>
         <div className={styles.branchGrid}>
           {branches.map(branch => (
@@ -370,7 +371,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
         </div>
       </section>}
 
-      {!bookingOnly && website.sections.contact.enabled && <section id="contact" className={styles.contactSection} style={{ order: sectionOrderIndex('CONTACT') + 1 }}>
+      {!bookingOnly && sectionVisible('CONTACT') && <section id="contact" className={styles.contactSection} style={{ order: sectionOrderIndex('CONTACT') + 1 }}>
         <div><span className={styles.eyebrow}>{website.sections.contact.eyebrow}</span><h2>{website.sections.contact.title}</h2><p>{organization.address}</p></div>
         <div className={styles.contactDetails}>
           {organization.phone && <a href={`tel:${organization.phone}`}>{organization.phone}</a>}
