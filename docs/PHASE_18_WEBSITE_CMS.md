@@ -81,3 +81,16 @@ npm run build
 ```
 
 Then verify the public landing page and booking flow manually with a tenant query such as `/site?tenant=onepiecesalon` and the dedicated booking page.
+
+
+### Booking CTA customization
+
+The Website CMS now exposes organization-scoped booking CTA controls:
+
+- Show/hide the public booking CTA.
+- Customize the CTA label.
+- Choose between the existing homepage booking modal or the dedicated `/site/book` booking page.
+- Tenant query parameters are preserved when navigating to the dedicated booking page.
+- Draft Preview uses the current unsaved CTA configuration.
+- Publish is still required before the saved CTA configuration becomes live.
+- The underlying public booking APIs and reservation flow remain unchanged.
