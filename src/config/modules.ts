@@ -7,6 +7,7 @@ export const MODULE_REGISTRY = [
   { key: 'REPORTS', label: 'Reports', route: '/app/reports' },
   { key: 'STAFF', label: 'Staff', route: '/app/staff' },
   { key: 'BILLING', label: 'Billing', route: '/app/billing', allowedRoles: ['OWNER', 'MANAGER'] },
+  { key: 'WEBSITE', label: 'Website', route: '/app/website', allowedRoles: ['OWNER'] },
 ] as const;
 export type ModuleName = (typeof MODULE_REGISTRY)[number]['key'];
 export const MODULES: readonly ModuleName[] = MODULE_REGISTRY.map(module => module.key);
