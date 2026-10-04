@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteContext {
   params: Promise<{ path: string[] }>;
