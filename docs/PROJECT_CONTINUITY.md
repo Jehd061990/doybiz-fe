@@ -2471,3 +2471,37 @@ Local verification should be rerun after pulling this commit:
 - `npm run typecheck`
 - `npm test -- --runInBand`
 - `npm run build`
+
+
+## 22. Template Settings Save Persistence + Cinematic Contrast Fix
+
+User verification found two issues in the template customization foundation:
+
+- Modern Luxury **Natural** and **Cinematic** still looked too similar in the public hero.
+- Editing Template Settings and clicking **Save Draft** caused the fields to return to their default values after the CMS refetched the saved configuration.
+
+Fixes:
+
+- Frontend CMS now uses the saved draft returned by `PUT /website` immediately instead of relying on a follow-up refetch to restore the form state.
+- Backend `updateWebsiteDraft()` now explicitly sets and marks the full `draft` subdocument as modified before saving, making template-settings persistence explicit.
+- Modern Luxury cinematic treatment was strengthened with lower brightness/saturation, higher contrast, stronger image zoom, and a stronger inset vignette so it is visually distinguishable from Natural.
+
+Verification still required locally:
+
+```bash
+git pull
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+Then manually verify:
+
+1. Select Modern Luxury.
+2. Change several Template Settings fields, including Image treatment → Cinematic.
+3. Click Save Draft.
+4. Confirm the fields remain unchanged after save.
+5. Reload the Website CMS and confirm the saved values remain.
+6. Preview Draft and compare Natural vs Cinematic using a real hero image.
+7. Publish and confirm the live site preserves the selected settings.
+8. Confirm `/site/book` and the shared booking flow remain unchanged.
