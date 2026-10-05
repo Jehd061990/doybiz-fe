@@ -91,6 +91,39 @@ describe('WebsiteManagementPage', () => {
     draft.template = 'CLASSIC';
   });
 
+  it('edits selected template settings and keeps them in draft preview and save payload', async () => {
+    draft.template = 'MODERN_LUXURY';
+    await renderWebsiteManagementPage();
+
+    fireEvent.change(screen.getByLabelText('Hero composition'), { target: { value: 'split' } });
+    fireEvent.change(screen.getByLabelText('Image treatment'), { target: { value: 'cinematic' } });
+    fireEvent.click(screen.getByLabelText('Show hero badge'));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview draft' }));
+
+    const preview = JSON.parse(window.localStorage.getItem('doybiz:website-preview-draft') || '{}');
+    expect(preview.templateSettings.modernLuxury).toEqual(expect.objectContaining({
+      heroComposition: 'split',
+      imageTreatment: 'cinematic',
+      showHeroBadge: false,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      url: '/website',
+      method: 'put',
+      values: expect.objectContaining({
+        templateSettings: expect.objectContaining({
+          modernLuxury: expect.objectContaining({
+            heroComposition: 'split',
+            imageTreatment: 'cinematic',
+            showHeroBadge: false,
+          }),
+        }),
+      }),
+    })));
+    draft.template = 'CLASSIC';
+  });
+
   it('renders the Website CMS editor', async () => {
     await renderWebsiteManagementPage();
     expect(screen.getByRole('heading', { name: 'Website' })).toBeInTheDocument();
