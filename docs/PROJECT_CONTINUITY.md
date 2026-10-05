@@ -2141,3 +2141,97 @@ After this verification, the next Website CMS improvement should be template-spe
 Rule remains:
 
 **Inspect first. Extend second. Test third. Document fourth.**
+
+# 18. Website Template Selector Test/TypeScript Fix
+
+The first verification of the visual template selector exposed two implementation/test compatibility issues.
+
+## Issues found
+
+### 1. Preview Draft passed the click event into preview state
+
+The shared preview function now accepts an optional template key:
+
+`previewDraft(template?: WebsiteTemplateKey)`
+
+The existing top-level **Preview draft** button was still using:
+
+`onClick={previewDraft}`
+
+React therefore passed a `MouseEvent` as the template argument. This caused:
+
+- TypeScript `MouseEvent` vs `WebsiteTemplateKey` incompatibility.
+- `JSON.stringify()` circular-reference failure when the event object was written to localStorage.
+- The existing preview-draft regression test to fail.
+
+## Fix
+
+The button now explicitly invokes the function without arguments:
+
+`onClick={() => previewDraft()}`
+
+Template-specific preview buttons continue to use:
+
+`onClick={() => previewDraft(key)}`
+
+This keeps the preview API type-safe and preserves the safe temporary-template-preview behavior.
+
+### 2. Template radio accessible names changed with the visual-card UI
+
+The new visual selector has two radio inputs whose visible label is:
+
+`Use this template`
+
+The template name is displayed in the surrounding card/button, not as the radio's accessible name.
+
+Existing tests were still querying:
+
+- radio named `Classic`
+- radio named `Modern Luxury`
+
+Those queries no longer matched the actual accessible DOM.
+
+## Test fix
+
+`src/components/website-management-page.test.tsx` now queries the two template radios using:
+
+`getAllByRole('radio', { name: 'Use this template' })`
+
+and treats:
+
+- index 0 = Classic
+- index 1 = Modern Luxury
+
+The test still verifies the selected state, Modern Luxury preview payload, preview route, and Save Draft persistence.
+
+## Implementation files
+
+`src/components/website-management-page.tsx`
+
+`src/components/website-management-page.test.tsx`
+
+## Commits
+
+`429289912218a122df454d11493471459f77cc36`
+`fix(website): pass explicit preview callback`
+
+`ceb5b4c6ce4d6c106b567e07ec1f727204e585e5`
+`test(website): align template selector accessibility queries`
+
+## Verification status
+
+The fixes are committed to `main`.
+
+GitHub did not report workflow runs for the latest test-fix commit, so the local verification commands still need to be run before this milestone is marked fully verified.
+
+Required:
+
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+Then manually verify the visual template selector and both preview paths.
+
+**Inspect first. Extend second. Test third. Document fourth.**
