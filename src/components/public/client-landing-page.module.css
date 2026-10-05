@@ -218,3 +218,10 @@
 @media(prefers-reduced-motion:reduce){
   .luxuryThreeHero{opacity:.52}
 }
+
+/* Navigation brand */
+.brandMarkLogo{display:block;width:auto;height:30px;max-width:150px;object-fit:contain}
+.brandMarkText{display:inline-block}
+.luxuryBrand .brandMarkLogo{height:34px;max-width:170px}
+.minimalModernBrand .brandMarkLogo{height:30px;max-width:150px}
+@media(max-width:650px){.brandMarkLogo{height:26px;max-width:120px}.luxuryBrand .brandMarkLogo{height:28px;max-width:135px}.minimalModernBrand .brandMarkLogo{height:26px;max-width:120px}}
