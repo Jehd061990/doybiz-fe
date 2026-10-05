@@ -2235,3 +2235,141 @@ npm run build
 Then manually verify the visual template selector and both preview paths.
 
 **Inspect first. Extend second. Test third. Document fourth.**
+
+## 19. Template Customization Foundation
+
+### Completed
+
+The website template architecture now supports **template-specific presentation settings** without creating separate website content models for each template.
+
+Shared website content remains unchanged:
+- hero content
+- services
+- branches
+- contact
+- booking CTA
+- section order
+- branding
+- footer
+- booking engine/API/state
+
+Template presentation is now represented by `template` + `templateSettings`.
+
+### Template settings
+
+**Classic**
+- Hero alignment: left / centered
+- Navigation style: standard / minimal
+- Section spacing: comfortable / compact
+- Hero image position: center / top / bottom
+- CTA style: solid / outline
+
+**Modern Luxury**
+- Hero composition: full bleed / split
+- Navigation style: editorial / minimal
+- Section spacing: airy / compact
+- Image treatment: natural / cinematic
+- Hero overlay: soft / strong
+- Hero badge visibility
+
+These settings are stored in the same WebsiteConfig draft/published object, so switching templates does not duplicate or discard business content.
+
+### Backend changes
+
+Files:
+- `doybiz-be-dev/src/models/WebsiteConfig.ts`
+- `doybiz-be-dev/src/services/websiteService.ts`
+- `doybiz-be-dev/src/testPhase5.ts`
+
+Changes:
+- Added `WebsiteTemplateSettings`
+- Added `DEFAULT_WEBSITE_TEMPLATE_SETTINGS`
+- Added nested Mongoose schema for template settings
+- Added normalization for all template setting values
+- Added backward-compatible migration for existing website configs
+- Existing configs receive safe defaults instead of requiring manual migration
+- Phase 5 public-site test now verifies the default template settings contract
+
+Backend commits:
+- `fea922c845937464cb30342bc1cde98a21947ba3` — add template customization settings foundation
+- `073453f788cb4431c111da9cf84e8f779614b592` — normalize and migrate template settings
+- `10871a148ff16831212699d4e67da64e542ea756` — verify default template customization settings
+
+### Frontend changes
+
+Files:
+- `src/components/website-management-page.tsx`
+- `src/components/public/website-renderer.tsx`
+- `src/components/public/client-landing-page.module.css`
+- `src/components/website-management-page.test.tsx`
+
+Changes:
+- Added Template Settings CMS section below the template selector
+- Settings shown are specific to the currently selected template
+- Changes remain local until Save Draft
+- Preview Draft includes the current template settings without saving/publishing
+- Classic and Modern Luxury renderers consume the shared template settings
+- Added presentation variants for navigation, spacing, hero alignment/image positioning, CTA style, luxury composition, overlay strength, and hero badge visibility
+- Existing booking flow remains shared and unchanged
+- Existing template selector and safe preview behavior remain intact
+
+Frontend commits:
+- `a246219c771cc9ce4069587e4d8619369e4d03e6` — add template settings controls to CMS
+- `9d4e21d6c64fa6008333f6bf2fe62467ad5684de` — wire template settings into public renderer
+- `72113e2bc6425459cbdf42ebde3fa17b89a6c3e3` — style template customization variants
+- `d2e5f45f6a75f18223e9c238630fb2d2a9f6fce2` — cover template customization persistence
+- `c6660f4392da2b0767de8709a42336d3cdfc9164` — keep image treatment isolated from hero content
+- `473c95979ab2ca224fef7fe45461b9cc280b7c7a` — remove unused template image variable
+
+### Important architecture rule
+
+Do not introduce `classicHero`, `luxuryHero`, or separate template content models.
+
+The intended architecture remains:
+
+`WebsiteConfig`
+→ `template`
+→ `templateSettings`
+→ `WebsiteRenderer`
+→ selected template
+→ shared booking engine
+
+Template settings control presentation only; business data remains shared.
+
+### Verification status
+
+Automated tests were added for:
+- Modern Luxury settings editing
+- local draft preview containing the selected settings
+- Save Draft payload containing the selected settings
+- backend default settings contract
+
+GitHub connector access does not execute the project's local npm scripts, so local verification should be run after pulling both repos:
+
+```bash
+# Frontend
+git pull
+npm run typecheck
+npm test -- --runInBand
+npm run build
+
+# Backend
+git pull
+npm run build
+npm run test:phase5
+```
+
+### Next recommended task
+
+Manually verify both templates in the CMS and public site:
+1. Select Classic and change its template settings.
+2. Preview Draft without saving.
+3. Confirm the preview changes visually.
+4. Save Draft and reload CMS.
+5. Publish and confirm live site.
+6. Repeat for Modern Luxury.
+7. Verify `/site/book` and booking flow remain unchanged.
+
+After this foundation is stable, proceed to **Facebook/mobile booking-page optimization**, then add a genuinely different third template.
+
+**Inspect first. Extend second. Test third. Document fourth.**
