@@ -34,11 +34,12 @@ const mockResponse = (payload: unknown, status = 200) => ({
   json: async () => payload,
 });
 
-function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[] } = {}) {
+function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY' } = {}) {
   const currentWebsite = {
     ...website,
     bookingCta: { ...website.bookingCta, mode: options.bookingCtaMode ?? website.bookingCta.mode },
     sectionOrder: options.sectionOrder ?? website.sectionOrder,
+    template: options.template ?? website.template,
   };
 
   const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
@@ -97,6 +98,18 @@ describe('ClientLandingPage', () => {
     expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Services' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Haircut' })).toBeInTheDocument();
+  });
+
+  it('renders the Modern Luxury template with the shared booking CTA and content', async () => {
+    mockPublicApi({ template: 'MODERN_LUXURY' });
+
+    render(<ClientLandingPage developmentTenant="onepiecesalon" />);
+
+    expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Services' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Haircut' })).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Book now' })[0]);
+    expect(screen.getByRole('dialog', { name: 'Book an appointment' })).toBeInTheDocument();
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
