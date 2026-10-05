@@ -2457,3 +2457,17 @@ Inspect first. Extend second. Test third. Document fourth.
   3. `npm test -- --runInBand`
   4. `npm run build`
   5. Preview Modern Luxury with Natural, then Cinematic, and confirm the hero image visibly changes while text/CTA remain unaffected.
+
+## 21. Modern Luxury Cinematic Verification Fixture Fix
+
+After local verification of commit `22a41ba`, frontend typecheck/build exposed a test fixture typing issue and the Modern Luxury presentation-settings test could not find `.luxuryHeroMedia` because the fixture supplied an empty hero background image URL. The renderer correctly creates the dedicated media layer only when a hero image URL exists.
+
+Fixed in commit `d4e460095ef464e19308d9841162fd3a35a9f079`:
+- Made the test fixture preserve `templateSettings` as an optional field instead of referencing a property that does not exist on the inferred base fixture type.
+- Added an explicit `heroBackgroundImageUrl` test option for image-treatment coverage.
+- The Cinematic test now exercises the actual `.luxuryHeroMedia.luxuryCinematic` rendering path.
+
+Local verification should be rerun after pulling this commit:
+- `npm run typecheck`
+- `npm test -- --runInBand`
+- `npm run build`
