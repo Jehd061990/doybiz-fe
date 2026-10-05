@@ -222,9 +222,9 @@
 /* Navigation brand */
 .brandMark{display:inline-flex;align-items:center;gap:10px;min-width:0}
 .brandMarkText{display:inline-block;line-height:1.05;text-align:left}
-.brandMarkFrame{--brand-frame-size:38px;--brand-frame-border:2px;display:grid;place-items:center;flex:0 0 var(--brand-frame-size);width:var(--brand-frame-size);height:var(--brand-frame-size);position:relative;color:var(--site-primary);background:var(--site-primary);padding:var(--brand-frame-border);box-sizing:border-box}
-.brandMarkFrameInner{display:grid;place-items:center;width:100%;height:100%;background:var(--site-background);overflow:hidden}
-.brandMarkLogo{display:block;width:72%;height:72%;max-width:none;object-fit:contain}
+.brandMarkFrame{--brand-frame-size:38px;display:block;flex:0 0 var(--brand-frame-size);width:var(--brand-frame-size);height:var(--brand-frame-size);position:relative;color:transparent;background:transparent;padding:0;box-sizing:border-box;overflow:hidden}
+.brandMarkFrameInner{display:block;width:100%;height:100%;background:transparent;overflow:hidden}
+.brandMarkLogo{display:block;width:100%;height:100%;max-width:none;object-fit:cover}
 .brandShape_circle .brandMarkFrame,.brandShape_circle .brandMarkFrameInner{border-radius:50%}
 .brandShape_square .brandMarkFrame{border-radius:10px}
 .brandShape_square .brandMarkFrameInner{border-radius:7px}
@@ -233,5 +233,5 @@
 .brandShape_heart .brandMarkFrameInner,.brandShape_star .brandMarkFrameInner{transform:scale(.86)}
 .brandSize_small .brandMarkFrame{--brand-frame-size:30px}.brandSize_medium .brandMarkFrame{--brand-frame-size:38px}.brandSize_large .brandMarkFrame{--brand-frame-size:48px}.brandSize_xlarge .brandMarkFrame{--brand-frame-size:60px}
 .brandLayout_horizontal{flex-direction:row}.brandLayout_vertical{flex-direction:column;gap:5px}.brandLayout_vertical .brandMarkText{text-align:center}
-.luxuryBrand .brandMarkFrame{--brand-frame-border:2px}.minimalModernBrand .brandMarkFrame{--brand-frame-border:2px}
+
 @media(max-width:650px){.brandSize_small .brandMarkFrame{--brand-frame-size:28px}.brandSize_medium .brandMarkFrame{--brand-frame-size:34px}.brandSize_large .brandMarkFrame{--brand-frame-size:42px}.brandSize_xlarge .brandMarkFrame{--brand-frame-size:52px}.brandMark{gap:7px}.brandLayout_vertical{gap:4px}}
