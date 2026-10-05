@@ -132,6 +132,47 @@ describe('WebsiteManagementPage', () => {
     });
   });
 
+  it('publishes the complete current draft state, including section order and visibility', async () => {
+    await renderWebsiteManagementPage();
+
+    const servicesCard = screen.getByRole('button', { name: 'Collapse 2. Services' }).parentElement!;
+    fireEvent.click(within(servicesCard).getByRole('checkbox', { name: /Enabled/i }));
+
+    const heroRow = screen.getByRole('button', { name: 'Collapse 1. Hero' }).parentElement!;
+    fireEvent.click(within(heroRow).getByRole('button', { name: 'Move down' }));
+
+    fireEvent.change(screen.getByLabelText('Services title'), { target: { value: 'Published services' } });
+    fireEvent.change(screen.getByLabelText('Branches title'), { target: { value: 'Published branches' } });
+    fireEvent.change(screen.getByLabelText('Contact title'), { target: { value: 'Published contact' } });
+    fireEvent.change(screen.getByLabelText('Primary color'), { target: { value: '#222222' } });
+    fireEvent.change(screen.getByLabelText('Button text'), { target: { value: 'Reserve now' } });
+    fireEvent.change(screen.getByDisplayValue('Powered by DoyBiz'), { target: { value: 'Published footer' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }));
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      url: '/website',
+      method: 'put',
+      values: expect.objectContaining({
+        sectionOrder: ['SERVICES', 'HERO', 'BRANCHES', 'CONTACT'],
+        branding: expect.objectContaining({ primaryColor: '#222222' }),
+        bookingCta: expect.objectContaining({ label: 'Reserve now' }),
+        sections: expect.objectContaining({
+          services: expect.objectContaining({ enabled: false, title: 'Published services' }),
+          branches: expect.objectContaining({ title: 'Published branches' }),
+          contact: expect.objectContaining({ title: 'Published contact' }),
+        }),
+        footer: expect.objectContaining({ poweredByText: 'Published footer' }),
+      }),
+    })));
+
+    expect(mockPublish).toHaveBeenCalledWith({
+      url: '/website/publish',
+      method: 'post',
+      values: {},
+    });
+  });
+
   it('reorders and removes a section, then adds it back before saving', async () => {
     await renderWebsiteManagementPage();
 
