@@ -116,6 +116,17 @@ describe('ClientLandingPage', () => {
     });
   });
 
+
+  it('applies Modern Luxury presentation settings to the public renderer', async () => {
+    mockPublicApi({ template: 'MODERN_LUXURY' });
+
+    render(<ClientLandingPage developmentTenant="onepiecesalon" />);
+
+    expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
+    const heroImage = document.querySelector('.luxuryHeroImage');
+    expect(heroImage).toBeInTheDocument();
+  });
+
   it('renders the published landing page with tenant-aware content', async () => {
     mockPublicApi();
 
