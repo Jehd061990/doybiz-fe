@@ -1606,3 +1606,166 @@ Before implementation, inspect the current Classic renderer and CMS template sel
 - reservation API
 - customer details flow
 - public tenant resolution
+
+
+# 38. Modern Luxury Landing Page Template — Implementation Started
+
+The first genuinely different public landing-page template was added on top of the verified template renderer architecture.
+
+## Goal
+
+Add a premium/editorial landing-page option without duplicating the existing website business data or booking implementation.
+
+## Backend
+
+Expanded the website template contract from:
+
+`CLASSIC`
+
+to:
+
+`CLASSIC | MODERN_LUXURY`
+
+The Mongoose schema now accepts both templates.
+
+Template normalization now accepts either supported template and falls back to the current draft template for unknown values.
+
+Relevant backend files:
+
+```
+src/models/WebsiteConfig.ts
+src/services/websiteService.ts
+```
+
+Commits:
+
+```
+fcd40857d6ffe029f48ed9a2ff26ea020e150fc6
+feat(website): add modern luxury template contract
+
+e2f0e487efa2b2829fff1cac0b8e7a54fe3653f9
+feat(website): normalize modern luxury template
+```
+
+## Frontend
+
+Added `MODERN_LUXURY` to the existing template registry and renderer.
+
+The new template provides a genuinely different presentation:
+
+- Editorial/luxury hero
+- Large image-led hero treatment
+- Premium typography hierarchy
+- Dark location section
+- Two-column service presentation
+- Minimal navigation
+- Elevated CTA treatment
+- Premium contact/footer presentation
+- Responsive mobile layout
+
+It continues to consume the same:
+
+- organization
+- branding
+- hero content
+- services
+- branches
+- contact content
+- booking CTA
+- section order
+- booking modal/page behavior
+- shared availability/booking workflow
+
+Important architecture rule remains:
+
+```
+Template = presentation
+WebsiteConfig = business content
+ClientLandingPage = shared booking/state/API logic
+```
+
+Relevant frontend files:
+
+```
+src/components/public/website-renderer.tsx
+src/components/public/client-landing-page.module.css
+src/components/website-management-page.tsx
+```
+
+The CMS template selector automatically exposes the new template through the existing `WEBSITE_TEMPLATES` registry.
+
+Frontend commits:
+
+```
+4e5fda1a0c353f640a18deb9e74a9fa432750d30
+feat(website): add modern luxury landing template
+
+42a130256cc5a4b1252662061b1f529e53dd81fa
+feat(website): style modern luxury landing template
+```
+
+## Regression coverage
+
+Added frontend coverage for:
+
+- selecting Modern Luxury in the CMS
+- saving the selected template
+- rendering the Modern Luxury public template
+- preserving the shared booking CTA/modal behavior
+
+Test commits:
+
+```
+b75fa4bbf56cf57b7b6cb3be28dbda12c15c0189
+test(website): cover modern luxury template selection
+
+29cd83e413638d2f0a25c83a534072bf6b825b58
+test(website): cover modern luxury template rendering
+```
+
+## Verification status
+
+Implementation is committed, but **not yet marked fully verified**.
+
+Run after pulling the latest frontend and backend changes:
+
+Frontend:
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+Backend:
+```bash
+npm run typecheck
+npm run build
+```
+
+If the backend test environment is available, also run the existing integration/phase tests as appropriate.
+
+Then manually verify:
+
+```
+/app/website
+/site?tenant=onepiecesalon
+/site/book?tenant=onepiecesalon
+```
+
+Specifically confirm:
+
+- Modern Luxury can be selected
+- Save Draft preserves it
+- Publish preserves it
+- live public site renders the Modern Luxury design
+- section order/visibility still work
+- booking modal still works
+- dedicated booking page still works
+- availability and reservation flow are unchanged
+
+Do not remove or alter the Classic template while verifying Modern Luxury.
+
+## Next step
+
+Run the full verification commands. If green, manually inspect the Modern Luxury visual output and then refine only any visual/UX issues discovered.
+
