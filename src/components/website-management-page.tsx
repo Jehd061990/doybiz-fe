@@ -630,8 +630,9 @@ export function WebsiteManagementPage() {
               </select>
             </label>
             <label className="field-control">
-              <span>Logo image URL</span>
+              <label htmlFor="website-logo-url">Logo image URL</label>
               <input
+                id="website-logo-url"
                 type="url"
                 value={draft.branding.logoUrl}
                 onChange={event => setDraft(current => current ? ({
