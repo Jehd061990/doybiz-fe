@@ -134,7 +134,7 @@ describe('ClientLandingPage', () => {
     expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
     const heroMedia = document.querySelector('.luxuryHeroMedia');
     expect(heroMedia).toHaveClass('luxuryCinematic');
-    expect(heroMedia).toHaveAttribute('style', expect.stringContaining('url(https://example.com/hero.jpg)'));
+    expect(heroMedia?.getAttribute('style')).toContain('url("https://example.com/hero.jpg")');
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
