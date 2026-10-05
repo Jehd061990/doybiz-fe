@@ -108,6 +108,7 @@ describe('ClientLandingPage', () => {
     expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Services' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Haircut' })).toBeInTheDocument();
+    expect(document.querySelector('.luxuryShell')).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'Book now' })[0]);
     expect(screen.getByRole('dialog', { name: 'Book an appointment' })).toBeInTheDocument();
   });
