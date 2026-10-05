@@ -182,7 +182,7 @@ describe('ClientLandingPage', () => {
     render(<ClientLandingPage developmentTenant="onepiecesalon" />);
 
     expect(await screen.findByRole('link', { name: /One Piece Salon/ })).toBeInTheDocument();
-    expect(screen.getByRole('img', { hidden: true })).toHaveAttribute('src', 'https://example.com/logo.png');
+    expect(screen.getByRole('img', { name: 'Navigation logo' })).toHaveAttribute('src', 'https://example.com/logo.png');
     expect(screen.getByText('One Piece Salon')).toBeInTheDocument();
   });
 
