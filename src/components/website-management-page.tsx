@@ -662,6 +662,7 @@ export function WebsiteManagementPage() {
             <label className="field-control">
               <span>Logo + text arrangement</span>
               <select
+                aria-label="Logo + text arrangement"
                 value={draft.branding.brandLayout}
                 disabled={draft.branding.brandDisplay !== 'both'}
                 onChange={event => setDraft(current => current ? ({ ...current, branding: { ...current.branding, brandLayout: event.target.value as WebsiteValue['branding']['brandLayout'] } }) : current)}
