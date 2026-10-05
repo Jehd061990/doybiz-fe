@@ -78,7 +78,7 @@ const clone = (value: WebsiteValue): WebsiteValue => {
   const templateSettings = cloned.templateSettings || DEFAULT_TEMPLATE_SETTINGS;
   return {
     ...cloned,
-    template: cloned.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : 'CLASSIC',
+    template: cloned.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : cloned.template === 'MINIMAL_MODERN' ? 'MINIMAL_MODERN' : 'CLASSIC',
     templateSettings: {
       classic: { ...DEFAULT_TEMPLATE_SETTINGS.classic, ...(templateSettings.classic || {}) },
       modernLuxury: { ...DEFAULT_TEMPLATE_SETTINGS.modernLuxury, ...(templateSettings.modernLuxury || {}) },
