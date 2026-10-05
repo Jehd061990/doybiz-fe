@@ -167,7 +167,11 @@ export function ModernLuxury3DHero({
       frame = window.requestAnimationFrame(animate);
     };
 
-    frame = window.requestAnimationFrame(animate);
+    if (reduceMotion) {
+      renderer.render(scene, camera);
+    } else {
+      frame = window.requestAnimationFrame(animate);
+    }
 
     return () => {
       window.cancelAnimationFrame(frame);
