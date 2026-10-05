@@ -254,7 +254,7 @@ export function ModernLuxuryTemplate({
         </nav>
       </header>
       {!bookingOnly && <section id='top' className={heroClass} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
-        <div className={styles.luxuryHeroImage}>
+        <div className={styles.luxuryHeroImage} data-image-treatment={settings.imageTreatment}>
           {website.hero.backgroundImageUrl ? (
             <div
               className={`${styles.luxuryHeroMedia} ${imageTreatmentClass}`}
@@ -266,6 +266,7 @@ export function ModernLuxuryTemplate({
               aria-hidden="true"
             />
           ) : <div className={styles.luxuryHeroGlow} />}
+          {isCinematic && <div className={styles.luxuryCinematicFrame} aria-hidden="true" />}
           <div className={styles.luxuryHeroContent}>
             <span className={styles.luxuryKicker}>{website.hero.eyebrow}</span>
             <h1>{website.hero.title}</h1>
