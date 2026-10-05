@@ -213,7 +213,7 @@ export function WebsiteManagementPage() {
           <p className="management-description">Customize your public landing page without changing your booking system.</p>
         </div>
         <div className="form-actions">
-          <button className="secondary-button" type="button" onClick={previewDraft} disabled={saving}>Preview draft</button>
+          <button className="secondary-button" type="button" onClick={() => previewDraft()} disabled={saving}>Preview draft</button>
           <a className="secondary-button" href={liveWebsiteHref} target="_blank" rel="noreferrer">Live website</a>
           <button className="secondary-button" type="button" onClick={saveDraft} disabled={saving}>{mutation.isPending ? 'Saving…' : 'Save draft'}</button>
           <button className="primary-button" type="button" onClick={publish} disabled={saving}>{publishMutation.isPending ? 'Publishing…' : 'Publish'}</button>
