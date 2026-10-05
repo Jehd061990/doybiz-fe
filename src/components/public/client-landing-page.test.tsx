@@ -183,7 +183,7 @@ describe('ClientLandingPage', () => {
 
     expect(await screen.findByRole('link', { name: /One Piece Salon/ })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Navigation logo' })).toHaveAttribute('src', 'https://example.com/logo.png');
-    expect(screen.getByText('One Piece Salon')).toBeInTheDocument();
+    expect(screen.getByText('One Piece Salon', { selector: '.brandMarkText' })).toBeInTheDocument();
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
