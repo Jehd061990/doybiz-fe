@@ -2532,3 +2532,34 @@ Local verification required before considering this milestone complete:
 4. Reload the CMS and confirm the saved values remain.
 5. Compare Natural vs Cinematic with an actual hero image; Cinematic should now be visibly darker, more desaturated, higher-contrast, and vignetted.
 6. Preview Draft and live publish should preserve the same template settings.
+
+## 23. Explicit Modern Luxury Image Treatment Rendering
+
+Manual verification showed Template Settings now persist correctly, but Natural vs Cinematic remained difficult to distinguish in Preview Draft and the published site.
+
+The public renderer was hardened so Image treatment is no longer represented only by a CSS class. Modern Luxury now derives an explicit `isCinematic` state and applies the treatment directly to the hero media style:
+
+- Natural: `filter: none`, `transform: scale(1)`
+- Cinematic: grayscale + reduced saturation + increased contrast + reduced brightness + slight zoom
+- Hero media also exposes `data-image-treatment="natural|cinematic"` for deterministic rendering/debugging.
+- The existing `luxuryCinematic` CSS class remains responsible for the additional vignette/visual treatment.
+
+Regression coverage now verifies:
+- the cinematic class is present
+- `data-image-treatment="cinematic"` is rendered
+- the serialized hero style contains the cinematic grayscale treatment
+- the configured hero image remains in the background
+
+Commits:
+- 3ebff0ddcef39bbcac7317fb2fbdeaae9e36cec1 — fix(website): make luxury image treatment explicit
+- a182b46a457a22d6b04e13dddc0a0b5391d32a5d — test(website): verify explicit cinematic image treatment
+
+Local verification still required:
+```bash
+git pull
+npm test -- --runInBand
+npm run typecheck
+npm run build
+```
+
+Then compare Natural vs Cinematic on Preview Draft and the published live site using the same real hero image.
