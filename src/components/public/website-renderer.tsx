@@ -140,7 +140,7 @@ function BrandMark({ organization, website }: { organization: Organization; webs
   const showText = display === 'text' || display === 'both' || !showLogo;
   return (
     <>
-      {showLogo && <img className={styles.brandMarkLogo} src={website.branding.logoUrl} alt="" aria-hidden="true" />}
+      {showLogo && <img className={styles.brandMarkLogo} src={website.branding.logoUrl} alt="Navigation logo" />}
       {showText && <span className={styles.brandMarkText}>{organization.name}</span>}
     </>
   );
