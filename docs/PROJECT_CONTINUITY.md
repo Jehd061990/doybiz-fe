@@ -2439,3 +2439,21 @@ No third template should be added until this customization foundation is locally
 Rule remains:
 
 Inspect first. Extend second. Test third. Document fourth.
+
+### #21 Modern Luxury cinematic treatment visibility fix (2026-10-06)
+- User manually noticed that Modern Luxury `Natural` and `Cinematic` looked effectively identical in Preview.
+- Inspection confirmed the earlier implementation applied `filter` to the entire `.luxuryHeroImage` container, which also contains hero text, badge, and CTA, making the image-treatment distinction weak and semantically incorrect.
+- Fixed by separating the hero background image into a dedicated `.luxuryHeroMedia` layer.
+- `Natural`: normal image rendering.
+- `Cinematic`: visibly stronger treatment using lower saturation, higher contrast, lower brightness, a subtle zoom, and inset vignette.
+- Updated the renderer, CSS, and regression test.
+- Commits:
+  - `bbe2b464b1c51f4987cdb837b77c249f88086a92` — `fix(website): make luxury cinematic treatment visible`
+  - `57ad716da6b55bae86c3be336fdb52e7bd9b7d18` — `style(website): strengthen luxury cinematic image treatment`
+  - `cff13e40b2e2d2d67d13037909a147de608cc59d` — `test(website): target luxury hero media treatment`
+- Local verification still required:
+  1. `git pull`
+  2. `npm run typecheck`
+  3. `npm test -- --runInBand`
+  4. `npm run build`
+  5. Preview Modern Luxury with Natural, then Cinematic, and confirm the hero image visibly changes while text/CTA remain unaffected.
