@@ -5,6 +5,42 @@ import styles from './client-landing-page.module.css';
 
 export type WebsiteTemplateKey = 'CLASSIC' | 'MODERN_LUXURY';
 
+export type WebsiteTemplateSettings = {
+  classic: {
+    heroAlignment: 'left' | 'center';
+    navigationStyle: 'standard' | 'minimal';
+    sectionSpacing: 'comfortable' | 'compact';
+    heroImagePosition: 'center' | 'top' | 'bottom';
+    ctaStyle: 'solid' | 'outline';
+  };
+  modernLuxury: {
+    heroComposition: 'full-bleed' | 'split';
+    navigationStyle: 'editorial' | 'minimal';
+    sectionSpacing: 'airy' | 'compact';
+    imageTreatment: 'natural' | 'cinematic';
+    overlayIntensity: 'soft' | 'strong';
+    showHeroBadge: boolean;
+  };
+};
+
+const DEFAULT_TEMPLATE_SETTINGS: WebsiteTemplateSettings = {
+  classic: {
+    heroAlignment: 'left',
+    navigationStyle: 'standard',
+    sectionSpacing: 'comfortable',
+    heroImagePosition: 'center',
+    ctaStyle: 'solid',
+  },
+  modernLuxury: {
+    heroComposition: 'full-bleed',
+    navigationStyle: 'editorial',
+    sectionSpacing: 'airy',
+    imageTreatment: 'natural',
+    overlayIntensity: 'strong',
+    showHeroBadge: true,
+  },
+};
+
 export type Organization = {
   id: string;
   name: string;
@@ -15,6 +51,7 @@ export type Organization = {
 
 export type WebsiteValue = {
   template: WebsiteTemplateKey;
+  templateSettings?: WebsiteTemplateSettings;
   sectionOrder: Array<'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT'>;
   branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
@@ -91,9 +128,15 @@ export function ClassicTemplate({
   setSelectedBranch,
   navigateTo,
 }: ClassicTemplateProps) {
+  const settings = website.templateSettings?.classic || DEFAULT_TEMPLATE_SETTINGS.classic;
+  const navClass = settings.navigationStyle === 'minimal' ? styles.header + ' ' + styles.headerMinimal : styles.header;
+  const heroClass = settings.sectionSpacing === 'compact' ? styles.hero + ' ' + styles.heroCompact : styles.hero;
+  const heroImagePosition = settings.heroImagePosition;
+  const buttonClass = settings.ctaStyle === 'outline' ? styles.secondaryButton : styles.primaryButton;
+
   return (
     <>
-      <header className={styles.header} style={{ order: 0 }}>
+      <header className={navClass} style={{ order: 0 }}>
         <a href={bookingOnly ? `${landingPageHref}#top` : '#top'} className={styles.brand}>{organization.name}</a>
         <nav className={styles.nav}>
           {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
@@ -103,17 +146,18 @@ export function ClassicTemplate({
         </nav>
       </header>
 
-      {!bookingOnly && <section id="top" className={styles.hero} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
-        <div className={styles.heroCopy}>
+      {!bookingOnly && <section id="top" className={heroClass} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
+
+        <div className={styles.heroCopy} style={{ textAlign: settings.heroAlignment }}>
           <span className={styles.eyebrow}>{website.hero.eyebrow}</span>
           <h1>{website.hero.title}</h1>
           <p>{website.hero.description}</p>
           <div className={styles.heroActions}>
-            {website.bookingCta.enabled && <button type="button" className={styles.primaryButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
+            {website.bookingCta.enabled && <button type="button" className={buttonClass} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
             <a href="#services" className={styles.secondaryButton}>View services</a>
           </div>
         </div>
-        <div className={styles.heroCard} style={website.hero.backgroundImageUrl ? { backgroundImage: `linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.35)), url(${website.hero.backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
+        <div className={styles.heroCard} style={website.hero.backgroundImageUrl ? { backgroundImage: `linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.35)), url(${website.hero.backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: heroImagePosition } : undefined}>
           <div className={styles.heroOrb} />
           <span>{website.hero.cardLabel}</span>
           <strong>{website.hero.cardTitle.split('\\n').map((line, index) => <span key={line + index}>{index ? <br /> : null}{line}</span>)}</strong>
@@ -165,7 +209,7 @@ export function ClassicTemplate({
         <div className={styles.contactDetails}>
           {organization.phone && <a href={`tel:${organization.phone}`}>{organization.phone}</a>}
           {organization.email && <a href={`mailto:${organization.email}`}>{organization.email}</a>}
-          {website.bookingCta.enabled && <button type="button" className={styles.primaryButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
+          {website.bookingCta.enabled && <button type="button" className={buttonClass} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
         </div>
       </section>}
 
@@ -178,9 +222,24 @@ export function ModernLuxuryTemplate({
   organization, website, branches, visibleServices, selectedBranch, bookingOnly, landingPageHref, bookingPageHref,
   handleBookingCta, openBooking, setSelectedBranch, navigateTo,
 }: ClassicTemplateProps) {
+  const settings = website.templateSettings?.modernLuxury || DEFAULT_TEMPLATE_SETTINGS.modernLuxury;
+  const heroClass = settings.heroComposition === 'split'
+    ? styles.luxuryHero + ' ' + styles.luxuryHeroSplit
+    : styles.luxuryHero;
+  const shellClass = settings.sectionSpacing === 'compact'
+    ? styles.luxuryShell + ' ' + styles.luxuryCompact
+    : styles.luxuryShell;
+  const navClass = settings.navigationStyle === 'minimal'
+    ? styles.luxuryHeader + ' ' + styles.luxuryHeaderMinimal
+    : styles.luxuryHeader;
+  const overlay = settings.overlayIntensity === 'soft'
+    ? 'linear-gradient(180deg, rgba(12,12,12,.04), rgba(12,12,12,.48))'
+    : 'linear-gradient(180deg, rgba(12,12,12,.08), rgba(12,12,12,.72))';
+  const imageFilter = settings.imageTreatment === 'cinematic' ? 'saturate(.82) contrast(1.08)' : undefined;
+
   return (
-    <div className={styles.luxuryShell}>
-      <header className={styles.luxuryHeader}>
+    <div className={shellClass}>
+      <header className={navClass}>
         <a href={bookingOnly ? landingPageHref + '#top' : '#top'} className={styles.luxuryBrand}>{organization.name}</a>
         <nav className={styles.luxuryNav}>
           {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? landingPageHref + '#services' : '#services'}>Services</a>}
@@ -189,8 +248,8 @@ export function ModernLuxuryTemplate({
           {website.bookingCta.enabled && !bookingOnly && <button type='button' className={styles.luxuryCta} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
         </nav>
       </header>
-      {!bookingOnly && <section id='top' className={styles.luxuryHero} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
-        <div className={styles.luxuryHeroImage} style={website.hero.backgroundImageUrl ? { backgroundImage: 'linear-gradient(180deg, rgba(12,12,12,.08), rgba(12,12,12,.72)), url(' + website.hero.backgroundImageUrl + ')' } : undefined}>
+      {!bookingOnly && <section id='top' className={heroClass} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
+        <div className={styles.luxuryHeroImage} style={website.hero.backgroundImageUrl ? { backgroundImage: overlay + ', url(' + website.hero.backgroundImageUrl + ')', filter: imageFilter } : undefined}>
           {!website.hero.backgroundImageUrl && <div className={styles.luxuryHeroGlow} />}
           <div className={styles.luxuryHeroContent}>
             <span className={styles.luxuryKicker}>{website.hero.eyebrow}</span>
@@ -198,7 +257,7 @@ export function ModernLuxuryTemplate({
             <p>{website.hero.description}</p>
             {website.bookingCta.enabled && <button type='button' className={styles.luxuryHeroButton} onClick={handleBookingCta}>{website.bookingCta.label}<span>↗</span></button>}
           </div>
-          <div className={styles.luxuryHeroBadge}><span>{website.hero.cardLabel}</span><strong>{website.hero.cardTitle.split('\\n').map((line, index) => <span key={line + index}>{index ? <br /> : null}{line}</span>)}</strong></div>
+          {settings.showHeroBadge && <div className={styles.luxuryHeroBadge}><span>{website.hero.cardLabel}</span><strong>{website.hero.cardTitle.split('\\n').map((line, index) => <span key={line + index}>{index ? <br /> : null}{line}</span>)}</strong></div>}
         </div>
       </section>}
       {!bookingOnly && sectionVisible(website, 'SERVICES') && <section id='services' className={styles.luxurySection} style={{ order: sectionOrderIndex(website, 'SERVICES') + 1 }}>
