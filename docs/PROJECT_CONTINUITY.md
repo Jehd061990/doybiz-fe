@@ -2695,3 +2695,8 @@ Verification after pulling this fix:
 
 Do not remove the Jest mock merely to test the visual Three.js runtime; browser/manual testing remains the correct verification path for WebGL rendering.
 
+### Navigation Brand Controls
+- Website branding now supports a configurable navigation brand display: `text`, `logo`, `both`, or `none`.
+- Branding also stores `logoUrl`; the Website CMS provides a URL field and logo upload control.
+- Classic, Modern Luxury, and Minimal Modern render the shared brand configuration in their navigation.
+- Existing website content and booking behavior remain unchanged; default behavior remains text-only organization name.
