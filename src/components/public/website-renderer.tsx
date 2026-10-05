@@ -1,6 +1,5 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
 import { ServiceImage } from '@/components/services/service-image';
 import styles from './client-landing-page.module.css';
 
@@ -88,13 +87,6 @@ export function ClassicTemplate({
   setSelectedBranch,
   navigateTo,
 }: ClassicTemplateProps) {
-  const themeStyle = {
-    '--site-primary': website.branding.primaryColor,
-    '--site-accent': website.branding.accentColor,
-    '--site-background': website.branding.backgroundColor,
-    '--site-text': website.branding.textColor,
-  } as CSSProperties;
-
   return (
     <>
       <header className={styles.header} style={{ order: 0 }}>
