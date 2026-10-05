@@ -3,7 +3,7 @@
 import { ServiceImage } from '@/components/services/service-image';
 import styles from './client-landing-page.module.css';
 
-export type WebsiteTemplateKey = 'CLASSIC';
+export type WebsiteTemplateKey = 'CLASSIC' | 'MODERN_LUXURY';
 
 export type Organization = {
   id: string;
@@ -63,6 +63,10 @@ export const WEBSITE_TEMPLATES: Record<WebsiteTemplateKey, { name: string; descr
   CLASSIC: {
     name: 'Classic',
     description: 'Clean and professional layout for service businesses.',
+  },
+  MODERN_LUXURY: {
+    name: 'Modern Luxury',
+    description: 'Editorial, premium presentation for brands that want a more elevated feel.',
   },
 };
 
@@ -170,8 +174,57 @@ export function ClassicTemplate({
   );
 }
 
+export function ModernLuxuryTemplate({
+  organization, website, branches, visibleServices, selectedBranch, bookingOnly, landingPageHref, bookingPageHref,
+  handleBookingCta, openBooking, setSelectedBranch, navigateTo,
+}: ClassicTemplateProps) {
+  return (
+    <div className={styles.luxuryShell}>
+      <header className={styles.luxuryHeader}>
+        <a href={bookingOnly ? landingPageHref + '#top' : '#top'} className={styles.luxuryBrand}>{organization.name}</a>
+        <nav className={styles.luxuryNav}>
+          {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? landingPageHref + '#services' : '#services'}>Services</a>}
+          {sectionVisible(website, 'BRANCHES') && <a href={bookingOnly ? landingPageHref + '#branches' : '#branches'}>Locations</a>}
+          {sectionVisible(website, 'CONTACT') && <a href={bookingOnly ? landingPageHref + '#contact' : '#contact'}>Contact</a>}
+          {website.bookingCta.enabled && !bookingOnly && <button type='button' className={styles.luxuryCta} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
+        </nav>
+      </header>
+      {!bookingOnly && <section id='top' className={styles.luxuryHero} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
+        <div className={styles.luxuryHeroImage} style={website.hero.backgroundImageUrl ? { backgroundImage: 'linear-gradient(180deg, rgba(12,12,12,.08), rgba(12,12,12,.72)), url(' + website.hero.backgroundImageUrl + ')' } : undefined}>
+          {!website.hero.backgroundImageUrl && <div className={styles.luxuryHeroGlow} />}
+          <div className={styles.luxuryHeroContent}>
+            <span className={styles.luxuryKicker}>{website.hero.eyebrow}</span>
+            <h1>{website.hero.title}</h1>
+            <p>{website.hero.description}</p>
+            {website.bookingCta.enabled && <button type='button' className={styles.luxuryHeroButton} onClick={handleBookingCta}>{website.bookingCta.label}<span>↗</span></button>}
+          </div>
+          <div className={styles.luxuryHeroBadge}><span>{website.hero.cardLabel}</span><strong>{website.hero.cardTitle.split('\\n').map((line, index) => <span key={line + index}>{index ? <br /> : null}{line}</span>)}</strong></div>
+        </div>
+      </section>}
+      {!bookingOnly && sectionVisible(website, 'SERVICES') && <section id='services' className={styles.luxurySection} style={{ order: sectionOrderIndex(website, 'SERVICES') + 1 }}>
+        <div className={styles.luxuryHeading}><div><span className={styles.luxuryKicker}>{website.sections.services.eyebrow}</span><h2>{website.sections.services.title}</h2></div>{branches.length > 1 && <select value={selectedBranch} onChange={event => setSelectedBranch(event.target.value)} className={styles.luxurySelect}><option value=''>All branches</option>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select>}</div>
+        {visibleServices.length ? <div className={styles.luxuryServiceGrid}>{visibleServices.map((service, index) => <article className={styles.luxuryServiceCard} key={service.id}>
+          <div className={styles.luxuryServiceImageWrap}><span>{String(index + 1).padStart(2, '0')}</span><ServiceImage src={service.imageUrl} alt={service.name} className={styles.luxuryServiceImage} loading='lazy' /></div>
+          <div className={styles.luxuryServiceBody}><div><h3>{service.name}</h3>{service.description && <p>{service.description}</p>}</div><div className={styles.luxuryServiceFooter}><span>₱{service.price.toLocaleString()} · {service.durationMinutes} min</span>{website.bookingCta.enabled && <button type='button' onClick={() => website.bookingCta.mode === 'page' ? navigateTo(bookingPageHref) : openBooking(service)}>{website.bookingCta.label} ↗</button>}</div></div>
+        </article>)}</div> : <p className={styles.luxuryEmpty}>No services are currently available.</p>}
+      </section>}
+      {!bookingOnly && sectionVisible(website, 'BRANCHES') && <section id='branches' className={styles.luxuryDarkSection} style={{ order: sectionOrderIndex(website, 'BRANCHES') + 1 }}>
+        <div className={styles.luxuryHeading}><div><span className={styles.luxuryKicker}>{website.sections.branches.eyebrow}</span><h2>{website.sections.branches.title}</h2></div></div>
+        <div className={styles.luxuryBranchGrid}>{branches.map((branch, index) => <article className={styles.luxuryBranchCard} key={branch.id}><span>{String(index + 1).padStart(2, '0')}</span><h3>{branch.name}</h3><p>{branch.address || 'Address available at the branch.'}</p>{branch.contactNumber && <a href={'tel:' + branch.contactNumber}>{branch.contactNumber}</a>}</article>)}</div>
+      </section>}
+      {!bookingOnly && sectionVisible(website, 'CONTACT') && <section id='contact' className={styles.luxuryContact} style={{ order: sectionOrderIndex(website, 'CONTACT') + 1 }}>
+        <div><span className={styles.luxuryKicker}>{website.sections.contact.eyebrow}</span><h2>{website.sections.contact.title}</h2><p>{organization.address}</p></div>
+        <div className={styles.luxuryContactDetails}>{organization.phone && <a href={'tel:' + organization.phone}>{organization.phone}</a>}{organization.email && <a href={'mailto:' + organization.email}>{organization.email}</a>}{website.bookingCta.enabled && <button type='button' className={styles.luxuryCta} onClick={handleBookingCta}>{website.bookingCta.label}</button>}</div>
+      </section>}
+      {!bookingOnly && <footer className={styles.luxuryFooter}><span>{organization.name}</span><span>{website.footer.poweredByText}</span></footer>}
+    </div>
+  );
+}
+
 export function WebsiteRenderer(props: ClassicTemplateProps) {
   switch (props.website.template) {
+    case 'MODERN_LUXURY':
+      return <ModernLuxuryTemplate {...props} />;
     case 'CLASSIC':
     default:
       return <ClassicTemplate {...props} />;
