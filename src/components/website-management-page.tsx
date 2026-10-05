@@ -66,6 +66,9 @@ type WebsiteValue = {
     textColor: string;
     logoUrl: string;
     brandDisplay: 'text' | 'logo' | 'both' | 'none';
+    logoShape: 'circle' | 'square' | 'heart' | 'star';
+    logoSize: 'small' | 'medium' | 'large' | 'xlarge';
+    brandLayout: 'horizontal' | 'vertical';
   };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
   bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
@@ -89,6 +92,9 @@ const clone = (value: WebsiteValue): WebsiteValue => {
       ...cloned.branding,
       logoUrl: cloned.branding?.logoUrl || '',
       brandDisplay: cloned.branding?.brandDisplay || 'text',
+      logoShape: cloned.branding?.logoShape || 'square',
+      logoSize: cloned.branding?.logoSize || 'medium',
+      brandLayout: cloned.branding?.brandLayout || 'horizontal',
     },
     template: cloned.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : cloned.template === 'MINIMAL_MODERN' ? 'MINIMAL_MODERN' : 'CLASSIC',
     templateSettings: {
@@ -628,6 +634,42 @@ export function WebsiteManagementPage() {
                 <option value="both">Logo + text</option>
                 <option value="none">Hide brand</option>
               </select>
+            </label>
+            <label className="field-control">
+              <span>Logo frame shape</span>
+              <select
+                value={draft.branding.logoShape}
+                onChange={event => setDraft(current => current ? ({ ...current, branding: { ...current.branding, logoShape: event.target.value as WebsiteValue['branding']['logoShape'] } }) : current)}
+              >
+                <option value="square">Square</option>
+                <option value="circle">Circle</option>
+                <option value="heart">Heart</option>
+                <option value="star">Star</option>
+              </select>
+            </label>
+            <label className="field-control">
+              <span>Logo size</span>
+              <select
+                value={draft.branding.logoSize}
+                onChange={event => setDraft(current => current ? ({ ...current, branding: { ...current.branding, logoSize: event.target.value as WebsiteValue['branding']['logoSize'] } }) : current)}
+              >
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+                <option value="xlarge">Extra large</option>
+              </select>
+            </label>
+            <label className="field-control">
+              <span>Logo + text arrangement</span>
+              <select
+                value={draft.branding.brandLayout}
+                disabled={draft.branding.brandDisplay !== 'both'}
+                onChange={event => setDraft(current => current ? ({ ...current, branding: { ...current.branding, brandLayout: event.target.value as WebsiteValue['branding']['brandLayout'] } }) : current)}
+              >
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+              </select>
+              <small>Applies when Navigation brand is set to Logo + text.</small>
             </label>
             <label className="field-control">
               <label htmlFor="website-logo-url">Logo image URL</label>
