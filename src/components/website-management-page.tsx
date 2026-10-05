@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useCustom, useCustomMutation, type HttpError } from '@refinedev/core';
+import { WEBSITE_TEMPLATES, type WebsiteTemplateKey } from './public/website-renderer';
 
 type WebsiteSectionKey = 'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT';
 type WebsiteValue = {
+  template: WebsiteTemplateKey;
   sectionOrder: WebsiteSectionKey[];
   branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
@@ -24,6 +26,7 @@ const clone = (value: WebsiteValue): WebsiteValue => {
   const cloned = JSON.parse(JSON.stringify(value)) as WebsiteValue & { bookingCta?: Partial<WebsiteValue['bookingCta']> };
   return {
     ...cloned,
+    template: cloned.template === 'CLASSIC' ? 'CLASSIC' : 'CLASSIC',
     sectionOrder: Array.isArray(cloned.sectionOrder) ? [...new Set(cloned.sectionOrder)].filter((key): key is WebsiteSectionKey => ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'].includes(key)) : ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
     bookingCta: {
       enabled: cloned.bookingCta?.enabled ?? true,
@@ -220,6 +223,27 @@ export function WebsiteManagementPage() {
       {error ? <p className="management-error" role="alert">{error}</p> : null}
 
       <div className="form-grid">
+        <section className="billing-section">
+          <div className="billing-section-heading"><h2>Landing Page Template</h2></div>
+          <div className="form-grid">
+            {(Object.keys(WEBSITE_TEMPLATES) as WebsiteTemplateKey[]).map(key => (
+              <label className="field-control" key={key}>
+                <span>
+                  <input
+                    type="radio"
+                    name="website-template"
+                    value={key}
+                    checked={draft.template === key}
+                    onChange={() => setDraft(current => current ? ({ ...current, template: key }) : current)}
+                  />
+                  {WEBSITE_TEMPLATES[key].name}
+                </span>
+                <small>{WEBSITE_TEMPLATES[key].description}</small>
+              </label>
+            ))}
+          </div>
+        </section>
+
         <section className="billing-section">
           <div className="billing-section-heading"><h2>Branding</h2></div>
           <div className="form-grid">
