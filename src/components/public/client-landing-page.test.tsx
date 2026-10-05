@@ -5,7 +5,7 @@ import { navigateTo } from './navigation';
 const website = {
   template: 'CLASSIC' as const,
   sectionOrder: ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
-  branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
+  branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717', logoUrl: '', brandDisplay: 'text' as const },
   hero: { eyebrow: 'WELCOME', title: 'Test title', description: 'Test description', cardLabel: 'ONLINE RESERVATIONS', cardTitle: 'Choose your service.', backgroundImageUrl: '' },
   bookingCta: { enabled: true, label: 'Book now', mode: 'modal' as const },
   sections: {
@@ -153,6 +153,37 @@ describe('ClientLandingPage', () => {
     expect(heroMedia?.getAttribute('style')).toContain('url("https://example.com/hero.jpg")');
     expect(heroMedia?.getAttribute('style')).toContain('grayscale(1)');
     expect(document.querySelector('.luxuryCinematicFrame')).toBeInTheDocument();
+  });
+
+  it('renders the configured navigation logo and text together', async () => {
+    mockPublicApi();
+    const responseWebsite = {
+      ...website,
+      branding: {
+        ...website.branding,
+        logoUrl: 'https://example.com/logo.png',
+        brandDisplay: 'both' as const,
+      },
+    };
+    Object.defineProperty(global, 'fetch', {
+      configurable: true,
+      writable: true,
+      value: jest.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('/api/public/site')) return mockResponse({ ...sitePayload, site: { ...sitePayload.site, website: responseWebsite } });
+        if (url.includes('/api/public/branches')) return mockResponse({ success: true, branches });
+        if (url.includes('/api/public/services')) return mockResponse({ success: true, services });
+        if (url.includes('/api/public/staff')) return mockResponse({ success: true, staff: [] });
+        if (url.includes('/api/public/availability')) return mockResponse({ success: true, availability: { branch: { id: 'branch-1', name: 'Main Branch' }, service: { id: 'service-1', name: 'Haircut', durationMinutes: 60 }, date: '2099-01-01', slots: [{ time: '10:00', staffIds: ['staff-1'] }] } });
+        return mockResponse({ success: true });
+      }),
+    });
+
+    render(<ClientLandingPage developmentTenant="onepiecesalon" />);
+
+    expect(await screen.findByRole('link', { name: /One Piece Salon/ })).toBeInTheDocument();
+    expect(screen.getByRole('img', { hidden: true })).toHaveAttribute('src', 'https://example.com/logo.png');
+    expect(screen.getByText('One Piece Salon')).toBeInTheDocument();
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
