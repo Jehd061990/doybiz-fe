@@ -130,7 +130,7 @@ describe('ClientLandingPage', () => {
     render(<ClientLandingPage developmentTenant="onepiecesalon" />);
 
     expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
-    expect(document.querySelector('.luxuryHeroImage')).toHaveClass('luxuryCinematic');
+    expect(document.querySelector('.luxuryHeroMedia')).toHaveClass('luxuryCinematic');
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
