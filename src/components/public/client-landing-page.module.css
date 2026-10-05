@@ -181,3 +181,40 @@
   .minimalModernServiceAction{grid-column:2}
   .minimalModernFooter{padding:20px 5vw;flex-direction:column}
 }
+
+/* Modern Luxury 3D hero */
+.luxuryThreeHero{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  opacity:.9;
+  mix-blend-mode:screen;
+}
+.luxuryThreeHero canvas{
+  display:block;
+  width:100%;
+  height:100%;
+}
+.luxuryHeroImage > .luxuryThreeHero::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 65% 48%, rgba(255,255,255,.08), transparent 34%);
+  pointer-events:none;
+}
+.luxuryHeroSplit .luxuryThreeHero{
+  left:42%;
+  opacity:.82;
+}
+@media(max-width:900px){
+  .luxuryThreeHero{opacity:.72}
+  .luxuryHeroSplit .luxuryThreeHero{left:20%}
+}
+@media(max-width:650px){
+  .luxuryThreeHero{opacity:.62}
+  .luxuryHeroSplit .luxuryThreeHero{left:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .luxuryThreeHero{opacity:.52}
+}
