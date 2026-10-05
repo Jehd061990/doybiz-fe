@@ -34,12 +34,13 @@ const mockResponse = (payload: unknown, status = 200) => ({
   json: async () => payload,
 });
 
-function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY' } = {}) {
+function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY'; templateSettings?: typeof website['templateSettings'] } = {}) {
   const currentWebsite = {
     ...website,
     bookingCta: { ...website.bookingCta, mode: options.bookingCtaMode ?? website.bookingCta.mode },
     sectionOrder: options.sectionOrder ?? website.sectionOrder,
     template: options.template ?? website.template,
+    templateSettings: options.templateSettings ?? website.templateSettings,
   };
 
   const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
@@ -118,13 +119,18 @@ describe('ClientLandingPage', () => {
 
 
   it('applies Modern Luxury presentation settings to the public renderer', async () => {
-    mockPublicApi({ template: 'MODERN_LUXURY' });
+    mockPublicApi({
+      template: 'MODERN_LUXURY',
+      templateSettings: {
+        ...website.templateSettings,
+        modernLuxury: { ...website.templateSettings.modernLuxury, imageTreatment: 'cinematic' },
+      },
+    });
 
     render(<ClientLandingPage developmentTenant="onepiecesalon" />);
 
     expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
-    const heroImage = document.querySelector('.luxuryHeroImage');
-    expect(heroImage).toBeInTheDocument();
+    expect(document.querySelector('.luxuryHeroImage')).toHaveClass('luxuryCinematic');
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
