@@ -11,7 +11,7 @@ const mockMutation = jest.fn((args: { url: string; method: string; values: unkno
 const draft = {
   template: 'CLASSIC',
   sectionOrder: ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
-  branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717', logoUrl: '', brandDisplay: 'text' },
+  branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717', logoUrl: '', brandDisplay: 'text', logoShape: 'square', logoSize: 'medium', brandLayout: 'horizontal' },
   hero: { eyebrow: 'WELCOME', title: 'Test title', description: 'Test description', cardLabel: 'ONLINE RESERVATIONS', cardTitle: 'Choose your service.', backgroundImageUrl: '' },
   bookingCta: { enabled: true, label: 'Book an appointment', mode: 'modal' },
   sections: {
@@ -161,6 +161,27 @@ describe('WebsiteManagementPage', () => {
         branding: expect.objectContaining({
           brandDisplay: 'both',
           logoUrl: 'https://example.com/logo.png',
+        }),
+      }),
+    })));
+  });
+
+  it('edits logo frame shape, size, and brand arrangement', async () => {
+    await renderWebsiteManagementPage();
+
+    fireEvent.change(screen.getByLabelText('Navigation brand'), { target: { value: 'both' } });
+    fireEvent.change(screen.getByLabelText('Logo frame shape'), { target: { value: 'heart' } });
+    fireEvent.change(screen.getByLabelText('Logo size'), { target: { value: 'large' } });
+    fireEvent.change(screen.getByLabelText('Logo + text arrangement'), { target: { value: 'vertical' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      values: expect.objectContaining({
+        branding: expect.objectContaining({
+          brandDisplay: 'both',
+          logoShape: 'heart',
+          logoSize: 'large',
+          brandLayout: 'vertical',
         }),
       }),
     })));
