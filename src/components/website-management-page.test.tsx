@@ -121,6 +121,9 @@ describe('WebsiteManagementPage', () => {
         }),
       }),
     })));
+    expect(screen.getByLabelText('Hero composition')).toHaveValue('split');
+    expect(screen.getByLabelText('Image treatment')).toHaveValue('cinematic');
+    expect(screen.getByLabelText('Show hero badge')).not.toBeChecked();
     draft.template = 'CLASSIC';
   });
 
