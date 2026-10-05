@@ -2680,3 +2680,18 @@ Manual verification:
 Rule remains:
 
 Inspect first. Extend second. Test third. Document fourth.
+
+## Three.js + Jest Integration Fix — October 2026
+
+The Modern Luxury template now keeps the production Three.js hero isolated from Jest's jsdom/CommonJS test runtime. Jest mocks `@/components/public/modern-luxury-3d-hero` from `jest.setup.ts`, so website/template tests validate the surrounding renderer and CMS without trying to initialize WebGL or load Three.js ESM inside Jest.
+
+The frontend also keeps `three@0.186.1` as a production dependency and `@types/three@0.186.0` as a development dependency. The lockfile uses the verified npm integrity for `@types/three@0.186.0`.
+
+Verification after pulling this fix:
+- `npm install`
+- `npm run typecheck`
+- `npm test -- --runInBand`
+- `npm run build`
+
+Do not remove the Jest mock merely to test the visual Three.js runtime; browser/manual testing remains the correct verification path for WebGL rendering.
+
