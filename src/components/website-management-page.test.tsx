@@ -65,7 +65,6 @@ describe('WebsiteManagementPage', () => {
     expect(templateRadios).toHaveLength(3);
     const classic = templateRadios[0];
     const modernLuxury = templateRadios[1];
-    const minimalModern = templateRadios[2];
     expect(classic).toBeChecked();
 
     expect(modernLuxury).toBeInTheDocument();
