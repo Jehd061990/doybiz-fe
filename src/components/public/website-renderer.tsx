@@ -1,6 +1,7 @@
 'use client';
 
 import { ServiceImage } from '@/components/services/service-image';
+import { ModernLuxury3DHero } from './modern-luxury-3d-hero';
 import styles from './client-landing-page.module.css';
 
 export type WebsiteTemplateKey = 'CLASSIC' | 'MODERN_LUXURY' | 'MINIMAL_MODERN';
@@ -285,6 +286,11 @@ export function ModernLuxuryTemplate({
             />
           ) : <div className={styles.luxuryHeroGlow} />}
           {isCinematic && <div className={styles.luxuryCinematicFrame} aria-hidden="true" />}
+          <ModernLuxury3DHero
+            primaryColor={website.branding.primaryColor}
+            accentColor={website.branding.accentColor}
+            className={styles.luxuryThreeHero}
+          />
           <div className={styles.luxuryHeroContent}>
             <span className={styles.luxuryKicker}>{website.hero.eyebrow}</span>
             <h1>{website.hero.title}</h1>
