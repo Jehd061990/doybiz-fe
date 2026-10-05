@@ -52,3 +52,20 @@
 .luxuryEmpty{font:14px Arial,sans-serif;color:#777}
 @media(max-width:900px){.luxuryHeroImage{min-height:600px}.luxuryServiceGrid{grid-template-columns:1fr}.luxuryBranchGrid{grid-template-columns:1fr}.luxuryBranchCard{border-right:0;border-bottom:1px solid rgba(255,255,255,.18)}.luxuryBranchCard:last-child{border-bottom:0}.luxuryContact{align-items:start;flex-direction:column}.luxuryContactDetails{justify-content:flex-start}}
 @media(max-width:650px){.luxuryHeader{height:70px;padding:0 16px;gap:12px}.luxuryNav{gap:12px;min-width:0;overflow-x:auto;scrollbar-width:none}.luxuryNav::-webkit-scrollbar{display:none}.luxuryNav a{white-space:nowrap;font-size:10px}.luxuryCta{white-space:nowrap;padding:9px 12px}.luxuryHero{padding:12px 12px 28px}.luxuryHeroImage{min-height:610px}.luxuryHeroContent{left:8%;right:8%;bottom:8%}.luxuryHero h1{font-size:clamp(46px,14vw,72px)}.luxuryHeroBadge{display:none}.luxurySection,.luxuryDarkSection,.luxuryContact{padding:72px 20px}.luxuryHeading{align-items:start;flex-direction:column}.luxuryServiceCard{grid-template-columns:1fr}.luxuryServiceImageWrap,.luxuryServiceImage{min-height:220px}.luxuryServiceBody{min-height:240px}.luxuryFooter{padding:22px 20px;gap:15px;flex-direction:column}}
+
+
+/* Template customization */
+.headerMinimal { border-bottom-color: transparent; box-shadow: none; }
+.heroCompact { padding-top: 56px; padding-bottom: 56px; }
+.luxuryCompact .luxurySection,
+.luxuryCompact .luxuryDarkSection,
+.luxuryCompact .luxuryContact { padding-top: 72px; padding-bottom: 72px; }
+.luxuryHeaderMinimal { border-bottom-color: transparent; background: transparent; }
+.luxuryHeroSplit .luxuryHeroImage { min-height: 560px; }
+@media (max-width: 700px) {
+  .heroCompact { padding-top: 36px; padding-bottom: 36px; }
+  .luxuryCompact .luxurySection,
+  .luxuryCompact .luxuryDarkSection,
+  .luxuryCompact .luxuryContact { padding-top: 52px; padding-bottom: 52px; }
+  .luxuryHeroSplit .luxuryHeroImage { min-height: 500px; }
+}
