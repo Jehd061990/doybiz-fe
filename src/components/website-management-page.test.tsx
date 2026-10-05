@@ -62,9 +62,10 @@ describe('WebsiteManagementPage', () => {
 
     expect(screen.getByRole('heading', { name: 'Landing Page Template' })).toBeInTheDocument();
     const templateRadios = screen.getAllByRole('radio', { name: 'Use this template' });
-    expect(templateRadios).toHaveLength(2);
+    expect(templateRadios).toHaveLength(3);
     const classic = templateRadios[0];
     const modernLuxury = templateRadios[1];
+    const minimalModern = templateRadios[2];
     expect(classic).toBeChecked();
 
     expect(modernLuxury).toBeInTheDocument();
@@ -88,6 +89,28 @@ describe('WebsiteManagementPage', () => {
     const templateRadios = screen.getAllByRole('radio', { name: 'Use this template' });
     expect(templateRadios[1]).toBeChecked();
     expect(templateRadios[0]).not.toBeChecked();
+    draft.template = 'CLASSIC';
+  });
+
+  it('selects the Minimal Modern template and exposes its settings', async () => {
+    draft.template = 'MINIMAL_MODERN';
+    await renderWebsiteManagementPage();
+    const templateRadios = screen.getAllByRole('radio', { name: 'Use this template' });
+    expect(templateRadios[2]).toBeChecked();
+    expect(screen.getByLabelText('Hero alignment')).toBeInTheDocument();
+    expect(screen.getByLabelText('Hero image position')).toBeInTheDocument();
+    expect(screen.getByLabelText('CTA style')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Hero image position'), { target: { value: 'left' } });
+    fireEvent.change(screen.getByLabelText('CTA style'), { target: { value: 'outline' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      values: expect.objectContaining({
+        template: 'MINIMAL_MODERN',
+        templateSettings: expect.objectContaining({
+          minimalModern: expect.objectContaining({ heroImagePosition: 'left', ctaStyle: 'outline' }),
+        }),
+      }),
+    })));
     draft.template = 'CLASSIC';
   });
 
