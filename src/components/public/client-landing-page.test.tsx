@@ -137,6 +137,7 @@ describe('ClientLandingPage', () => {
     expect(heroMedia).toHaveAttribute('data-image-treatment', 'cinematic');
     expect(heroMedia?.getAttribute('style')).toContain('url("https://example.com/hero.jpg")');
     expect(heroMedia?.getAttribute('style')).toContain('grayscale(1)');
+    expect(document.querySelector('.luxuryCinematicFrame')).toBeInTheDocument();
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
