@@ -1,51 +1,19 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { ServiceImage } from '@/components/services/service-image';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import styles from './client-landing-page.module.css';
 import { navigateTo } from './navigation';
-
-type Organization = {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-};
-
-type WebsiteValue = {
-  sectionOrder: Array<'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT'>;
-  branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
-  hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
-  bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
-  sections: {
-    services: { enabled: boolean; eyebrow: string; title: string };
-    branches: { enabled: boolean; eyebrow: string; title: string };
-    contact: { enabled: boolean; eyebrow: string; title: string };
-  };
-  footer: { poweredByText: string };
-};
+import {
+  WebsiteRenderer,
+  type Branch,
+  type Organization,
+  type Service,
+  type WebsiteValue,
+} from './website-renderer';
 
 type SiteResponse = {
   success: true;
   site: { organization: Organization; primaryDomain: string | null; website: WebsiteValue };
-};
-
-type Branch = {
-  id: string;
-  name: string;
-  address?: string;
-  contactNumber?: string;
-};
-
-type Service = {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  durationMinutes: number;
-  branchId?: string | null;
-  imageUrl?: string | null;
 };
 
 type Staff = {
@@ -83,10 +51,24 @@ const getLocalToday = () => {
 };
 
 const today = getLocalToday();
-
 const PREVIEW_STORAGE_KEY = 'doybiz:website-preview-draft';
 
-export function ClientLandingPage({ developmentTenant, bookingOnly = false, openBookingOnLoad = false, previewDraft = false }: { developmentTenant?: string; bookingOnly?: boolean; openBookingOnLoad?: boolean; previewDraft?: boolean }) {
+const normalizeWebsite = (website: WebsiteValue): WebsiteValue => ({
+  ...website,
+  template: website.template === 'CLASSIC' ? 'CLASSIC' : 'CLASSIC',
+});
+
+export function ClientLandingPage({
+  developmentTenant,
+  bookingOnly = false,
+  openBookingOnLoad = false,
+  previewDraft = false,
+}: {
+  developmentTenant?: string;
+  bookingOnly?: boolean;
+  openBookingOnLoad?: boolean;
+  previewDraft?: boolean;
+}) {
   const tenantQuery = developmentTenant ? `?tenant=${encodeURIComponent(developmentTenant)}` : '';
 
   const [site, setSite] = useState<SiteResponse['site'] | null>(null);
@@ -128,11 +110,14 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
           publicRequest<{ success: true; services: Service[] }>(`services${tenantQuery}`),
         ]);
         if (cancelled) return;
-        let website = siteResult.site.website;
+        let website = normalizeWebsite(siteResult.site.website);
         if (previewDraft && typeof window !== 'undefined') {
           try {
             const storedDraft = window.localStorage.getItem(PREVIEW_STORAGE_KEY);
-            if (storedDraft) website = JSON.parse(storedDraft) as WebsiteValue;
+            if (storedDraft) {
+              const parsedDraft = JSON.parse(storedDraft) as WebsiteValue;
+              website = normalizeWebsite(parsedDraft);
+            }
           } catch {
             // Ignore malformed preview data and fall back to the published website.
           }
@@ -287,8 +272,7 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
   const website = site.website;
   const landingPageHref = tenantQuery ? `/site${tenantQuery}` : '/site';
   const bookingPageHref = tenantQuery ? `/site/book${tenantQuery}` : '/site/book';
-  const sectionOrderIndex = (key: 'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT') => website.sectionOrder?.indexOf(key) ?? -1;
-  const sectionVisible = (key: 'SERVICES' | 'BRANCHES' | 'CONTACT') => sectionOrderIndex(key) >= 0 && website.sections[key.toLowerCase() as keyof WebsiteValue['sections']].enabled;
+
   const handleBookingCta = () => {
     if (website.bookingCta.mode === 'page') {
       navigateTo(bookingPageHref);
@@ -296,92 +280,33 @@ export function ClientLandingPage({ developmentTenant, bookingOnly = false, open
     }
     openBooking();
   };
-  const themeStyle = {
-    '--site-primary': website.branding.primaryColor,
-    '--site-accent': website.branding.accentColor,
-    '--site-background': website.branding.backgroundColor,
-    '--site-text': website.branding.textColor,
-  } as CSSProperties;
 
   return (
-    <main style={{ ...themeStyle, display: 'flex', flexDirection: 'column' }} className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}>
-      <header className={styles.header} style={{ order: 0 }}>
-        <a href={bookingOnly ? `${landingPageHref}#top` : '#top'} className={styles.brand}>{organization.name}</a>
-        <nav className={styles.nav}>
-          {sectionVisible('SERVICES') && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
-          {sectionVisible('BRANCHES') && <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>}
-          {sectionVisible('CONTACT') && <a href={bookingOnly ? `${landingPageHref}#contact` : '#contact'}>Contact</a>}
-          {website.bookingCta.enabled && !bookingOnly && <button type="button" className={styles.navButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
-        </nav>
-      </header>
-
-      {!bookingOnly && <section id="top" className={styles.hero} style={{ order: sectionOrderIndex('HERO') + 1 }}>
-        <div className={styles.heroCopy}>
-          <span className={styles.eyebrow}>{website.hero.eyebrow}</span>
-          <h1>{website.hero.title}</h1>
-          <p>{website.hero.description}</p>
-          <div className={styles.heroActions}>
-            {website.bookingCta.enabled && <button type="button" className={styles.primaryButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
-            <a href="#services" className={styles.secondaryButton}>View services</a>
-          </div>
-        </div>
-        <div className={styles.heroCard} style={website.hero.backgroundImageUrl ? { backgroundImage: `linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.35)), url(${website.hero.backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
-          <div className={styles.heroOrb} />
-          <span>{website.hero.cardLabel}</span>
-          <strong>{website.hero.cardTitle.split('\\n').map((line, index) => <span key={line + index}>{index ? <br /> : null}{line}</span>)}</strong>
-        </div>
-      </section>}
-
-      {!bookingOnly && sectionVisible('SERVICES') && <section id="services" className={styles.section} style={{ order: sectionOrderIndex('SERVICES') + 1 }}>
-        <div className={styles.sectionHeading}>
-          <div><span className={styles.eyebrow}>{website.sections.services.eyebrow}</span><h2>{website.sections.services.title}</h2></div>
-          {branches.length > 1 && (
-            <select value={selectedBranch} onChange={event => setSelectedBranch(event.target.value)} className={styles.select}>
-              <option value="">All branches</option>
-              {branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
-            </select>
-          )}
-        </div>
-        {visibleServices.length ? (
-          <div className={styles.serviceGrid}>
-            {visibleServices.map(service => (
-              <article className={styles.serviceCard} key={service.id}>
-                <ServiceImage src={service.imageUrl} alt={service.name} className={styles.serviceImage} loading="lazy" />
-                <div className={styles.serviceBody}>
-                  <div className={styles.serviceTop}><h3>{service.name}</h3><span>₱{service.price.toLocaleString()}</span></div>
-                  {service.description && <p>{service.description}</p>}
-                  <div className={styles.serviceMeta}>{service.durationMinutes} min {website.bookingCta.enabled && <button type="button" onClick={() => website.bookingCta.mode === 'page' ? navigateTo(bookingPageHref) : openBooking(service)}>{website.bookingCta.label}</button>}</div>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : <p className={styles.empty}>No services are currently available.</p>}
-      </section>}
-
-      {!bookingOnly && sectionVisible('BRANCHES') && <section id="branches" className={styles.sectionAlt} style={{ order: sectionOrderIndex('BRANCHES') + 1 }}>
-        <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>{website.sections.branches.eyebrow}</span><h2>{website.sections.branches.title}</h2></div></div>
-        <div className={styles.branchGrid}>
-          {branches.map(branch => (
-            <article className={styles.branchCard} key={branch.id}>
-              <span className={styles.branchNumber}>{String(branches.indexOf(branch) + 1).padStart(2, '0')}</span>
-              <h3>{branch.name}</h3>
-              <p>{branch.address || 'Address available at the branch.'}</p>
-              {branch.contactNumber && <a href={`tel:${branch.contactNumber}`}>{branch.contactNumber}</a>}
-            </article>
-          ))}
-        </div>
-      </section>}
-
-      {!bookingOnly && sectionVisible('CONTACT') && <section id="contact" className={styles.contactSection} style={{ order: sectionOrderIndex('CONTACT') + 1 }}>
-        <div><span className={styles.eyebrow}>{website.sections.contact.eyebrow}</span><h2>{website.sections.contact.title}</h2><p>{organization.address}</p></div>
-        <div className={styles.contactDetails}>
-          {organization.phone && <a href={`tel:${organization.phone}`}>{organization.phone}</a>}
-          {organization.email && <a href={`mailto:${organization.email}`}>{organization.email}</a>}
-          {website.bookingCta.enabled && <button type="button" className={styles.primaryButton} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
-        </div>
-      </section>}
-
-      {!bookingOnly && <footer className={styles.footer} style={{ order: 10 }}><span>{organization.name}</span><span>{website.footer.poweredByText}</span></footer>}
+    <main
+      className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}
+      style={{
+        '--site-primary': website.branding.primaryColor,
+        '--site-accent': website.branding.accentColor,
+        '--site-background': website.branding.backgroundColor,
+        '--site-text': website.branding.textColor,
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <WebsiteRenderer
+        organization={organization}
+        website={website}
+        branches={branches}
+        visibleServices={visibleServices}
+        selectedBranch={selectedBranch}
+        bookingOnly={bookingOnly}
+        landingPageHref={landingPageHref}
+        bookingPageHref={bookingPageHref}
+        handleBookingCta={handleBookingCta}
+        openBooking={openBooking}
+        setSelectedBranch={setSelectedBranch}
+        navigateTo={navigateTo}
+      />
 
       {bookingOpen && (
         <div className={bookingOnly ? styles.bookingPageContainer : styles.modalBackdrop} style={{ order: 100 }} role="presentation" onMouseDown={() => !bookingOnly && setBookingOpen(false)}>
