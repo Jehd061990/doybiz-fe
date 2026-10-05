@@ -68,7 +68,14 @@ export type WebsiteValue = {
   template: WebsiteTemplateKey;
   templateSettings?: WebsiteTemplateSettings;
   sectionOrder: Array<'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT'>;
-  branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
+  branding: {
+    primaryColor: string;
+    accentColor: string;
+    backgroundColor: string;
+    textColor: string;
+    logoUrl: string;
+    brandDisplay: 'text' | 'logo' | 'both' | 'none';
+  };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
   bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
   sections: {
@@ -126,6 +133,19 @@ export const WEBSITE_TEMPLATES: Record<WebsiteTemplateKey, { name: string; descr
   },
 };
 
+function BrandMark({ organization, website }: { organization: Organization; website: WebsiteValue }) {
+  const display = website.branding.brandDisplay || 'text';
+  if (display === 'none') return null;
+  const showLogo = (display === 'logo' || display === 'both') && Boolean(website.branding.logoUrl);
+  const showText = display === 'text' || display === 'both' || !showLogo;
+  return (
+    <>
+      {showLogo && <img className={styles.brandMarkLogo} src={website.branding.logoUrl} alt="" aria-hidden="true" />}
+      {showText && <span className={styles.brandMarkText}>{organization.name}</span>}
+    </>
+  );
+}
+
 const sectionOrderIndex = (website: WebsiteValue, key: WebsiteValue['sectionOrder'][number]) =>
   website.sectionOrder?.indexOf(key) ?? -1;
 
@@ -156,7 +176,7 @@ export function ClassicTemplate({
   return (
     <>
       <header className={navClass} style={{ order: 0 }}>
-        <a href={bookingOnly ? `${landingPageHref}#top` : '#top'} className={styles.brand}>{organization.name}</a>
+        <a href={bookingOnly ? `${landingPageHref}#top` : '#top'} className={styles.brand}><BrandMark organization={organization} website={website} /></a>
         <nav className={styles.nav}>
           {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? `${landingPageHref}#services` : '#services'}>Services</a>}
           {sectionVisible(website, 'BRANCHES') && <a href={bookingOnly ? `${landingPageHref}#branches` : '#branches'}>Branches</a>}
@@ -264,7 +284,7 @@ export function ModernLuxuryTemplate({
   return (
     <div className={shellClass}>
       <header className={navClass}>
-        <a href={bookingOnly ? landingPageHref + '#top' : '#top'} className={styles.luxuryBrand}>{organization.name}</a>
+        <a href={bookingOnly ? landingPageHref + '#top' : '#top'} className={styles.luxuryBrand}><BrandMark organization={organization} website={website} /></a>
         <nav className={styles.luxuryNav}>
           {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? landingPageHref + '#services' : '#services'}>Services</a>}
           {sectionVisible(website, 'BRANCHES') && <a href={bookingOnly ? landingPageHref + '#branches' : '#branches'}>Locations</a>}
@@ -336,7 +356,7 @@ export function MinimalModernTemplate({
   return (
     <div className={shellClass}>
       <header className={navClass}>
-        <a href={bookingOnly ? landingPageHref + '#top' : '#top'} className={styles.minimalModernBrand}>{organization.name}</a>
+        <a href={bookingOnly ? landingPageHref + '#top' : '#top'} className={styles.minimalModernBrand}><BrandMark organization={organization} website={website} /></a>
         <nav className={styles.minimalModernNav}>
           {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? landingPageHref + '#services' : '#services'}>Services</a>}
           {sectionVisible(website, 'BRANCHES') && <a href={bookingOnly ? landingPageHref + '#branches' : '#branches'}>Locations</a>}
