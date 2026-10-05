@@ -21,6 +21,13 @@ type WebsiteTemplateSettings = {
     overlayIntensity: 'soft' | 'strong';
     showHeroBadge: boolean;
   };
+  minimalModern: {
+    heroAlignment: 'left' | 'center';
+    navigationStyle: 'minimal' | 'standard';
+    sectionSpacing: 'airy' | 'compact';
+    heroImagePosition: 'left' | 'right';
+    ctaStyle: 'solid' | 'outline';
+  };
 };
 
 const DEFAULT_TEMPLATE_SETTINGS: WebsiteTemplateSettings = {
@@ -38,6 +45,13 @@ const DEFAULT_TEMPLATE_SETTINGS: WebsiteTemplateSettings = {
     imageTreatment: 'natural',
     overlayIntensity: 'strong',
     showHeroBadge: true,
+  },
+  minimalModern: {
+    heroAlignment: 'left',
+    navigationStyle: 'minimal',
+    sectionSpacing: 'airy',
+    heroImagePosition: 'right',
+    ctaStyle: 'solid',
   },
 };
 
@@ -416,7 +430,7 @@ export function WebsiteManagementPage() {
                 </select>
               </label>
             </div>
-          ) : (
+          ) : draft.template === 'MODERN_LUXURY' ? (
             <div className="form-grid">
               <label className="field-control">
                 <span>Hero composition</span>
@@ -513,10 +527,41 @@ export function WebsiteManagementPage() {
               </label>
             </div>
           )}
-        </section>
-
-        <section className="billing-section">
-          <div className="billing-section-heading"><h2>Branding</h2></div>
+          ) : (
+            <div className="form-grid">
+              <label className="field-control">
+                <span>Hero alignment</span>
+                <select value={draft.templateSettings.minimalModern.heroAlignment} onChange={event => setDraft(current => current ? ({ ...current, templateSettings: { ...current.templateSettings, minimalModern: { ...current.templateSettings.minimalModern, heroAlignment: event.target.value as 'left' | 'center' } } }) : current)}>
+                  <option value="left">Left aligned</option><option value="center">Centered</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Navigation style</span>
+                <select value={draft.templateSettings.minimalModern.navigationStyle} onChange={event => setDraft(current => current ? ({ ...current, templateSettings: { ...current.templateSettings, minimalModern: { ...current.templateSettings.minimalModern, navigationStyle: event.target.value as 'minimal' | 'standard' } } }) : current)}>
+                  <option value="minimal">Minimal</option><option value="standard">Standard</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Section spacing</span>
+                <select value={draft.templateSettings.minimalModern.sectionSpacing} onChange={event => setDraft(current => current ? ({ ...current, templateSettings: { ...current.templateSettings, minimalModern: { ...current.templateSettings.minimalModern, sectionSpacing: event.target.value as 'airy' | 'compact' } } }) : current)}>
+                  <option value="airy">Airy</option><option value="compact">Compact</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Hero image position</span>
+                <select value={draft.templateSettings.minimalModern.heroImagePosition} onChange={event => setDraft(current => current ? ({ ...current, templateSettings: { ...current.templateSettings, minimalModern: { ...current.templateSettings.minimalModern, heroImagePosition: event.target.value as 'left' | 'right' } } }) : current)}>
+                  <option value="left">Left</option><option value="right">Right</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>CTA style</span>
+                <select value={draft.templateSettings.minimalModern.ctaStyle} onChange={event => setDraft(current => current ? ({ ...current, templateSettings: { ...current.templateSettings, minimalModern: { ...current.templateSettings.minimalModern, ctaStyle: event.target.value as 'solid' | 'outline' } } }) : current)}>
+                  <option value="solid">Solid</option><option value="outline">Outline</option>
+                </select>
+              </label>
+            </div>
+          )}
+        </section>Branding</h2></div>
           <div className="form-grid">
             {([
               ['primaryColor', 'Primary color'], ['accentColor', 'Accent color'],
