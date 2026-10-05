@@ -76,6 +76,14 @@ describe('WebsiteManagementPage', () => {
     })));
   });
 
+  it('restores a saved Modern Luxury draft as the selected template', async () => {
+    draft.template = 'MODERN_LUXURY';
+    await renderWebsiteManagementPage();
+    expect(screen.getByRole('radio', { name: /Modern Luxury/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /Classic/ })).not.toBeChecked();
+    draft.template = 'CLASSIC';
+  });
+
   it('renders the Website CMS editor', async () => {
     await renderWebsiteManagementPage();
     expect(screen.getByRole('heading', { name: 'Website' })).toBeInTheDocument();
