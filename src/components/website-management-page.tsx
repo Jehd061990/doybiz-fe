@@ -224,13 +224,14 @@ export function WebsiteManagementPage() {
   async function saveDraft() {
     setError(''); setMessage('');
     if (!draft) return;
+    const draftSnapshot = clone(draft);
     try {
-      const response = await mutateAsync({ url: '/website', method: 'put', values: draft });
-      if (response?.data?.draft) {
-        setDraft(clone(response.data.draft));
-      } else {
-        await query.query.refetch();
-      }
+      await mutateAsync({ url: '/website', method: 'put', values: draftSnapshot });
+      // Keep the editor bound to the exact configuration the user saved.
+      // Refine may invalidate/refetch the GET query after a mutation, but a
+      // server refresh must never replace the user's saved controls with an
+      // older/default query snapshot.
+      setDraft(draftSnapshot);
       setMessage('Draft saved. Publish it when you are ready to make the changes live.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save website settings.');
