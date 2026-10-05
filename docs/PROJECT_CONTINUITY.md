@@ -2612,3 +2612,71 @@ Backend verification:
 npm run build
 npm run test:phase5
 ```
+
+## 26. Modern Luxury Generic Three.js Hero — Initial Implementation (2026-10-06)
+
+Modern Luxury now has a generic procedural 3D hero layer built with Three.js.
+
+### Design intent
+
+The 3D treatment is intentionally business-agnostic so the same Modern Luxury template can be used by:
+- salons
+- clinics
+- wellness/spa businesses
+- fitness studios
+- professional services
+- other service-based organizations
+
+The 3D scene does not contain business-specific assets. It uses procedural geometry:
+- metallic torus-knot centerpiece
+- thin accent rings
+- subtle floating particles
+- generic studio lighting
+
+### Architecture
+
+3D is presentation-only and does not change WebsiteConfig business content or the shared DoyBiz booking engine.
+
+### Interaction/performance safeguards
+
+- Pointer-responsive rotation on supported devices
+- Gentle idle animation
+- prefers-reduced-motion support
+- Device-pixel-ratio cap
+- Lower geometry/particle counts on small screens
+- Transparent WebGL canvas so the existing hero imagery remains a visual fallback layer
+- WebGL initialization failure safely exits without breaking the landing page
+
+### Files
+
+- src/components/public/modern-luxury-3d-hero.tsx
+- src/components/public/website-renderer.tsx
+- src/components/public/client-landing-page.module.css
+- src/components/public/client-landing-page.test.tsx
+- package.json
+- package-lock.json
+
+### Dependency
+
+Three.js 0.186.1 was added as a direct frontend dependency.
+
+### Verification
+
+Run after pulling:
+
+npm install
+npm run typecheck
+npm test -- --runInBand
+npm run build
+
+Manual verification:
+1. Select Modern Luxury.
+2. Preview with and without a Hero image.
+3. Confirm the 3D object appears without changing the booking CTA.
+4. Move the pointer across the hero and confirm subtle 3D response.
+5. Check mobile layout and reduced-motion behavior.
+6. Confirm Classic, Minimal Modern, and /site/book remain unchanged.
+
+Rule remains:
+
+Inspect first. Extend second. Test third. Document fourth.
