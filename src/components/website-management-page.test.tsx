@@ -11,7 +11,7 @@ const mockMutation = jest.fn((args: { url: string; method: string; values: unkno
 const draft = {
   template: 'CLASSIC',
   sectionOrder: ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
-  branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
+  branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717', logoUrl: '', brandDisplay: 'text' },
   hero: { eyebrow: 'WELCOME', title: 'Test title', description: 'Test description', cardLabel: 'ONLINE RESERVATIONS', cardTitle: 'Choose your service.', backgroundImageUrl: '' },
   bookingCta: { enabled: true, label: 'Book an appointment', mode: 'modal' },
   sections: {
@@ -147,6 +147,23 @@ describe('WebsiteManagementPage', () => {
     expect(screen.getByLabelText('Image treatment')).toHaveValue('cinematic');
     expect(screen.getByLabelText('Show hero badge')).not.toBeChecked();
     draft.template = 'CLASSIC';
+  });
+
+  it('edits navigation brand display and logo URL', async () => {
+    await renderWebsiteManagementPage();
+
+    fireEvent.change(screen.getByLabelText('Navigation brand'), { target: { value: 'both' } });
+    fireEvent.change(screen.getByLabelText('Logo image URL'), { target: { value: 'https://example.com/logo.png' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      values: expect.objectContaining({
+        branding: expect.objectContaining({
+          brandDisplay: 'both',
+          logoUrl: 'https://example.com/logo.png',
+        }),
+      }),
+    })));
   });
 
   it('renders the Website CMS editor', async () => {
