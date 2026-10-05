@@ -170,9 +170,10 @@ export function WebsiteManagementPage() {
     : '';
   const liveWebsiteHref = publicTenantQuery ? `/site${publicTenantQuery}` : '/site';
 
-  function previewDraft() {
+  function previewDraft(template?: WebsiteTemplateKey) {
     if (typeof window === 'undefined' || !draft) return;
-    window.localStorage.setItem('doybiz:website-preview-draft', JSON.stringify(draft));
+    const previewWebsite = template ? { ...draft, template } : draft;
+    window.localStorage.setItem('doybiz:website-preview-draft', JSON.stringify(previewWebsite));
     window.open(`/site${publicTenantQuery}${publicTenantQuery ? '&' : '?'}preview=draft`, '_blank', 'noopener,noreferrer');
   }
 
@@ -224,23 +225,54 @@ export function WebsiteManagementPage() {
 
       <div className="form-grid">
         <section className="billing-section">
-          <div className="billing-section-heading"><h2>Landing Page Template</h2></div>
-          <div className="form-grid">
-            {(Object.keys(WEBSITE_TEMPLATES) as WebsiteTemplateKey[]).map(key => (
-              <label className="field-control" key={key}>
-                <span>
-                  <input
-                    type="radio"
-                    name="website-template"
-                    value={key}
-                    checked={draft.template === key}
-                    onChange={() => setDraft(current => current ? ({ ...current, template: key }) : current)}
-                  />
-                  {WEBSITE_TEMPLATES[key].name}
-                </span>
-                <small>{WEBSITE_TEMPLATES[key].description}</small>
-              </label>
-            ))}
+          <div className="billing-section-heading">
+            <div>
+              <h2>Landing Page Template</h2>
+              <p>Choose a visual style for your public website. Your content and booking system stay shared.</p>
+            </div>
+          </div>
+          <div className="website-template-grid">
+            {(Object.keys(WEBSITE_TEMPLATES) as WebsiteTemplateKey[]).map(key => {
+              const selected = draft.template === key;
+              return (
+                <article className={`website-template-card${selected ? ' is-selected' : ''}`} key={key}>
+                  <button
+                    type="button"
+                    className="website-template-select"
+                    aria-pressed={selected}
+                    onClick={() => setDraft(current => current ? ({ ...current, template: key }) : current)}
+                  >
+                    <span className={`website-template-preview website-template-preview--${key.toLowerCase()}`} aria-hidden="true">
+                      <span className="website-template-preview-header" />
+                      <span className="website-template-preview-hero"><span /><span /><span /></span>
+                      <span className="website-template-preview-content"><i /><i /><i /></span>
+                    </span>
+                    <span className="website-template-card-body">
+                      <span className="website-template-card-title-row">
+                        <strong>{WEBSITE_TEMPLATES[key].name}</strong>
+                        {selected ? <span className="website-template-selected">Selected</span> : null}
+                      </span>
+                      <small>{WEBSITE_TEMPLATES[key].description}</small>
+                    </span>
+                  </button>
+                  <div className="website-template-actions">
+                    <button type="button" className="secondary-button" onClick={() => previewDraft(key)} disabled={saving}>
+                      Preview template
+                    </button>
+                    <label className="website-template-radio">
+                      <input
+                        type="radio"
+                        name="website-template"
+                        value={key}
+                        checked={selected}
+                        onChange={() => setDraft(current => current ? ({ ...current, template: key }) : current)}
+                      />
+                      Use this template
+                    </label>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
 
