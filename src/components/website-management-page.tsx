@@ -96,8 +96,10 @@ export function WebsiteManagementPage() {
   });
 
   useEffect(() => {
-    if (query.result.data?.draft) setDraft(clone(query.result.data.draft));
-  }, [query.result.data?.draft]);
+    // Initialize the editor from the server once. Do not overwrite local edits
+    // when Refine invalidates/refetches the query after a mutation.
+    if (!draft && query.result.data?.draft) setDraft(clone(query.result.data.draft));
+  }, [draft, query.result.data?.draft]);
 
   useEffect(() => {
     let cancelled = false;
