@@ -2505,3 +2505,30 @@ Then manually verify:
 6. Preview Draft and compare Natural vs Cinematic using a real hero image.
 7. Publish and confirm the live site preserves the selected settings.
 8. Confirm `/site/book` and the shared booking flow remain unchanged.
+
+## 22. Template Settings Save-State and Cinematic Presentation Hardening
+
+The template customization flow had two remaining UX issues during manual verification:
+
+- After Save Draft, the Template Settings controls could visually fall back to default values because the Refine mutation/query lifecycle could refresh the editor from an older/default server snapshot.
+- Modern Luxury "Cinematic" could be technically active but visually too subtle compared with Natural.
+
+Fixes:
+- WebsiteManagementPage.saveDraft() now snapshots the exact local draft, sends that snapshot to PUT /website, and restores that same snapshot into editor state after a successful save instead of replacing it with the mutation response/refetched query.
+- Added regression assertions that Hero composition, Image treatment, and Show hero badge remain selected after Save Draft.
+- Strengthened the Cinematic hero treatment with stronger desaturation, contrast, brightness reduction, scale, vignette, and layered dark gradient treatment.
+- Added a renderer regression assertion that the cinematic hero media uses the expected image and luxuryCinematic class.
+
+Commits:
+- 50fdc1dad3b045cc4a55e0a3c7a8401262322d74 — fix(website): keep saved template settings in editor
+- cdbc6446aeac07de56710387ebf36e53618b707d — test(website): verify template settings stay after save
+- 6cfe2f700273163e42996ff7e5c36e870aa52a4d — fix(website): make cinematic hero treatment visibly distinct
+- 03d2eebdd426b15cef616c56c9924785309b8cc7 — test(website): verify cinematic hero media is active
+
+Local verification required before considering this milestone complete:
+1. Pull the latest frontend commits.
+2. Run typecheck, tests, and production build.
+3. In Website CMS, set Modern Luxury settings to non-default values, Save Draft, and confirm the controls remain unchanged.
+4. Reload the CMS and confirm the saved values remain.
+5. Compare Natural vs Cinematic with an actual hero image; Cinematic should now be visibly darker, more desaturated, higher-contrast, and vignetted.
+6. Preview Draft and live publish should preserve the same template settings.
