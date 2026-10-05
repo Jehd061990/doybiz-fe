@@ -1769,3 +1769,129 @@ Do not remove or alter the Classic template while verifying Modern Luxury.
 
 Run the full verification commands. If green, manually inspect the Modern Luxury visual output and then refine only any visual/UX issues discovered.
 
+
+
+# 39. Modern Luxury Template Persistence Fix — Critical Regression
+
+During manual verification, the Modern Luxury template could be selected in the Website CMS, but after **Save Draft** or **Preview Draft** the CMS radio selection reverted to Classic. The preview and live public website also rendered Classic.
+
+## Root cause
+
+Two frontend normalization functions were still using the Phase 1 placeholder behavior that converted every non-Classic template back to Classic:
+
+1. `src/components/website-management-page.tsx`
+
+The CMS draft clone contained:
+
+```ts
+template: cloned.template === 'CLASSIC' ? 'CLASSIC' : 'CLASSIC'
+```
+
+This meant a persisted `MODERN_LUXURY` draft was converted back to `CLASSIC` whenever the CMS reloaded/refetched the draft.
+
+2. `src/components/public/client-landing-page.tsx`
+
+The public website normalizer contained the same behavior:
+
+```ts
+template: website.template === 'CLASSIC' ? 'CLASSIC' : 'CLASSIC'
+```
+
+Therefore even when the backend returned `MODERN_LUXURY`, the public renderer received `CLASSIC`.
+
+## Fix
+
+Both normalizers now explicitly preserve the supported Modern Luxury key:
+
+```ts
+template: cloned.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : 'CLASSIC'
+```
+
+and:
+
+```ts
+template: website.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : 'CLASSIC'
+```
+
+This keeps backward compatibility by treating unknown values as Classic while preserving the newly supported Modern Luxury value.
+
+## Regression tests added
+
+Added coverage to:
+
+```
+src/components/public/client-landing-page.test.tsx
+src/components/website-management-page.test.tsx
+```
+
+The public template test now verifies that the Modern Luxury-specific renderer output (`.luxuryShell`) is actually rendered, not merely the same shared content.
+
+The CMS test verifies that a persisted `MODERN_LUXURY` draft is restored with the Modern Luxury radio selected.
+
+## Commits
+
+```
+c70c5561d7d867a0e9aba39d8c6bc3a9ec3b266a
+fix(website): preserve selected landing template on public site
+
+8f2b1e5c4ea573d0bced5918a6b99aac2a1b5803
+fix(website): preserve template selection in CMS draft
+
+330e8f3d7dac1b6b1ed6381f64fa7a32fcbdfd9b
+test(website): verify modern luxury template is rendered
+
+c082867eb9f4aa2e39496996bc158b756669c46b
+test(website): preserve modern luxury draft selection
+```
+
+## Verification status
+
+The user previously confirmed:
+
+```
+npm run typecheck
+PASS
+
+npm test -- --runInBand
+PASS
+27 suites / 120 tests
+
+npm run build
+PASS
+```
+
+Those results were from before the persistence regression fix. The new commits therefore require a fresh local verification run.
+
+## Required verification
+
+After pulling the latest frontend:
+
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+Then manually verify the complete persistence path:
+
+1. Select **Modern Luxury** in `/app/website`.
+2. Click **Save Draft**.
+3. Confirm the radio remains **Modern Luxury** after the CMS refresh.
+4. Click **Preview draft** and confirm the preview renders the Modern Luxury visual layout.
+5. Click **Publish**.
+6. Open `/site?tenant=onepiecesalon`.
+7. Confirm the live website renders Modern Luxury.
+8. Open `/site/book?tenant=onepiecesalon` and confirm booking still works.
+9. Switch back to Classic and confirm Classic still renders correctly.
+
+## Known non-blocking test warning
+
+The existing `ClientLandingPage` Jest tests may print React `act(...)` warnings from asynchronous staff/availability state updates. These do not currently fail the suite, but they should be cleaned up in a later test-maintenance task without changing production booking behavior.
+
+## Next recommended task
+
+Complete the fresh automated and manual verification above. If all checks pass, mark Modern Luxury as fully verified and record the final verification commit in this continuity document.
+
+Rule remains:
+
+**Inspect first. Extend second. Test third. Document fourth.**
