@@ -34,13 +34,14 @@ const mockResponse = (payload: unknown, status = 200) => ({
   json: async () => payload,
 });
 
-function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY'; templateSettings?: any } = {}) {
+function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY'; templateSettings?: any; heroBackgroundImageUrl?: string } = {}) {
   const currentWebsite = {
     ...website,
     bookingCta: { ...website.bookingCta, mode: options.bookingCtaMode ?? website.bookingCta.mode },
     sectionOrder: options.sectionOrder ?? website.sectionOrder,
     template: options.template ?? website.template,
-    templateSettings: options.templateSettings ?? website.templateSettings,
+    templateSettings: options.templateSettings,
+    hero: { ...website.hero, backgroundImageUrl: options.heroBackgroundImageUrl ?? website.hero.backgroundImageUrl },
   };
 
   const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
@@ -121,6 +122,7 @@ describe('ClientLandingPage', () => {
   it('applies Modern Luxury presentation settings to the public renderer', async () => {
     mockPublicApi({
       template: 'MODERN_LUXURY',
+      heroBackgroundImageUrl: 'https://example.com/hero.jpg',
       templateSettings: {
         classic: { heroAlignment: 'left', navigationStyle: 'standard', sectionSpacing: 'comfortable', heroImagePosition: 'center', ctaStyle: 'solid' },
         modernLuxury: { heroComposition: 'full-bleed', navigationStyle: 'editorial', sectionSpacing: 'airy', imageTreatment: 'cinematic', overlayIntensity: 'strong', showHeroBadge: true },
