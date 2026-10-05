@@ -3,6 +3,7 @@ import { ClientLandingPage } from './client-landing-page';
 import { navigateTo } from './navigation';
 
 const website = {
+  template: 'CLASSIC' as const,
   sectionOrder: ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
   branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
   hero: { eyebrow: 'WELCOME', title: 'Test title', description: 'Test description', cardLabel: 'ONLINE RESERVATIONS', cardTitle: 'Choose your service.', backgroundImageUrl: '' },
@@ -86,6 +87,16 @@ jest.mock('@/components/services/service-image', () => ({
 describe('ClientLandingPage', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it('uses the selected Classic template renderer', async () => {
+    mockPublicApi();
+
+    render(<ClientLandingPage developmentTenant="onepiecesalon" />);
+
+    expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Services' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Haircut' })).toBeInTheDocument();
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
