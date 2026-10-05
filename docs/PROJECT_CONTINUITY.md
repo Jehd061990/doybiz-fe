@@ -1149,6 +1149,59 @@ The next work should focus on **incremental CMS/public-site enhancement**, with 
 
 ---
 
+
+---
+
+# 33. Section Builder Publish Regression Coverage
+
+After reviewing the current Section Builder implementation, an additional regression test was added to verify that the **Publish** action sends the complete edited draft state before calling the dedicated publish endpoint.
+
+The new coverage verifies that one Publish operation preserves and sends together:
+
+- section order
+- section visibility/enabled state
+- Services content
+- Branches content
+- Contact content
+- branding
+- booking CTA
+- footer content
+
+It also verifies that the dedicated publish action remains:
+
+```text
+PUT /website
+    ↓
+POST /website/publish
+```
+
+This closes an important frontend regression gap: previously the publish test only asserted the Hero headline, so a future change could accidentally omit another part of the website configuration while the test suite still passed.
+
+### New commit
+
+```text
+ee31adbcf470a20db716e9f601743a2922e61013
+test(website): cover complete publish payload
+```
+
+### Next verification
+
+Run locally:
+
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+Then manually verify the published order/visibility on:
+
+```text
+/site?tenant=onepiecesalon
+```
+
+The next implementation milestone remains improving the Section Builder/public rendering contract before adding additional section types.
+
 # 32. Final Rule
 
 > **Inspect first. Extend second. Test third. Document fourth.**
