@@ -61,12 +61,15 @@ describe('WebsiteManagementPage', () => {
     await renderWebsiteManagementPage();
 
     expect(screen.getByRole('heading', { name: 'Landing Page Template' })).toBeInTheDocument();
-    const classic = screen.getByRole('radio', { name: /Classic/ });
+    const templateRadios = screen.getAllByRole('radio', { name: 'Use this template' });
+    expect(templateRadios).toHaveLength(2);
+    const classic = templateRadios[0];
+    const modernLuxury = templateRadios[1];
     expect(classic).toBeChecked();
 
-    expect(screen.getByRole('radio', { name: /Modern Luxury/ })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('radio', { name: /Modern Luxury/ }));
-    expect(screen.getByRole('radio', { name: /Modern Luxury/ })).toBeChecked();
+    expect(modernLuxury).toBeInTheDocument();
+    fireEvent.click(modernLuxury);
+    expect(modernLuxury).toBeChecked();
     fireEvent.click(screen.getAllByRole('button', { name: 'Preview template' })[1]);
     expect(window.localStorage.getItem('doybiz:website-preview-draft')).toContain('MODERN_LUXURY');
     expect(window.open).toHaveBeenCalledWith('/site?preview=draft', '_blank', 'noopener,noreferrer');
@@ -82,8 +85,9 @@ describe('WebsiteManagementPage', () => {
   it('restores a saved Modern Luxury draft as the selected template', async () => {
     draft.template = 'MODERN_LUXURY';
     await renderWebsiteManagementPage();
-    expect(screen.getByRole('radio', { name: /Modern Luxury/ })).toBeChecked();
-    expect(screen.getByRole('radio', { name: /Classic/ })).not.toBeChecked();
+    const templateRadios = screen.getAllByRole('radio', { name: 'Use this template' });
+    expect(templateRadios[1]).toBeChecked();
+    expect(templateRadios[0]).not.toBeChecked();
     draft.template = 'CLASSIC';
   });
 
