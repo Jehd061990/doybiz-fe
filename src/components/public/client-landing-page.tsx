@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import styles from './client-landing-page.module.css';
 import { navigateTo } from './navigation';
 import {
@@ -272,6 +272,14 @@ export function ClientLandingPage({
   const website = site.website;
   const landingPageHref = tenantQuery ? `/site${tenantQuery}` : '/site';
   const bookingPageHref = tenantQuery ? `/site/book${tenantQuery}` : '/site/book';
+  const siteStyle = {
+    '--site-primary': website.branding.primaryColor,
+    '--site-accent': website.branding.accentColor,
+    '--site-background': website.branding.backgroundColor,
+    '--site-text': website.branding.textColor,
+    display: 'flex',
+    flexDirection: 'column',
+  } as CSSProperties;
 
   const handleBookingCta = () => {
     if (website.bookingCta.mode === 'page') {
@@ -284,14 +292,7 @@ export function ClientLandingPage({
   return (
     <main
       className={bookingOnly ? `${styles.page} ${styles.bookingOnlyPage}` : styles.page}
-      style={{
-        '--site-primary': website.branding.primaryColor,
-        '--site-accent': website.branding.accentColor,
-        '--site-background': website.branding.backgroundColor,
-        '--site-text': website.branding.textColor,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
+      style={siteStyle}
     >
       <WebsiteRenderer
         organization={organization}
