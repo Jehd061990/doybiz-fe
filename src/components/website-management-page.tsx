@@ -5,8 +5,45 @@ import { useCustom, useCustomMutation, type HttpError } from '@refinedev/core';
 import { WEBSITE_TEMPLATES, type WebsiteTemplateKey } from './public/website-renderer';
 
 type WebsiteSectionKey = 'HERO' | 'SERVICES' | 'BRANCHES' | 'CONTACT';
+type WebsiteTemplateSettings = {
+  classic: {
+    heroAlignment: 'left' | 'center';
+    navigationStyle: 'standard' | 'minimal';
+    sectionSpacing: 'comfortable' | 'compact';
+    heroImagePosition: 'center' | 'top' | 'bottom';
+    ctaStyle: 'solid' | 'outline';
+  };
+  modernLuxury: {
+    heroComposition: 'full-bleed' | 'split';
+    navigationStyle: 'editorial' | 'minimal';
+    sectionSpacing: 'airy' | 'compact';
+    imageTreatment: 'natural' | 'cinematic';
+    overlayIntensity: 'soft' | 'strong';
+    showHeroBadge: boolean;
+  };
+};
+
+const DEFAULT_TEMPLATE_SETTINGS: WebsiteTemplateSettings = {
+  classic: {
+    heroAlignment: 'left',
+    navigationStyle: 'standard',
+    sectionSpacing: 'comfortable',
+    heroImagePosition: 'center',
+    ctaStyle: 'solid',
+  },
+  modernLuxury: {
+    heroComposition: 'full-bleed',
+    navigationStyle: 'editorial',
+    sectionSpacing: 'airy',
+    imageTreatment: 'natural',
+    overlayIntensity: 'strong',
+    showHeroBadge: true,
+  },
+};
+
 type WebsiteValue = {
   template: WebsiteTemplateKey;
+  templateSettings: WebsiteTemplateSettings;
   sectionOrder: WebsiteSectionKey[];
   branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
@@ -24,9 +61,14 @@ type MediaAsset = { _id: string; originalName: string; mimeType: string; size: n
 
 const clone = (value: WebsiteValue): WebsiteValue => {
   const cloned = JSON.parse(JSON.stringify(value)) as WebsiteValue & { bookingCta?: Partial<WebsiteValue['bookingCta']> };
+  const templateSettings = cloned.templateSettings || DEFAULT_TEMPLATE_SETTINGS;
   return {
     ...cloned,
     template: cloned.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : 'CLASSIC',
+    templateSettings: {
+      classic: { ...DEFAULT_TEMPLATE_SETTINGS.classic, ...(templateSettings.classic || {}) },
+      modernLuxury: { ...DEFAULT_TEMPLATE_SETTINGS.modernLuxury, ...(templateSettings.modernLuxury || {}) },
+    },
     sectionOrder: Array.isArray(cloned.sectionOrder) ? [...new Set(cloned.sectionOrder)].filter((key): key is WebsiteSectionKey => ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'].includes(key)) : ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
     bookingCta: {
       enabled: cloned.bookingCta?.enabled ?? true,
@@ -274,6 +316,196 @@ export function WebsiteManagementPage() {
               );
             })}
           </div>
+        </section>
+
+        <section className="billing-section">
+          <div className="billing-section-heading">
+            <div>
+              <h2>Template Settings</h2>
+              <p>Fine-tune the selected template without changing shared website content or booking behavior.</p>
+            </div>
+          </div>
+          {draft.template === 'CLASSIC' ? (
+            <div className="form-grid">
+              <label className="field-control">
+                <span>Hero alignment</span>
+                <select
+                  value={draft.templateSettings.classic.heroAlignment}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      classic: { ...current.templateSettings.classic, heroAlignment: event.target.value as 'left' | 'center' },
+                    },
+                  }) : current)}
+                >
+                  <option value="left">Left aligned</option>
+                  <option value="center">Centered</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Navigation style</span>
+                <select
+                  value={draft.templateSettings.classic.navigationStyle}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      classic: { ...current.templateSettings.classic, navigationStyle: event.target.value as 'standard' | 'minimal' },
+                    },
+                  }) : current)}
+                >
+                  <option value="standard">Standard</option>
+                  <option value="minimal">Minimal</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Section spacing</span>
+                <select
+                  value={draft.templateSettings.classic.sectionSpacing}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      classic: { ...current.templateSettings.classic, sectionSpacing: event.target.value as 'comfortable' | 'compact' },
+                    },
+                  }) : current)}
+                >
+                  <option value="comfortable">Comfortable</option>
+                  <option value="compact">Compact</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Hero image position</span>
+                <select
+                  value={draft.templateSettings.classic.heroImagePosition}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      classic: { ...current.templateSettings.classic, heroImagePosition: event.target.value as 'center' | 'top' | 'bottom' },
+                    },
+                  }) : current)}
+                >
+                  <option value="center">Center</option>
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>CTA style</span>
+                <select
+                  value={draft.templateSettings.classic.ctaStyle}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      classic: { ...current.templateSettings.classic, ctaStyle: event.target.value as 'solid' | 'outline' },
+                    },
+                  }) : current)}
+                >
+                  <option value="solid">Solid</option>
+                  <option value="outline">Outline</option>
+                </select>
+              </label>
+            </div>
+          ) : (
+            <div className="form-grid">
+              <label className="field-control">
+                <span>Hero composition</span>
+                <select
+                  value={draft.templateSettings.modernLuxury.heroComposition}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      modernLuxury: { ...current.templateSettings.modernLuxury, heroComposition: event.target.value as 'full-bleed' | 'split' },
+                    },
+                  }) : current)}
+                >
+                  <option value="full-bleed">Full bleed</option>
+                  <option value="split">Split composition</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Navigation style</span>
+                <select
+                  value={draft.templateSettings.modernLuxury.navigationStyle}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      modernLuxury: { ...current.templateSettings.modernLuxury, navigationStyle: event.target.value as 'editorial' | 'minimal' },
+                    },
+                  }) : current)}
+                >
+                  <option value="editorial">Editorial</option>
+                  <option value="minimal">Minimal</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Section spacing</span>
+                <select
+                  value={draft.templateSettings.modernLuxury.sectionSpacing}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      modernLuxury: { ...current.templateSettings.modernLuxury, sectionSpacing: event.target.value as 'airy' | 'compact' },
+                    },
+                  }) : current)}
+                >
+                  <option value="airy">Airy</option>
+                  <option value="compact">Compact</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Image treatment</span>
+                <select
+                  value={draft.templateSettings.modernLuxury.imageTreatment}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      modernLuxury: { ...current.templateSettings.modernLuxury, imageTreatment: event.target.value as 'natural' | 'cinematic' },
+                    },
+                  }) : current)}
+                >
+                  <option value="natural">Natural</option>
+                  <option value="cinematic">Cinematic</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span>Hero overlay</span>
+                <select
+                  value={draft.templateSettings.modernLuxury.overlayIntensity}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      modernLuxury: { ...current.templateSettings.modernLuxury, overlayIntensity: event.target.value as 'soft' | 'strong' },
+                    },
+                  }) : current)}
+                >
+                  <option value="soft">Soft</option>
+                  <option value="strong">Strong</option>
+                </select>
+              </label>
+              <label className="field-control">
+                <span><input
+                  type="checkbox"
+                  checked={draft.templateSettings.modernLuxury.showHeroBadge}
+                  onChange={event => setDraft(current => current ? ({
+                    ...current,
+                    templateSettings: {
+                      ...current.templateSettings,
+                      modernLuxury: { ...current.templateSettings.modernLuxury, showHeroBadge: event.target.checked },
+                    },
+                  }) : current)}
+                /> Show hero badge</span>
+              </label>
+            </div>
+          )}
         </section>
 
         <section className="billing-section">
