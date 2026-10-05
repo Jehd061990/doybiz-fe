@@ -69,3 +69,6 @@
   .luxuryCompact .luxuryContact { padding-top: 52px; padding-bottom: 52px; }
   .luxuryHeroSplit .luxuryHeroImage { min-height: 500px; }
 }
+
+
+.bookingPageIntro{margin:8px 0 0;max-width:680px;color:#687069;font-size:14px;line-height:1.5}.bookingSelectionSummary{display:flex;gap:10px;flex-wrap:wrap;margin:-2px 0 4px}.bookingSelectionSummary span{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border:1px solid #e4dfd7;border-radius:12px;background:#fbfaf7;color:#4d554f;font-size:13px}.bookingSelectionSummary b{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--site-primary)}
