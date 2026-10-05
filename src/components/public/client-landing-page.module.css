@@ -61,6 +61,7 @@
 .luxuryCompact .luxuryDarkSection,
 .luxuryCompact .luxuryContact { padding-top: 72px; padding-bottom: 72px; }
 .luxuryHeaderMinimal { border-bottom-color: transparent; background: transparent; }
+.luxuryCinematic { filter: saturate(.82) contrast(1.08); }
 .luxuryHeroSplit .luxuryHeroImage { min-height: 560px; }
 @media (max-width: 700px) {
   .heroCompact { padding-top: 36px; padding-bottom: 36px; }
