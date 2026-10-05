@@ -235,7 +235,6 @@ export function ModernLuxuryTemplate({
   const overlay = settings.overlayIntensity === 'soft'
     ? 'linear-gradient(180deg, rgba(12,12,12,.04), rgba(12,12,12,.48))'
     : 'linear-gradient(180deg, rgba(12,12,12,.08), rgba(12,12,12,.72))';
-  const imageFilter = undefined;
 
   return (
     <div className={shellClass}>
