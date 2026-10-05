@@ -59,7 +59,14 @@ type WebsiteValue = {
   template: WebsiteTemplateKey;
   templateSettings: WebsiteTemplateSettings;
   sectionOrder: WebsiteSectionKey[];
-  branding: { primaryColor: string; accentColor: string; backgroundColor: string; textColor: string };
+  branding: {
+    primaryColor: string;
+    accentColor: string;
+    backgroundColor: string;
+    textColor: string;
+    logoUrl: string;
+    brandDisplay: 'text' | 'logo' | 'both' | 'none';
+  };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
   bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
   sections: {
@@ -78,6 +85,11 @@ const clone = (value: WebsiteValue): WebsiteValue => {
   const templateSettings = cloned.templateSettings || DEFAULT_TEMPLATE_SETTINGS;
   return {
     ...cloned,
+    branding: {
+      ...cloned.branding,
+      logoUrl: cloned.branding?.logoUrl || '',
+      brandDisplay: cloned.branding?.brandDisplay || 'text',
+    },
     template: cloned.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : cloned.template === 'MINIMAL_MODERN' ? 'MINIMAL_MODERN' : 'CLASSIC',
     templateSettings: {
       classic: { ...DEFAULT_TEMPLATE_SETTINGS.classic, ...(templateSettings.classic || {}) },
@@ -154,6 +166,31 @@ export function WebsiteManagementPage() {
       setMessage('Image uploaded and selected for the hero. Save draft to keep the change.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to upload image.');
+    } finally {
+      setMediaUploading(false);
+    }
+  }
+
+  async function uploadLogo(file: File) {
+    setError('');
+    setMessage('');
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Logo image must be 5 MB or smaller.');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    setMediaUploading(true);
+    try {
+      const response = await fetch('/api/backend/media', { method: 'POST', body: formData });
+      const body = await response.json();
+      if (!response.ok || !body.asset) throw new Error(body.message || 'Unable to upload logo.');
+      const asset = body.asset as MediaAsset;
+      setMedia(current => [asset, ...current]);
+      setDraft(current => current ? ({ ...current, branding: { ...current.branding, logoUrl: asset.url } }) : current);
+      setMessage('Logo uploaded and selected. Save draft to keep the change.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to upload logo.');
     } finally {
       setMediaUploading(false);
     }
@@ -564,7 +601,12 @@ export function WebsiteManagementPage() {
         </section>
 
         <section className="billing-section">
-          <div className="billing-section-heading"><h2>Branding</h2></div>
+          <div className="billing-section-heading">
+            <div>
+              <h2>Branding</h2>
+              <p>Control the navigation brand shown on the public website.</p>
+            </div>
+          </div>
           <div className="form-grid">
             {([
               ['primaryColor', 'Primary color'], ['accentColor', 'Accent color'],
@@ -572,6 +614,44 @@ export function WebsiteManagementPage() {
             ] as const).map(([key, label]) => (
               <label className="field-control" key={key}><span>{label}</span><input value={draft.branding[key]} onChange={event => updateBranding(key, event.target.value)} placeholder="#111111" /></label>
             ))}
+            <label className="field-control">
+              <span>Navigation brand</span>
+              <select
+                value={draft.branding.brandDisplay}
+                onChange={event => setDraft(current => current ? ({
+                  ...current,
+                  branding: { ...current.branding, brandDisplay: event.target.value as WebsiteValue['branding']['brandDisplay'] },
+                }) : current)}
+              >
+                <option value="text">Text only</option>
+                <option value="logo">Logo only</option>
+                <option value="both">Logo + text</option>
+                <option value="none">Hide brand</option>
+              </select>
+            </label>
+            <label className="field-control">
+              <span>Logo image URL</span>
+              <input
+                type="url"
+                value={draft.branding.logoUrl}
+                onChange={event => setDraft(current => current ? ({
+                  ...current,
+                  branding: { ...current.branding, logoUrl: event.target.value },
+                }) : current)}
+                placeholder="https://…"
+              />
+              <small>Used when the navigation brand is set to Logo or Logo + text.</small>
+            </label>
+            <div className="field-control">
+              <span>Upload logo</span>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                <label className="secondary-button" style={{ cursor: mediaUploading ? 'wait' : 'pointer' }}>
+                  {mediaUploading ? 'Uploading…' : 'Upload logo'}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" disabled={mediaUploading} hidden onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void uploadLogo(file); }} />
+                </label>
+                {draft.branding.logoUrl ? <img src={draft.branding.logoUrl} alt="Current logo preview" style={{ height: 40, maxWidth: 180, objectFit: 'contain', border: '1px solid #e5e5e5', borderRadius: 6, padding: 4 }} /> : <small>No logo selected.</small>}
+              </div>
+            </div>
           </div>
         </section>
 
