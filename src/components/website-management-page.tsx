@@ -526,7 +526,6 @@ export function WebsiteManagementPage() {
                 /> Show hero badge</span>
               </label>
             </div>
-          )}
           ) : (
             <div className="form-grid">
               <label className="field-control">
