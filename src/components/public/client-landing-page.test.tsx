@@ -34,7 +34,7 @@ const mockResponse = (payload: unknown, status = 200) => ({
   json: async () => payload,
 });
 
-function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY'; templateSettings?: any; heroBackgroundImageUrl?: string } = {}) {
+function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY' | 'MINIMAL_MODERN'; templateSettings?: any; heroBackgroundImageUrl?: string } = {}) {
   const currentWebsite = {
     ...website,
     bookingCta: { ...website.bookingCta, mode: options.bookingCtaMode ?? website.bookingCta.mode },
@@ -111,6 +111,21 @@ describe('ClientLandingPage', () => {
     expect(screen.getByRole('link', { name: 'Services' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Haircut' })).toBeInTheDocument();
     expect(document.querySelector('.luxuryShell')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Book now' })[0]);
+    expect(screen.getByRole('dialog', { name: 'Book an appointment' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '10:00' })).toBeInTheDocument();
+    });
+  });
+
+  it('renders the Minimal Modern template with the shared booking CTA and content', async () => {
+    mockPublicApi({ template: 'MINIMAL_MODERN' });
+
+    render(<ClientLandingPage developmentTenant="onepiecesalon" />);
+
+    expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
+    expect(document.querySelector('.minimalModernShell')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Haircut' })).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'Book now' })[0]);
     expect(screen.getByRole('dialog', { name: 'Book an appointment' })).toBeInTheDocument();
     await waitFor(() => {
