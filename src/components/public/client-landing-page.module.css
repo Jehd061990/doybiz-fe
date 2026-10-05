@@ -67,6 +67,19 @@
   transform:scale(1.06);
   box-shadow:inset 0 0 180px rgba(0,0,0,.42);
 }
+.luxuryCinematicFrame{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  border-top:14px solid rgba(0,0,0,.78);
+  border-bottom:14px solid rgba(0,0,0,.78);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08), inset 0 0 140px rgba(0,0,0,.5);
+}
+.luxuryHeroImage[data-image-treatment="cinematic"] .luxuryHeroContent,
+.luxuryHeroImage[data-image-treatment="cinematic"] .luxuryHeroBadge{
+  z-index:2;
+}
 .luxuryCinematic::after{
   content:'';
   position:absolute;
