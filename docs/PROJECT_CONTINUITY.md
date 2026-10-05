@@ -1895,3 +1895,147 @@ Complete the fresh automated and manual verification above. If all checks pass, 
 Rule remains:
 
 **Inspect first. Extend second. Test third. Document fourth.**
+
+---
+
+# 16. Modern Luxury Template — Fully Verified
+
+The Modern Luxury landing page template is now fully verified across the complete CMS lifecycle.
+
+### Verified flow
+
+```text
+/app/website
+    ↓
+Select Modern Luxury
+    ↓
+Save Draft
+    ↓
+Preview Draft
+    ↓
+Publish
+    ↓
+/site?tenant=onepiecesalon
+    ↓
+/site/book?tenant=onepiecesalon
+```
+
+Manual verification confirmed:
+
+- Modern Luxury can be selected in Website CMS.
+- Save Draft preserves `MODERN_LUXURY`.
+- Reloading the CMS preserves the selected template.
+- Preview Draft renders the Modern Luxury layout.
+- Publish preserves and publishes the Modern Luxury configuration.
+- Live public website renders Modern Luxury.
+- Dedicated booking page continues to work.
+- Existing Classic template remains available.
+
+### Root cause discovered during final verification
+
+The first manual persistence test showed:
+
+- Preview Draft → Modern Luxury
+- Save Draft → Classic
+- Publish → Classic
+
+The backend GitHub implementation already supported `MODERN_LUXURY`, but the locally running backend had not yet been pulled/restarted with the latest backend template-normalization commits.
+
+After updating the backend and restarting it, Save Draft and Publish correctly preserved `MODERN_LUXURY`.
+
+This reinforces the project verification rule:
+
+> When a frontend configuration works in local preview but not after persistence, verify the running backend version and restart state before changing working frontend code.
+
+### Test maintenance
+
+The Modern Luxury public rendering test was tightened to wait for the asynchronous availability request after opening the booking modal, addressing the React `act(...)` warning caused by asynchronous staff/availability state updates during that test.
+
+### Final automated verification
+
+Frontend verification completed successfully:
+
+```text
+npm run typecheck
+PASS
+
+npm test -- --runInBand
+PASS
+27 suites / 121 tests
+
+npm run build
+PASS
+```
+
+### Relevant implementation
+
+Frontend:
+
+```text
+src/components/public/website-renderer.tsx
+src/components/public/client-landing-page.tsx
+src/components/public/client-landing-page.test.tsx
+src/components/website-management-page.tsx
+src/components/website-management-page.test.tsx
+src/components/public/client-landing-page.module.css
+```
+
+Backend:
+
+```text
+src/models/WebsiteConfig.ts
+src/services/websiteService.ts
+```
+
+### Important commits
+
+```text
+fcd40857d6ffe029f48ed9a2ff26ea020e150fc6
+feat(website): add modern luxury template contract
+
+e2f0e487efa2b2829fff1cac0b8e7a54fe3653f9
+feat(website): normalize modern luxury template
+
+4e5fda1a0c353f640a18deb9e74a9fa432750d30
+feat(website): add modern luxury landing template
+
+42a130256cc5a4b1252662061b1f529e53dd81fa
+feat(website): style modern luxury landing template
+
+c70c5561d7d867a0e9aba39d8c6bc3a9ec3b266a
+fix(website): preserve selected landing template on public site
+
+8f2b1e5c4ea573d0bced5918a6b99aac2a1b5803
+fix(website): preserve template selection in CMS draft
+
+330e8f3d7dac1b6b1ed6381f64fa7a32fcbdfd9b
+test(website): verify modern luxury template is rendered
+
+c082867eb9f4aa2e39496996bc158b756669c46b
+test(website): preserve modern luxury draft selection
+
+abec39d7f6f66df3b5e037fce439a638e1d66624
+test(website): await modern luxury booking availability
+```
+
+### Status
+
+**Modern Luxury template: VERIFIED**
+
+Do not rebuild the template architecture. The current shared model remains:
+
+```text
+WebsiteConfig
+    ↓
+WebsiteRenderer
+    ├── ClassicTemplate
+    └── ModernLuxuryTemplate
+    ↓
+shared booking flow
+```
+
+The next recommended task is to improve the CMS template-selection UX and add a safe visual template-preview experience before adding more landing-page templates.
+
+Rule remains:
+
+**Inspect first. Extend second. Test third. Document fourth.**
