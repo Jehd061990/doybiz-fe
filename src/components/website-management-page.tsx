@@ -82,6 +82,7 @@ const clone = (value: WebsiteValue): WebsiteValue => {
     templateSettings: {
       classic: { ...DEFAULT_TEMPLATE_SETTINGS.classic, ...(templateSettings.classic || {}) },
       modernLuxury: { ...DEFAULT_TEMPLATE_SETTINGS.modernLuxury, ...(templateSettings.modernLuxury || {}) },
+      minimalModern: { ...DEFAULT_TEMPLATE_SETTINGS.minimalModern, ...(templateSettings.minimalModern || {}) },
     },
     sectionOrder: Array.isArray(cloned.sectionOrder) ? [...new Set(cloned.sectionOrder)].filter((key): key is WebsiteSectionKey => ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'].includes(key)) : ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
     bookingCta: {
