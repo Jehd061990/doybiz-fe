@@ -1528,3 +1528,81 @@ If verification passes, manually check the Classic template on:
 ```
 
 Then proceed to the first genuinely different `MODERN_LUXURY` template.
+
+# 37. Landing Page Template System Phase 1 — Fully Verified
+
+The developer completed the post-fix local verification and manually checked the resulting website output.
+
+## Automated verification
+
+All required frontend checks passed after the CSS variable typing fix:
+
+```text
+npm run typecheck
+PASS
+
+npm test -- --runInBand
+PASS
+27 test suites passed
+119 tests passed
+
+npm run build
+PASS
+```
+
+The earlier TypeScript error for the custom landing-page CSS variables is therefore resolved.
+
+## Manual verification
+
+The developer also checked the rendered output after the changes. The Classic landing page/template behavior and the dedicated booking-page output were confirmed working.
+
+Verified areas include:
+- `/app/website`
+- Classic template selection
+- `/site?tenant=onepiecesalon`
+- `/site/book?tenant=onepiecesalon`
+- landing-page navigation
+- booking page presentation
+- existing booking flow/output
+
+## Milestone status
+
+**Landing Page Template System Phase 1 is now fully verified.**
+
+The architecture is ready for the next template implementation:
+
+```text
+Website Config
+    ↓
+WebsiteRenderer
+    ↓
+CLASSIC
+    ↓
+shared public/booking behavior
+
+Next:
+WebsiteRenderer
+    ↓
+MODERN_LUXURY
+```
+
+The next implementation should add a genuinely different visual template while continuing to consume the same WebsiteConfig, public data, and shared booking workflow.
+
+## Relevant commit
+
+```text
+51bf7e0cb7d8a3211ad0554ebfba1b51418c69da
+fix(website): type custom landing page css variables
+```
+
+## Next recommended task
+
+Proceed to **MODERN_LUXURY**.
+
+Before implementation, inspect the current Classic renderer and CMS template selector, then extend the existing template registry/renderer architecture without duplicating:
+- website business data
+- booking state
+- availability logic
+- reservation API
+- customer details flow
+- public tenant resolution
