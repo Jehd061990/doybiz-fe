@@ -254,4 +254,13 @@ describe('ClientLandingPage', () => {
       expect(screen.getByRole('button', { name: '10:00' })).toBeInTheDocument();
     });
   });
+  it('renders the generic Three.js hero layer for Modern Luxury', async () => {
+    mockPublicApi({ template: 'MODERN_LUXURY' });
+
+    render(<ClientLandingPage developmentTenant="onepiecesalon" />);
+
+    expect(await screen.findByRole('heading', { name: 'Test title' })).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="modern-luxury-3d-hero"]')).toBeInTheDocument();
+  });
+
 });
