@@ -111,6 +111,9 @@ describe('ClientLandingPage', () => {
     expect(document.querySelector('.luxuryShell')).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'Book now' })[0]);
     expect(screen.getByRole('dialog', { name: 'Book an appointment' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '10:00' })).toBeInTheDocument();
+    });
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
