@@ -26,7 +26,7 @@ const clone = (value: WebsiteValue): WebsiteValue => {
   const cloned = JSON.parse(JSON.stringify(value)) as WebsiteValue & { bookingCta?: Partial<WebsiteValue['bookingCta']> };
   return {
     ...cloned,
-    template: cloned.template === 'CLASSIC' ? 'CLASSIC' : 'CLASSIC',
+    template: cloned.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : 'CLASSIC',
     sectionOrder: Array.isArray(cloned.sectionOrder) ? [...new Set(cloned.sectionOrder)].filter((key): key is WebsiteSectionKey => ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'].includes(key)) : ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
     bookingCta: {
       enabled: cloned.bookingCta?.enabled ?? true,
