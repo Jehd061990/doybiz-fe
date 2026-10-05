@@ -67,6 +67,9 @@ describe('WebsiteManagementPage', () => {
     expect(screen.getByRole('radio', { name: /Modern Luxury/ })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('radio', { name: /Modern Luxury/ }));
     expect(screen.getByRole('radio', { name: /Modern Luxury/ })).toBeChecked();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Preview template' })[1]);
+    expect(window.localStorage.getItem('doybiz:website-preview-draft')).toContain('MODERN_LUXURY');
+    expect(window.open).toHaveBeenCalledWith('/site?preview=draft', '_blank', 'noopener,noreferrer');
     fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
 
     await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
