@@ -64,13 +64,15 @@ describe('WebsiteManagementPage', () => {
     const classic = screen.getByRole('radio', { name: /Classic/ });
     expect(classic).toBeChecked();
 
-    fireEvent.click(classic);
+    expect(screen.getByRole('radio', { name: /Modern Luxury/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: /Modern Luxury/ }));
+    expect(screen.getByRole('radio', { name: /Modern Luxury/ })).toBeChecked();
     fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
 
     await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
       url: '/website',
       method: 'put',
-      values: expect.objectContaining({ template: 'CLASSIC' }),
+      values: expect.objectContaining({ template: 'MODERN_LUXURY' }),
     })));
   });
 
