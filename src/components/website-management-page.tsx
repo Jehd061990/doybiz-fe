@@ -560,7 +560,10 @@ export function WebsiteManagementPage() {
               </label>
             </div>
           )}
-        </section>Branding</h2></div>
+        </section>
+
+        <section className="billing-section">
+          <div className="billing-section-heading"><h2>Branding</h2></div>
           <div className="form-grid">
             {([
               ['primaryColor', 'Primary color'], ['accentColor', 'Accent color'],
