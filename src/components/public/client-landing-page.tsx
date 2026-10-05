@@ -56,6 +56,11 @@ const PREVIEW_STORAGE_KEY = 'doybiz:website-preview-draft';
 const normalizeWebsite = (website: WebsiteValue): WebsiteValue => ({
   ...website,
   template: website.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : website.template === 'MINIMAL_MODERN' ? 'MINIMAL_MODERN' : 'CLASSIC',
+  branding: {
+    ...website.branding,
+    logoUrl: website.branding.logoUrl || '',
+    brandDisplay: website.branding.brandDisplay || 'text',
+  },
 });
 
 export function ClientLandingPage({
