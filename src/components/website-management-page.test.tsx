@@ -9,6 +9,7 @@ const mockMutation = jest.fn((args: { url: string; method: string; values: unkno
 );
 
 const draft = {
+  template: 'CLASSIC',
   sectionOrder: ['HERO', 'SERVICES', 'BRANCHES', 'CONTACT'],
   branding: { primaryColor: '#111111', accentColor: '#c59d5f', backgroundColor: '#f7f4ef', textColor: '#171717' },
   hero: { eyebrow: 'WELCOME', title: 'Test title', description: 'Test description', cardLabel: 'ONLINE RESERVATIONS', cardTitle: 'Choose your service.', backgroundImageUrl: '' },
@@ -54,6 +55,23 @@ describe('WebsiteManagementPage', () => {
     mockMutate.mockReset().mockResolvedValue({});
     mockPublish.mockReset().mockResolvedValue({});
     mockMutation.mockClear();
+  });
+
+  it('renders and persists the selected landing page template', async () => {
+    await renderWebsiteManagementPage();
+
+    expect(screen.getByRole('heading', { name: 'Landing Page Template' })).toBeInTheDocument();
+    const classic = screen.getByRole('radio', { name: /Classic/ });
+    expect(classic).toBeChecked();
+
+    fireEvent.click(classic);
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({
+      url: '/website',
+      method: 'put',
+      values: expect.objectContaining({ template: 'CLASSIC' }),
+    })));
   });
 
   it('renders the Website CMS editor', async () => {
