@@ -34,7 +34,7 @@ const mockResponse = (payload: unknown, status = 200) => ({
   json: async () => payload,
 });
 
-function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY'; templateSettings?: typeof website['templateSettings'] } = {}) {
+function mockPublicApi(options: { bookingCtaMode?: 'modal' | 'page'; sectionOrder?: string[]; template?: 'CLASSIC' | 'MODERN_LUXURY'; templateSettings?: any } = {}) {
   const currentWebsite = {
     ...website,
     bookingCta: { ...website.bookingCta, mode: options.bookingCtaMode ?? website.bookingCta.mode },
@@ -122,8 +122,8 @@ describe('ClientLandingPage', () => {
     mockPublicApi({
       template: 'MODERN_LUXURY',
       templateSettings: {
-        ...website.templateSettings,
-        modernLuxury: { ...website.templateSettings.modernLuxury, imageTreatment: 'cinematic' },
+        classic: { heroAlignment: 'left', navigationStyle: 'standard', sectionSpacing: 'comfortable', heroImagePosition: 'center', ctaStyle: 'solid' },
+        modernLuxury: { heroComposition: 'full-bleed', navigationStyle: 'editorial', sectionSpacing: 'airy', imageTreatment: 'cinematic', overlayIntensity: 'strong', showHeroBadge: true },
       },
     });
 
