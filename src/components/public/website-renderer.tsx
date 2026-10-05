@@ -235,7 +235,12 @@ export function ModernLuxuryTemplate({
   const overlay = settings.overlayIntensity === 'soft'
     ? 'linear-gradient(180deg, rgba(12,12,12,.04), rgba(12,12,12,.48))'
     : 'linear-gradient(180deg, rgba(12,12,12,.08), rgba(12,12,12,.72))';
-  const imageTreatmentClass = settings.imageTreatment === 'cinematic' ? styles.luxuryCinematic : '';
+  const isCinematic = settings.imageTreatment === 'cinematic';
+  const imageTreatmentClass = isCinematic ? styles.luxuryCinematic : styles.luxuryNatural;
+  const imageTreatmentStyle = {
+    filter: isCinematic ? 'grayscale(1) saturate(.24) contrast(1.38) brightness(.68)' : 'none',
+    transform: isCinematic ? 'scale(1.055)' : 'scale(1)',
+  } as const;
 
   return (
     <div className={shellClass}>
@@ -253,7 +258,11 @@ export function ModernLuxuryTemplate({
           {website.hero.backgroundImageUrl ? (
             <div
               className={`${styles.luxuryHeroMedia} ${imageTreatmentClass}`}
-              style={{ backgroundImage: overlay + ', url(' + website.hero.backgroundImageUrl + ')' }}
+              data-image-treatment={settings.imageTreatment}
+              style={{
+                backgroundImage: overlay + ', url(' + website.hero.backgroundImageUrl + ')',
+                ...imageTreatmentStyle,
+              }}
               aria-hidden="true"
             />
           ) : <div className={styles.luxuryHeroGlow} />}
