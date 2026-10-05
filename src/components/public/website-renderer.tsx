@@ -75,6 +75,9 @@ export type WebsiteValue = {
     textColor: string;
     logoUrl: string;
     brandDisplay: 'text' | 'logo' | 'both' | 'none';
+    logoShape: 'circle' | 'square' | 'heart' | 'star';
+    logoSize: 'small' | 'medium' | 'large' | 'xlarge';
+    brandLayout: 'horizontal' | 'vertical';
   };
   hero: { eyebrow: string; title: string; description: string; cardLabel: string; cardTitle: string; backgroundImageUrl: string };
   bookingCta: { enabled: boolean; label: string; mode: 'modal' | 'page' };
@@ -138,11 +141,26 @@ function BrandMark({ organization, website }: { organization: Organization; webs
   if (display === 'none') return null;
   const showLogo = (display === 'logo' || display === 'both') && Boolean(website.branding.logoUrl);
   const showText = display === 'text' || display === 'both' || !showLogo;
+  const shape = website.branding.logoShape || 'square';
+  const size = website.branding.logoSize || 'medium';
+  const layout = website.branding.brandLayout || 'horizontal';
+  const className = [
+    styles.brandMark,
+    showLogo ? styles[`brandShape_${shape}`] : '',
+    showLogo ? styles[`brandSize_${size}`] : '',
+    showLogo && showText ? styles[`brandLayout_${layout}`] : '',
+  ].filter(Boolean).join(' ');
   return (
-    <>
-      {showLogo && <img className={styles.brandMarkLogo} src={website.branding.logoUrl} alt="Navigation logo" />}
+    <span className={className} data-logo-shape={shape} data-logo-size={size} data-brand-layout={layout}>
+      {showLogo && (
+        <span className={styles.brandMarkFrame}>
+          <span className={styles.brandMarkFrameInner}>
+            <img className={styles.brandMarkLogo} src={website.branding.logoUrl} alt="Navigation logo" />
+          </span>
+        </span>
+      )}
       {showText && <span className={styles.brandMarkText}>{organization.name}</span>}
-    </>
+    </span>
   );
 }
 
