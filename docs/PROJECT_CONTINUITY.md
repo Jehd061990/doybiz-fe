@@ -1202,6 +1202,37 @@ Then manually verify the published order/visibility on:
 
 The next implementation milestone remains improving the Section Builder/public rendering contract before adding additional section types.
 
+# 34. Publish Regression Test Selector Fix
+
+The new complete-publish regression test initially failed because the Services card is expanded by default while Branches and Contact are collapsed by default. The failure was in the test setup, not the Section Builder implementation.
+
+The test was corrected to explicitly expand:
+
+- Branches via `Edit 3. Branches`
+- Contact via `Edit 4. Contact`
+
+before querying their title inputs. No application behavior was changed.
+
+### Fix commit
+
+```text
+3c3820fe8b0485d1114961d040f199a4f6424923
+test(website): expand collapsed sections before publish assertions
+```
+
+### Current verification status
+
+The selector fix is committed. Full local verification still needs to be rerun after pulling the latest commit:
+
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+Do not mark the new publish regression as fully verified until those commands pass.
+
+
 # 32. Final Rule
 
 > **Inspect first. Extend second. Test third. Document fourth.**
