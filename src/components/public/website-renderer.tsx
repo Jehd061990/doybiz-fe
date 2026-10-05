@@ -235,7 +235,7 @@ export function ModernLuxuryTemplate({
   const overlay = settings.overlayIntensity === 'soft'
     ? 'linear-gradient(180deg, rgba(12,12,12,.04), rgba(12,12,12,.48))'
     : 'linear-gradient(180deg, rgba(12,12,12,.08), rgba(12,12,12,.72))';
-  const imageFilter = settings.imageTreatment === 'cinematic' ? 'saturate(.82) contrast(1.08)' : undefined;
+  const imageFilter = undefined;
 
   return (
     <div className={shellClass}>
@@ -249,7 +249,7 @@ export function ModernLuxuryTemplate({
         </nav>
       </header>
       {!bookingOnly && <section id='top' className={heroClass} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
-        <div className={styles.luxuryHeroImage} style={website.hero.backgroundImageUrl ? { backgroundImage: overlay + ', url(' + website.hero.backgroundImageUrl + ')', filter: imageFilter } : undefined}>
+        <div className={styles.luxuryHeroImage} style={website.hero.backgroundImageUrl ? { backgroundImage: overlay + ', url(' + website.hero.backgroundImageUrl + ')' } : undefined}>
           {!website.hero.backgroundImageUrl && <div className={styles.luxuryHeroGlow} />}
           <div className={styles.luxuryHeroContent}>
             <span className={styles.luxuryKicker}>{website.hero.eyebrow}</span>
