@@ -55,7 +55,7 @@ const PREVIEW_STORAGE_KEY = 'doybiz:website-preview-draft';
 
 const normalizeWebsite = (website: WebsiteValue): WebsiteValue => ({
   ...website,
-  template: website.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : 'CLASSIC',
+  template: website.template === 'MODERN_LUXURY' ? 'MODERN_LUXURY' : website.template === 'MINIMAL_MODERN' ? 'MINIMAL_MODERN' : 'CLASSIC',
 });
 
 export function ClientLandingPage({
