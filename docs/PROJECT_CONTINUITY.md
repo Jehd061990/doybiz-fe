@@ -1238,3 +1238,220 @@ Do not mark the new publish regression as fully verified until those commands pa
 > **Inspect first. Extend second. Test third. Document fourth.**
 
 DoyBiz already has substantial implementation. Never assume a feature is missing simply because it is not described in an older document. Always inspect the latest code and tests before implementing.
+
+
+# 35. Landing Page Template System Phase 1
+
+The Website CMS/public website was extended with the first version of a reusable landing-page template architecture.
+
+## Goal
+
+DoyBiz should support multiple landing-page designs in the future without duplicating the business data or booking implementation.
+
+The design boundary is now:
+
+```
+Website Config / Business Content
+            ↓
+      Template Renderer
+       /           \
+   CLASSIC       future templates
+            ↓
+     Shared booking flow
+```
+
+## Backend contract
+
+Added:
+
+```ts
+export type WebsiteTemplateKey = 'CLASSIC';
+export const DEFAULT_WEBSITE_TEMPLATE = 'CLASSIC';
+```
+
+`WebsiteConfigValue` now contains:
+
+```ts
+template: WebsiteTemplateKey;
+```
+
+The Mongoose website value schema stores the template and currently permits `CLASSIC`.
+
+Existing website records are migrated lazily by `getWebsiteConfig()` when the field is missing, preserving backward compatibility.
+
+Template normalization currently defaults safely to `CLASSIC`.
+
+Important backend files:
+
+```
+src/models/WebsiteConfig.ts
+src/services/websiteService.ts
+```
+
+## Frontend renderer
+
+Added:
+
+```
+src/components/public/website-renderer.tsx
+```
+
+The renderer currently contains:
+
+- `WebsiteTemplateKey`
+- shared website/public data types
+- `WEBSITE_TEMPLATES` registry
+- `ClassicTemplate`
+- `WebsiteRenderer`
+
+The existing public design was extracted into `ClassicTemplate`.
+
+The booking state/API/availability/reservation workflow remains in `ClientLandingPage`, so templates do not own or duplicate booking logic.
+
+Current rendering flow:
+
+```
+ClientLandingPage
+    ↓
+WebsiteRenderer
+    ↓
+ClassicTemplate
+    ↓
+existing public sections + navigation
+    ↓
+shared booking overlay/flow
+```
+
+This preserves the existing `/site` and `/site/book` behavior while creating a clean extension point for future designs.
+
+## CMS template selector
+
+`src/components/website-management-page.tsx` now exposes a Landing Page Template selector.
+
+Current option:
+
+```
+Classic
+Clean and professional layout for service businesses.
+```
+
+The selected template is part of the normal draft payload, so it follows the existing:
+
+```
+Save Draft
+    ↓
+PUT /website
+    ↓
+Publish
+    ↓
+POST /website/publish
+```
+
+architecture.
+
+## Tests added
+
+Added frontend coverage for:
+
+- template selector rendering
+- selected template persistence through Save Draft
+- public page rendering through the Classic template renderer
+
+Existing website publishing, Section Builder, booking, preview, and dedicated booking-page tests remain in place.
+
+## Important design rule
+
+Templates control **presentation/layout**.
+
+Website configuration continues to control **business content**.
+
+Booking remains a shared workflow.
+
+Therefore changing a future template should not require changing:
+
+- services
+- branches
+- staff
+- availability
+- reservations
+- customer details
+- booking API
+
+## Current template registry
+
+Only one template is intentionally registered:
+
+```
+CLASSIC
+```
+
+The next template should be added only after the current architecture is locally verified.
+
+Recommended next milestone:
+
+```
+MODERN_LUXURY
+```
+
+with a genuinely different visual layout while consuming the same WebsiteConfig and booking system.
+
+## Verification status
+
+The implementation has been committed to GitHub, but the local frontend/backend typecheck, test suite, and production build still need to be run after pulling the latest changes.
+
+Do not mark this milestone fully verified until:
+
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+all pass.
+
+## Relevant commits
+
+Frontend:
+
+```
+c363244cc8e078d839e0935df86645d756bc2789
+feat(website): add template renderer foundation
+
+604274e9d2eead2c4dbcd6f83040399627498a34
+refactor(website): route landing page through template renderer
+
+c5c73fc405da8fb8a92ca322655e3ebd2ac343c6
+feat(website): add landing template selector
+
+02fde613e0c8aaf88ef0b854760d8ee6a6e50a21
+test(website): cover template selector
+
+f12e587149cdac6c32b2f75fd0891f3c0be750fa
+test(website): cover template renderer
+```
+
+Backend:
+
+```
+630a49b46c3f8c77498136b6fa2397e651cbeba5
+feat(website): add landing page template contract
+
+f292bd0c53ed6f5c274782e9e5fabfd00fb6e45f
+feat(website): normalize and migrate landing templates
+```
+
+## Next step
+
+Pull the latest frontend and backend changes locally and run the full verification commands.
+
+After that, manually confirm:
+
+1. Existing Classic landing page looks unchanged.
+2. Website CMS shows the template selector.
+3. Save Draft preserves the selected template.
+4. Publish preserves the selected template.
+5. `/site?tenant=onepiecesalon` still renders correctly.
+6. `/site/book?tenant=onepiecesalon` still works.
+7. Booking flow and availability are unaffected.
+
+Only after this passes should we build the first genuinely different `MODERN_LUXURY` template.
