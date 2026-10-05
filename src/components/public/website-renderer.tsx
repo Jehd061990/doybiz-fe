@@ -249,8 +249,14 @@ export function ModernLuxuryTemplate({
         </nav>
       </header>
       {!bookingOnly && <section id='top' className={heroClass} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
-        <div className={`${styles.luxuryHeroImage} ${imageTreatmentClass}`} style={website.hero.backgroundImageUrl ? { backgroundImage: overlay + ', url(' + website.hero.backgroundImageUrl + ')' } : undefined}>
-          {!website.hero.backgroundImageUrl && <div className={styles.luxuryHeroGlow} />}
+        <div className={styles.luxuryHeroImage}>
+          {website.hero.backgroundImageUrl ? (
+            <div
+              className={`${styles.luxuryHeroMedia} ${imageTreatmentClass}`}
+              style={{ backgroundImage: overlay + ', url(' + website.hero.backgroundImageUrl + ')' }}
+              aria-hidden="true"
+            />
+          ) : <div className={styles.luxuryHeroGlow} />}
           <div className={styles.luxuryHeroContent}>
             <span className={styles.luxuryKicker}>{website.hero.eyebrow}</span>
             <h1>{website.hero.title}</h1>
