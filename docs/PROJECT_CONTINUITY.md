@@ -2563,3 +2563,52 @@ npm run build
 ```
 
 Then compare Natural vs Cinematic on Preview Draft and the published live site using the same real hero image.
+
+
+## 25. Third Landing Page Template — Minimal Modern
+
+The third public landing page template was added without rebuilding the existing website CMS, booking flow, or publishing architecture.
+
+### Template registry
+- `CLASSIC`
+- `MODERN_LUXURY`
+- `MINIMAL_MODERN`
+
+Minimal Modern is intentionally differentiated through a clean/light presentation, generous whitespace, large typography, minimal navigation, service-list presentation, simple location blocks, and a conversion-focused booking CTA.
+
+### Shared architecture preserved
+
+```
+Website Config
+      |
+WebsiteRenderer
+      |
+CLASSIC / MODERN_LUXURY / MINIMAL_MODERN
+      |
+Shared booking state/API/availability/reservation flow
+```
+
+The new template consumes the same organization, services, branches, contact, booking CTA, section order, and booking APIs as the existing templates.
+
+### Template customization
+Added `minimalModern` settings:
+- Hero alignment
+- Navigation style
+- Section spacing
+- Hero image position
+- CTA style
+
+Backend model/defaults/normalization/schema, CMS editor, template selector, renderer, and regression tests were updated together.
+
+Local verification:
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+Backend verification:
+```bash
+npm run build
+npm run test:phase5
+```
