@@ -1455,3 +1455,76 @@ After that, manually confirm:
 7. Booking flow and availability are unaffected.
 
 Only after this passes should we build the first genuinely different `MODERN_LUXURY` template.
+
+
+# 36. Landing Template TypeScript CSS Variable Fix
+
+The first local verification after pulling the Landing Page Template System exposed a frontend typecheck/build issue in `ClientLandingPage`.
+
+## Issue
+
+The existing landing page applies custom CSS variables through the React `style` prop:
+
+```text
+--site-primary
+--site-accent
+--site-background
+--site-text
+```
+
+The current React TypeScript definitions do not accept arbitrary CSS custom-property keys directly on `CSSProperties`, causing:
+
+```text
+TS2353: Object literal may only specify known properties, and '--site-primary' does not exist in type 'Properties<...>'
+```
+
+The Jest suite still passed, but typecheck and production build failed during their type-check phase.
+
+## Fix
+
+`src/components/public/client-landing-page.tsx` now:
+
+- imports the React `CSSProperties` type
+- creates the landing page style object once
+- explicitly treats that object as `CSSProperties`
+- preserves the existing CSS custom-property values and flex layout behavior
+
+No visual behavior or website configuration contract was changed.
+
+## Commit
+
+```text
+51bf7e0cb7d8a3211ad0554ebfba1b51418c69da
+fix(website): type custom landing page css variables
+```
+
+## Verification status
+
+After pulling this fix, rerun:
+
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
+
+The previously reported state was:
+
+```text
+typecheck: FAILED
+tests: 27 suites / 119 tests PASSED
+build: FAILED during typecheck
+```
+
+Do not mark the Template System Phase 1 milestone fully verified until all three commands pass.
+
+## Next step
+
+If verification passes, manually check the Classic template on:
+
+```text
+/site?tenant=onepiecesalon
+/site/book?tenant=onepiecesalon
+```
+
+Then proceed to the first genuinely different `MODERN_LUXURY` template.
