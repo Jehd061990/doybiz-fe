@@ -2039,3 +2039,105 @@ The next recommended task is to improve the CMS template-selection UX and add a 
 Rule remains:
 
 **Inspect first. Extend second. Test third. Document fourth.**
+---
+
+# 17. Website Template Selector UX — Visual Selection and Safe Preview
+
+The Website CMS template selector was upgraded from plain radio fields into visual template cards.
+
+### Current UX
+
+Each available template now shows:
+
+- Visual style preview card
+- Template name
+- Description
+- Selected state
+- **Use this template** radio control
+- **Preview template** action
+
+Selecting a card still only changes the local draft. It does not save or publish automatically.
+
+### Safe template preview
+
+The new **Preview template** action creates a temporary preview copy using the selected template key and stores it in:
+
+`doybiz:website-preview-draft`
+
+It then opens the existing draft preview route.
+
+This means an owner can preview Classic or Modern Luxury without changing the saved draft or published website.
+
+The existing **Preview draft** action remains unchanged and continues to preview the current draft.
+
+### Architecture preserved
+
+No separate template configuration was introduced.
+
+The CMS still uses:
+
+`WebsiteConfig → template + shared content → WebsiteRenderer`
+
+Template-specific presentation remains separate from shared:
+
+- services
+- branches
+- contact information
+- branding
+- booking CTA
+- booking state
+- availability
+- reservation submission
+
+### Responsive behavior
+
+The template cards use a two-column layout on larger screens and collapse to one column on smaller screens.
+
+### Regression coverage
+
+Updated:
+
+`src/components/website-management-page.test.tsx`
+
+The CMS test now verifies that:
+
+- Modern Luxury can be selected.
+- The template preview action stores `MODERN_LUXURY` in the draft preview payload.
+- The existing preview route is opened.
+- The saved draft is not replaced by the preview-only template change.
+
+### Implementation files
+
+`src/components/website-management-page.tsx`
+
+`src/components/website-management-page.test.tsx`
+
+`src/app/globals.css`
+
+### Commits
+
+`34ffda5f22f0182ab0cdebcb7f1b529dbb0ed52c`
+`feat(website): improve template selector and previews`
+
+`6873f06818b7b76e603486cf3a8857540f8441d5`
+`feat(website): style visual template selector`
+
+`ca7e8764904fb650b2efd923b72a4ae9723c468f`
+`test(website): cover template preview action`
+
+### Next recommended task
+
+Run the full frontend verification suite and manually verify:
+
+1. Template cards render correctly.
+2. Selecting Modern Luxury marks it selected but does not publish.
+3. Preview template shows Modern Luxury without changing the saved draft.
+4. Save Draft still persists the selected template.
+5. Publish still works.
+6. Existing Classic and Modern Luxury live pages remain unchanged.
+
+After this verification, the next Website CMS improvement should be template-specific customization controls or a third landing template, depending on product priorities.
+
+Rule remains:
+
+**Inspect first. Extend second. Test third. Document fourth.**
