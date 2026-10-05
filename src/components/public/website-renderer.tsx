@@ -3,7 +3,7 @@
 import { ServiceImage } from '@/components/services/service-image';
 import styles from './client-landing-page.module.css';
 
-export type WebsiteTemplateKey = 'CLASSIC' | 'MODERN_LUXURY';
+export type WebsiteTemplateKey = 'CLASSIC' | 'MODERN_LUXURY' | 'MINIMAL_MODERN';
 
 export type WebsiteTemplateSettings = {
   classic: {
@@ -20,6 +20,13 @@ export type WebsiteTemplateSettings = {
     imageTreatment: 'natural' | 'cinematic';
     overlayIntensity: 'soft' | 'strong';
     showHeroBadge: boolean;
+  };
+  minimalModern: {
+    heroAlignment: 'left' | 'center';
+    navigationStyle: 'minimal' | 'standard';
+    sectionSpacing: 'airy' | 'compact';
+    heroImagePosition: 'left' | 'right';
+    ctaStyle: 'solid' | 'outline';
   };
 };
 
@@ -38,6 +45,13 @@ const DEFAULT_TEMPLATE_SETTINGS: WebsiteTemplateSettings = {
     imageTreatment: 'natural',
     overlayIntensity: 'strong',
     showHeroBadge: true,
+  },
+  minimalModern: {
+    heroAlignment: 'left',
+    navigationStyle: 'minimal',
+    sectionSpacing: 'airy',
+    heroImagePosition: 'right',
+    ctaStyle: 'solid',
   },
 };
 
@@ -104,6 +118,10 @@ export const WEBSITE_TEMPLATES: Record<WebsiteTemplateKey, { name: string; descr
   MODERN_LUXURY: {
     name: 'Modern Luxury',
     description: 'Editorial, premium presentation for brands that want a more elevated feel.',
+  },
+  MINIMAL_MODERN: {
+    name: 'Minimal Modern',
+    description: 'Spacious, clean, conversion-focused layout for modern service brands.',
   },
 };
 
@@ -296,10 +314,76 @@ export function ModernLuxuryTemplate({
   );
 }
 
+export function MinimalModernTemplate({
+  organization, website, branches, visibleServices, selectedBranch, bookingOnly, landingPageHref, bookingPageHref,
+  handleBookingCta, openBooking, setSelectedBranch, navigateTo,
+}: ClassicTemplateProps) {
+  const settings = website.templateSettings?.minimalModern || DEFAULT_TEMPLATE_SETTINGS.minimalModern;
+  const shellClass = settings.sectionSpacing === 'compact'
+    ? styles.minimalModernShell + ' ' + styles.minimalModernCompact
+    : styles.minimalModernShell;
+  const navClass = settings.navigationStyle === 'standard'
+    ? styles.minimalModernHeader + ' ' + styles.minimalModernHeaderStandard
+    : styles.minimalModernHeader;
+  const buttonClass = settings.ctaStyle === 'outline' ? styles.minimalModernOutline : styles.minimalModernButton;
+
+  return (
+    <div className={shellClass}>
+      <header className={navClass}>
+        <a href={bookingOnly ? landingPageHref + '#top' : '#top'} className={styles.minimalModernBrand}>{organization.name}</a>
+        <nav className={styles.minimalModernNav}>
+          {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? landingPageHref + '#services' : '#services'}>Services</a>}
+          {sectionVisible(website, 'BRANCHES') && <a href={bookingOnly ? landingPageHref + '#branches' : '#branches'}>Locations</a>}
+          {sectionVisible(website, 'CONTACT') && <a href={bookingOnly ? landingPageHref + '#contact' : '#contact'}>Contact</a>}
+          {website.bookingCta.enabled && !bookingOnly && <button type="button" className={buttonClass} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
+        </nav>
+      </header>
+      {!bookingOnly && <section id="top" className={styles.minimalModernHero} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
+        <div className={styles.minimalModernHeroCopy} style={{ textAlign: settings.heroAlignment }}>
+          <span className={styles.minimalModernKicker}>{website.hero.eyebrow}</span>
+          <h1>{website.hero.title}</h1>
+          <p>{website.hero.description}</p>
+          <div className={styles.minimalModernHeroActions}>
+            {website.bookingCta.enabled && <button type="button" className={buttonClass} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
+            {sectionVisible(website, 'SERVICES') && <a href="#services" className={styles.minimalModernTextLink}>Explore services <span>→</span></a>}
+          </div>
+        </div>
+        <div className={styles.minimalModernHeroMedia} data-image-position={settings.heroImagePosition} style={website.hero.backgroundImageUrl ? { backgroundImage: 'url(' + website.hero.backgroundImageUrl + ')' } : undefined}>
+          {!website.hero.backgroundImageUrl && <div className={styles.minimalModernHeroPlaceholder}><span>DOYBIZ</span></div>}
+          <span className={styles.minimalModernHeroLabel}>{website.hero.cardLabel}</span>
+        </div>
+      </section>}
+      {!bookingOnly && sectionVisible(website, 'SERVICES') && <section id="services" className={styles.minimalModernSection} style={{ order: sectionOrderIndex(website, 'SERVICES') + 1 }}>
+        <div className={styles.minimalModernHeading}>
+          <div><span className={styles.minimalModernKicker}>{website.sections.services.eyebrow}</span><h2>{website.sections.services.title}</h2></div>
+          {branches.length > 1 && <select value={selectedBranch} onChange={event => setSelectedBranch(event.target.value)} className={styles.minimalModernSelect}><option value="">All branches</option>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select>}
+        </div>
+        {visibleServices.length ? <div className={styles.minimalModernServiceList}>{visibleServices.map((service, index) => <article className={styles.minimalModernService} key={service.id}>
+          <span className={styles.minimalModernServiceIndex}>{String(index + 1).padStart(2, '0')}</span>
+          <div className={styles.minimalModernServiceImage}><ServiceImage src={service.imageUrl} alt={service.name} loading="lazy" /></div>
+          <div className={styles.minimalModernServiceBody}><h3>{service.name}</h3>{service.description && <p>{service.description}</p>}<span>{service.durationMinutes} min</span></div>
+          <div className={styles.minimalModernServiceAction}><strong>₱{service.price.toLocaleString()}</strong>{website.bookingCta.enabled && <button type="button" className={styles.minimalModernTextLink} onClick={() => website.bookingCta.mode === 'page' ? navigateTo(bookingPageHref) : openBooking(service)}>Book <span>→</span></button>}</div>
+        </article>)}</div> : <p className={styles.minimalModernEmpty}>No services are currently available.</p>}
+      </section>}
+      {!bookingOnly && sectionVisible(website, 'BRANCHES') && <section id="branches" className={styles.minimalModernLocations} style={{ order: sectionOrderIndex(website, 'BRANCHES') + 1 }}>
+        <div className={styles.minimalModernHeading}><div><span className={styles.minimalModernKicker}>{website.sections.branches.eyebrow}</span><h2>{website.sections.branches.title}</h2></div></div>
+        <div className={styles.minimalModernLocationGrid}>{branches.map((branch, index) => <article className={styles.minimalModernLocation} key={branch.id}><span>{String(index + 1).padStart(2, '0')}</span><h3>{branch.name}</h3><p>{branch.address || 'Address available at the branch.'}</p>{branch.contactNumber && <a href={'tel:' + branch.contactNumber}>{branch.contactNumber}</a>}</article>)}</div>
+      </section>}
+      {!bookingOnly && sectionVisible(website, 'CONTACT') && <section id="contact" className={styles.minimalModernContact} style={{ order: sectionOrderIndex(website, 'CONTACT') + 1 }}>
+        <div><span className={styles.minimalModernKicker}>{website.sections.contact.eyebrow}</span><h2>{website.sections.contact.title}</h2><p>{organization.address}</p></div>
+        <div className={styles.minimalModernContactDetails}>{organization.phone && <a href={'tel:' + organization.phone}>{organization.phone}</a>}{organization.email && <a href={'mailto:' + organization.email}>{organization.email}</a>}{website.bookingCta.enabled && <button type="button" className={buttonClass} onClick={handleBookingCta}>{website.bookingCta.label}</button>}</div>
+      </section>}
+      {!bookingOnly && <footer className={styles.minimalModernFooter}><span>{organization.name}</span><span>{website.footer.poweredByText}</span></footer>}
+    </div>
+  );
+}
+
 export function WebsiteRenderer(props: ClassicTemplateProps) {
   switch (props.website.template) {
     case 'MODERN_LUXURY':
       return <ModernLuxuryTemplate {...props} />;
+    case 'MINIMAL_MODERN':
+      return <MinimalModernTemplate {...props} />;
     case 'CLASSIC':
     default:
       return <ClassicTemplate {...props} />;
