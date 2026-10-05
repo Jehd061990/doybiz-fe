@@ -2373,3 +2373,69 @@ Manually verify both templates in the CMS and public site:
 After this foundation is stable, proceed to **Facebook/mobile booking-page optimization**, then add a genuinely different third template.
 
 **Inspect first. Extend second. Test third. Document fourth.**
+
+## 20. Template Customization Foundation — Renderer Completion Check
+
+The current repository was re-inspected before extending the template customization work.
+
+### Inspection result
+
+The CMS and backend already persist and normalize templateSettings for both templates.
+
+Confirmed backend:
+- WebsiteConfig.ts defines the full WebsiteTemplateSettings contract and Mongoose enums/defaults.
+- websiteService.ts normalizes template settings and backfills missing settings for older website configs.
+- getPublicWebsiteConfig() exposes the published settings.
+- Phase 5 coverage verifies the default template-settings contract.
+
+Confirmed frontend:
+- WebsiteManagementPage loads, edits, previews, and saves template settings.
+- WebsiteRenderer consumes Classic and Modern Luxury settings.
+- Existing booking flow remains outside the renderer and is still shared.
+
+### Gap found during inspection
+
+Modern Luxury had a persisted imageTreatment setting (natural | cinematic), but the public renderer did not actually apply that setting. The CMS could save the value, but changing it did not change the rendered hero image presentation.
+
+### Fix
+
+The Modern Luxury renderer now maps imageTreatment: cinematic to a dedicated luxuryCinematic presentation class.
+
+The stylesheet applies a restrained saturation/contrast treatment so the setting has an observable public-site effect without changing the underlying hero image content.
+
+### Commits
+
+- ae1e75461afb01ec450c911997a64ab6b0974ebb — fix(website): apply modern luxury image treatment
+- 23f59b99dbbd2b189acc16c2a953f4eed1d3d250 — feat(website): style modern luxury cinematic imagery
+- 8aa1d0400274f55c44b9c75924301dae5822437e — test(website): cover modern luxury presentation settings
+- bac60f01b38f9837185ee903b737c664b894ff2a — test(website): verify modern luxury image treatment
+- 148b8d69b6aa3e6c6819f9c925681880b42e0ecd — fix(test): keep template settings fixture compatible
+
+### Verification status
+
+Repository inspection is complete and the renderer gap has been fixed.
+
+Local npm verification still needs to be run from the frontend repository:
+
+    npm run typecheck
+    npm test -- --runInBand
+    npm run build
+
+Backend verification should also be run after pulling the current backend repository:
+
+    npm run build
+    npm run test:phase5
+
+Manual CMS/public verification should confirm:
+1. Modern Luxury → Image treatment → Cinematic changes the public hero presentation.
+2. Natural restores the default image treatment.
+3. Save Draft persists the selection.
+4. Preview Draft reflects the selection without publishing.
+5. Publish carries the setting to the live website.
+6. /site/book and the shared booking flow remain unchanged.
+
+No third template should be added until this customization foundation is locally verified.
+
+Rule remains:
+
+Inspect first. Extend second. Test third. Document fourth.
