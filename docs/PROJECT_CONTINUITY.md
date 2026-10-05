@@ -2700,3 +2700,25 @@ Do not remove the Jest mock merely to test the visual Three.js runtime; browser/
 - Branding also stores `logoUrl`; the Website CMS provides a URL field and logo upload control.
 - Classic, Modern Luxury, and Minimal Modern render the shared brand configuration in their navigation.
 - Existing website content and booking behavior remain unchanged; default behavior remains text-only organization name.
+
+
+## Navigation Logo Frame Customization — October 2026
+
+Navigation branding now supports presentation controls beyond Logo/Text selection:
+
+- `logoShape`: `square`, `circle`, `heart`, or `star`
+- `logoSize`: `small`, `medium`, `large`, or `xlarge`
+- `brandLayout`: `horizontal` or `vertical` when `brandDisplay=both`
+- The frame and logo scale together, with responsive mobile sizing.
+- The same shared branding configuration is rendered by Classic, Modern Luxury, and Minimal Modern.
+- Existing defaults remain backward-compatible: square frame, medium size, horizontal layout.
+- Public-site normalization also supplies defaults so older saved configurations remain safe.
+
+CMS controls now expose these options beside the existing Navigation brand, Logo URL, and Upload logo controls.
+
+Verification:
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
