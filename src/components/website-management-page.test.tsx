@@ -142,6 +142,10 @@ describe('WebsiteManagementPage', () => {
     fireEvent.click(within(heroRow).getByRole('button', { name: 'Move down' }));
 
     fireEvent.change(screen.getByLabelText('Services title'), { target: { value: 'Published services' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit 3. Branches' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit 4. Contact' }));
+
     fireEvent.change(screen.getByLabelText('Branches title'), { target: { value: 'Published branches' } });
     fireEvent.change(screen.getByLabelText('Contact title'), { target: { value: 'Published contact' } });
     fireEvent.change(screen.getByLabelText('Primary color'), { target: { value: '#222222' } });
