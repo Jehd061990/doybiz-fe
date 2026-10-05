@@ -223,9 +223,13 @@ export function WebsiteManagementPage() {
     setError(''); setMessage('');
     if (!draft) return;
     try {
-      await mutateAsync({ url: '/website', method: 'put', values: draft });
+      const response = await mutateAsync({ url: '/website', method: 'put', values: draft });
+      if (response?.data?.draft) {
+        setDraft(clone(response.data.draft));
+      } else {
+        await query.query.refetch();
+      }
       setMessage('Draft saved. Publish it when you are ready to make the changes live.');
-      await query.query.refetch();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save website settings.');
     }
