@@ -66,6 +66,7 @@ type WebsiteValue = {
     textColor: string;
     logoUrl: string;
     brandDisplay: 'text' | 'logo' | 'both' | 'none';
+    brandText?: string;
     logoShape: 'circle' | 'square' | 'heart' | 'star';
     logoSize: 'small' | 'medium' | 'large' | 'xlarge';
     brandLayout: 'horizontal' | 'vertical';
@@ -92,6 +93,7 @@ const clone = (value: WebsiteValue): WebsiteValue => {
       ...cloned.branding,
       logoUrl: cloned.branding?.logoUrl || '',
       brandDisplay: cloned.branding?.brandDisplay || 'text',
+      brandText: cloned.branding?.brandText || '',
       logoShape: cloned.branding?.logoShape || 'square',
       logoSize: cloned.branding?.logoSize || 'medium',
       brandLayout: cloned.branding?.brandLayout || 'horizontal',
@@ -634,6 +636,16 @@ export function WebsiteManagementPage() {
                 <option value="both">Logo + text</option>
                 <option value="none">Hide brand</option>
               </select>
+            </label>
+            <label className="field-control">
+              <span>Brand text <small>(optional)</small></span>
+              <input
+                type="text"
+                value={draft.branding.brandText || ''}
+                onChange={event => setDraft(current => current ? ({ ...current, branding: { ...current.branding, brandText: event.target.value } }) : current)}
+                placeholder="Leave blank to use organization name"
+              />
+              <small>Shown when Text only or Logo + text is selected. If blank, the organization name is used.</small>
             </label>
             <label className="field-control">
               <span>Logo frame shape</span>
