@@ -225,7 +225,7 @@ describe('ClientLandingPage', () => {
     render(<ClientLandingPage developmentTenant="onepiecesalon" bookingOnly />);
 
     expect(await screen.findByRole('heading', { name: 'Book an appointment' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'OPS Studio' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#top');
+    expect(screen.getByRole('link', { name: 'One Piece Salon' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#top');
     expect(screen.getByRole('link', { name: 'Services' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#services');
     expect(screen.getByRole('link', { name: 'Branches' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#branches');
     expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#contact');
