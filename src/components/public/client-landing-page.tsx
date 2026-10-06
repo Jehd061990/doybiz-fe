@@ -60,6 +60,7 @@ const normalizeWebsite = (website: WebsiteValue): WebsiteValue => ({
     ...website.branding,
     logoUrl: website.branding.logoUrl || '',
     brandDisplay: website.branding.brandDisplay || 'text',
+    brandText: website.branding.brandText || '',
     logoShape: website.branding.logoShape || 'square',
     logoSize: website.branding.logoSize || 'medium',
     brandLayout: website.branding.brandLayout || 'horizontal',
