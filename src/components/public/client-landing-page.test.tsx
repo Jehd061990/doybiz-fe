@@ -185,7 +185,7 @@ describe('ClientLandingPage', () => {
 
     render(<ClientLandingPage developmentTenant="onepiecesalon" />);
 
-    expect(await screen.findByRole('link', { name: /One Piece Salon/ })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /OPS Studio/ })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Navigation logo' })).toHaveAttribute('src', 'https://example.com/logo.png');
     expect(screen.getByText('OPS Studio', { selector: '.brandMarkText' })).toBeInTheDocument();
     const brandMark = document.querySelector('.brandMark');
@@ -225,7 +225,7 @@ describe('ClientLandingPage', () => {
     render(<ClientLandingPage developmentTenant="onepiecesalon" bookingOnly />);
 
     expect(await screen.findByRole('heading', { name: 'Book an appointment' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'One Piece Salon' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#top');
+    expect(screen.getByRole('link', { name: 'OPS Studio' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#top');
     expect(screen.getByRole('link', { name: 'Services' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#services');
     expect(screen.getByRole('link', { name: 'Branches' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#branches');
     expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '/site?tenant=onepiecesalon#contact');
