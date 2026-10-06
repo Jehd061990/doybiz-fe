@@ -169,7 +169,7 @@ describe('WebsiteManagementPage', () => {
   it('edits custom navigation brand text', async () => {
     await renderWebsiteManagementPage();
 
-    const brandTextInput = screen.getByPlaceholder('Leave blank to use organization name');
+    const brandTextInput = screen.getByPlaceholderText('Leave blank to use organization name');
     fireEvent.change(brandTextInput, { target: { value: 'OPS Studio' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
 
