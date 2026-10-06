@@ -163,6 +163,7 @@ describe('ClientLandingPage', () => {
         ...website.branding,
         logoUrl: 'https://example.com/logo.png',
         brandDisplay: 'both' as const,
+        brandText: 'OPS Studio',
         logoShape: 'heart' as const,
         logoSize: 'large' as const,
         brandLayout: 'vertical' as const,
@@ -186,12 +187,19 @@ describe('ClientLandingPage', () => {
 
     expect(await screen.findByRole('link', { name: /One Piece Salon/ })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Navigation logo' })).toHaveAttribute('src', 'https://example.com/logo.png');
-    expect(screen.getByText('One Piece Salon', { selector: '.brandMarkText' })).toBeInTheDocument();
+    expect(screen.getByText('OPS Studio', { selector: '.brandMarkText' })).toBeInTheDocument();
     const brandMark = document.querySelector('.brandMark');
     expect(brandMark).toHaveAttribute('data-logo-shape', 'heart');
     expect(brandMark).toHaveAttribute('data-logo-size', 'large');
     expect(brandMark).toHaveAttribute('data-brand-layout', 'vertical');
     expect(brandMark).toHaveClass('brandShape_heart', 'brandSize_large', 'brandLayout_vertical');
+  });
+
+  it('falls back to the organization name when custom brand text is blank', async () => {
+    mockPublicApi();
+    render(<ClientLandingPage developmentTenant="onepiecesalon" />);
+
+    expect(await screen.findByText('One Piece Salon', { selector: '.brandMarkText' })).toBeInTheDocument();
   });
 
   it('renders the published landing page with tenant-aware content', async () => {
