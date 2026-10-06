@@ -2722,3 +2722,22 @@ npm run typecheck
 npm test -- --runInBand
 npm run build
 ```
+
+
+## Custom Navigation Brand Text — October 2026
+
+Navigation branding now supports an optional editable `brandText` value.
+
+- Website CMS exposes **Brand text (optional)**.
+- When a custom value is provided, Classic, Modern Luxury, and Minimal Modern display it as the navigation text.
+- When the field is blank or whitespace-only, the renderer automatically falls back to the organization/company name.
+- The backend persists and trims the value with a 120-character limit.
+- Existing websites remain backward-compatible because missing `brandText` values normalize to an empty string.
+- Logo display, frame shape, size, and horizontal/vertical layout remain unchanged.
+
+Verification:
+```bash
+npm run typecheck
+npm test -- --runInBand
+npm run build
+```
