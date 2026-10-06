@@ -75,6 +75,7 @@ export type WebsiteValue = {
     textColor: string;
     logoUrl: string;
     brandDisplay: 'text' | 'logo' | 'both' | 'none';
+    brandText?: string;
     logoShape: 'circle' | 'square' | 'heart' | 'star';
     logoSize: 'small' | 'medium' | 'large' | 'xlarge';
     brandLayout: 'horizontal' | 'vertical';
@@ -144,6 +145,7 @@ function BrandMark({ organization, website }: { organization: Organization; webs
   const shape = website.branding.logoShape || 'square';
   const size = website.branding.logoSize || 'medium';
   const layout = website.branding.brandLayout || 'horizontal';
+  const brandText = website.branding.brandText?.trim() || organization.name;
   const className = [
     styles.brandMark,
     showLogo ? styles[`brandShape_${shape}`] : '',
@@ -159,7 +161,7 @@ function BrandMark({ organization, website }: { organization: Organization; webs
           </span>
         </span>
       )}
-      {showText && <span className={styles.brandMarkText}>{organization.name}</span>}
+      {showText && <span className={styles.brandMarkText}>{brandText}</span>}
     </span>
   );
 }
