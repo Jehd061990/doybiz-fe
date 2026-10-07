@@ -125,7 +125,11 @@ export function ModernLuxury3DHero({
     const resize = () => {
       const width = Math.max(1, mount.clientWidth);
       const height = Math.max(1, mount.clientHeight);
-      camera.aspect = width / height;
+      const aspect = width / height;
+      camera.aspect = aspect;
+      // Narrow mobile viewports have a much tighter horizontal FOV. Pull the
+      // camera back so the decorative rings and knot never get clipped.
+      camera.position.z = aspect < 0.72 ? 7.1 : aspect < 0.95 ? 6.2 : 5.2;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
     };
