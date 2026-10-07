@@ -332,7 +332,13 @@ export function ClientLandingPage({
                 <h3>Your reservation is pending.</h3>
                 <p>Please keep this confirmation reference:</p>
                 <code>{confirmation}</code>
-                <button type="button" className={styles.primaryButton} onClick={() => bookingOnly ? window.location.reload() : setBookingOpen(false)}>Done</button>
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  onClick={() => bookingOnly ? navigateTo(`${landingPageHref}#top`) : setBookingOpen(false)}
+                >
+                  Done
+                </button>
               </div>
             ) : (
               <form onSubmit={submitBooking}>
