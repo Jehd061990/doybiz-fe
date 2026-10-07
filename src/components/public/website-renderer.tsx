@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { ServiceImage } from '@/components/services/service-image';
 import { ModernLuxury3DHero } from './modern-luxury-3d-hero';
 import styles from './client-landing-page.module.css';
@@ -281,6 +283,7 @@ export function ModernLuxuryTemplate({
   organization, website, branches, visibleServices, selectedBranch, bookingOnly, landingPageHref, bookingPageHref,
   handleBookingCta, openBooking, setSelectedBranch, navigateTo,
 }: ClassicTemplateProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const settings = website.templateSettings?.modernLuxury || DEFAULT_TEMPLATE_SETTINGS.modernLuxury;
   const heroClass = settings.heroComposition === 'split'
     ? styles.luxuryHero + ' ' + styles.luxuryHeroSplit
@@ -304,12 +307,40 @@ export function ModernLuxuryTemplate({
   return (
     <div className={shellClass}>
       <header className={navClass}>
-        <a href={bookingOnly ? landingPageHref + '#top' : '#top'} className={styles.luxuryBrand}><BrandMark organization={organization} website={website} /></a>
+        <a
+          href={bookingOnly ? landingPageHref + '#top' : '#top'}
+          className={styles.luxuryBrand}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <BrandMark organization={organization} website={website} />
+        </a>
+        <button
+          type="button"
+          className={styles.luxuryMenuToggle}
+          aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="modern-luxury-mobile-nav"
+          onClick={() => setMobileMenuOpen(open => !open)}
+        >
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+        </button>
         <nav className={styles.luxuryNav}>
           {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? landingPageHref + '#services' : '#services'}>Services</a>}
           {sectionVisible(website, 'BRANCHES') && <a href={bookingOnly ? landingPageHref + '#branches' : '#branches'}>Locations</a>}
           {sectionVisible(website, 'CONTACT') && <a href={bookingOnly ? landingPageHref + '#contact' : '#contact'}>Contact</a>}
           {website.bookingCta.enabled && !bookingOnly && <button type='button' className={styles.luxuryCta} onClick={handleBookingCta}>{website.bookingCta.label}</button>}
+        </nav>
+        <nav
+          id="modern-luxury-mobile-nav"
+          className={mobileMenuOpen ? styles.luxuryMobileNav + ' ' + styles.luxuryMobileNavOpen : styles.luxuryMobileNav}
+          aria-hidden={!mobileMenuOpen}
+        >
+          {sectionVisible(website, 'SERVICES') && <a href={bookingOnly ? landingPageHref + '#services' : '#services'} onClick={() => setMobileMenuOpen(false)}>Services</a>}
+          {sectionVisible(website, 'BRANCHES') && <a href={bookingOnly ? landingPageHref + '#branches' : '#branches'} onClick={() => setMobileMenuOpen(false)}>Locations</a>}
+          {sectionVisible(website, 'CONTACT') && <a href={bookingOnly ? landingPageHref + '#contact' : '#contact'} onClick={() => setMobileMenuOpen(false)}>Contact</a>}
+          {website.bookingCta.enabled && !bookingOnly && <button type='button' className={styles.luxuryMobileCta} onClick={() => { setMobileMenuOpen(false); handleBookingCta(); }}>{website.bookingCta.label}</button>}
         </nav>
       </header>
       {!bookingOnly && <section id='top' className={heroClass} style={{ order: sectionOrderIndex(website, 'HERO') + 1 }}>
