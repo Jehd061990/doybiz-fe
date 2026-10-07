@@ -618,3 +618,140 @@
     transition: none;
   }
 }
+
+
+/* Booking modal: vertical-first scrolling and safe wrapping */
+.modalBackdrop {
+  overflow: hidden;
+}
+
+.modal {
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modalHeader,
+.modalHeader > div,
+.formGrid,
+.formGrid > *,
+.slotField,
+.slotGrid,
+.formActions,
+.confirmation {
+  min-width: 0;
+}
+
+.modalHeader {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.modalHeader h2,
+.steps,
+.error,
+.confirmation,
+.confirmation h3,
+.confirmation p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.steps {
+  flex-wrap: wrap;
+}
+
+.formGrid label {
+  min-width: 0;
+}
+
+.formGrid input,
+.formGrid select,
+.formGrid textarea,
+.formActions button {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.formGrid input,
+.formGrid textarea {
+  width: 100%;
+}
+
+.formGrid select {
+  width: 100%;
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+
+.slotGrid {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.slot,
+.selectedSlot {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 650px) {
+  .modalBackdrop {
+    padding: 12px;
+    place-items: start center;
+  }
+
+  .modal {
+    width: min(100%, 560px);
+    max-height: calc(100dvh - 24px);
+    padding: 20px;
+    border-radius: 18px;
+  }
+
+  .modalHeader {
+    gap: 12px;
+  }
+
+  .modalHeader > div {
+    flex: 1 1 0;
+  }
+
+  .modalHeader h2 {
+    font-size: clamp(24px, 7vw, 30px);
+    line-height: 1.08;
+  }
+
+  .formGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fullField,
+  .slotField,
+  .error,
+  .formActions {
+    grid-column: 1;
+  }
+
+  .formActions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .modalBackdrop {
+    padding: 8px;
+  }
+
+  .modal {
+    max-height: calc(100dvh - 16px);
+    padding: 16px;
+  }
+}
